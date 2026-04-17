@@ -1,0 +1,1443 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets">
+
+<h:head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title><ui:insert name="title">BTK</ui:insert></title>
+    <h:outputStylesheet library="css" name="transmission-pages.css"/>
+    <style>
+        :root {
+            --btk-primary: #007bae;
+            --btk-primary-2: #2aa6d9;
+            --btk-deep: #0b2f45;
+            --btk-ink: #132a3a;
+            --btk-bg: #f0f4f9;
+            --btk-card: #ffffff;
+            --btk-muted: #7a90a8;
+            --btk-border: #dce8f5;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--btk-bg);
+            min-height: 100vh;
+        }
+
+        /* Layout */
+        .app {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, var(--btk-primary) 0%, var(--btk-deep) 100%);
+            color: #e9f3ff;
+            padding: 18px 5px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            transition: width .18s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.is-collapsed { width: 90px; }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 25px 10px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.12);
+            margin-bottom: 45px;
+        }
+
+        .sidebar-brand {
+            font-weight: 900;
+            letter-spacing: 4px;
+            font-size: 1.1rem;
+            white-space: nowrap;
+        }
+
+        .sidebar.is-collapsed .sidebar-brand { display: none; }
+
+        .nav {
+            display: grid;
+            gap: 15px;
+            justify-content: center;
+            overflow-y: auto;
+            padding-right: 6px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .nav::-webkit-scrollbar { width: 0; height: 0; }
+
+        .nav a,
+        .nav .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+            color: #e9f3ff;
+            text-decoration: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .12);
+            transition: transform .12s ease, background .12s ease;
+            white-space: nowrap;
+            justify-content: flex-start;
+            font-size: .86rem;
+            height: 30px;
+            min-height: 50px;
+        }
+
+        .nav a:hover,
+        .nav .nav-item:hover {
+            background: rgba(255,255,255,.14);
+            transform: translateY(-1px);
+        }
+
+        .nav .icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,.18);
+            flex: 0 0 auto;
+        }
+        .nav .icon svg { width: 20px; height: 20px; stroke: #e9f3ff; stroke-width: 2; fill: none; }
+        .nav .icon svg .fill { fill: #e9f3ff; stroke: none; }
+
+        .sidebar.is-collapsed .nav .label { display: none; }
+        .sidebar.is-collapsed .nav .nav-submenu { display: none; }
+        .sidebar.is-collapsed .nav a,
+        .sidebar.is-collapsed .nav .nav-item {
+            display: flex;
+            gap: 10px;
+            padding: 0 10px;
+            min-height: 50px;
+            background: rgba(255, 255, 255, .06);
+            border-color: rgba(255, 255, 255, .12);
+        }
+
+        .nav-group { display: grid; gap: 8px; }
+        .nav-toggle {
+            width: 100%;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            background: rgba(255,255,255,.08);
+            font: inherit;
+        }
+        .nav-toggle .chev {
+            margin-left: auto;
+            font-size: .9rem;
+            transition: transform .12s ease;
+        }
+        .nav-group.is-open .nav-toggle .chev { transform: rotate(180deg); }
+        .nav-submenu {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding-left: 12px;
+        }
+        .nav-group.is-open .nav-submenu { display: flex; }
+        .nav-submenu a {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255,255,255,.08);
+            font-size: .86rem;
+            padding: 0 10px 0 16px;
+            height: 30px;
+            min-height: 30px;
+        }
+
+        .nav a.nav-item-disabled,
+        .nav .nav-item.nav-item-disabled {
+            background: rgba(255, 255, 255, .03) !important;
+            border-color: rgba(255, 255, 255, .08) !important;
+            color: rgba(233, 243, 255, .45) !important;
+            pointer-events: none;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .nav .nav-item.nav-item-disabled .icon {
+            background: rgba(0, 0, 0, .08);
+        }
+
+        /* Main */
+        .main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            padding-top: 25px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, var(--btk-deep) 0%, var(--btk-primary) 100%);
+            padding: 0 18px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0,0,0,.25);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 80;
+            width: 100%;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .hamburger {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: white;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .hamburger:hover { background: rgba(11, 146, 236, 0.18); }
+
+        .brand {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #cde0f5;
+            font-size: .88rem;
+        }
+        .notif-form { margin: 0; }
+        .notif-wrapper { position: relative; }
+        .notif-bell {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,.32);
+            background: rgba(255,255,255,.14);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: background .15s ease, transform .15s ease;
+        }
+        .notif-bell:hover {
+            background: rgba(255,255,255,.24);
+            transform: translateY(-1px);
+        }
+        .notif-bell.has-new {
+            box-shadow: 0 0 0 3px rgba(255, 92, 122, .26);
+            animation: notifPulse 1.8s infinite;
+        }
+        .notif-bell .pi { font-size: 1rem; }
+        .notif-badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            min-width: 19px;
+            height: 19px;
+            border-radius: 999px;
+            background: #ff5c7a;
+            color: #fff;
+            font-size: .68rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            border: 2px solid #0f3f5b;
+        }
+        .notif-panel.ui-overlaypanel {
+            width: 340px;
+            max-height: 420px;
+            overflow: auto;
+            border-radius: 12px;
+            border: 1px solid #dbe6f2;
+            box-shadow: 0 12px 30px rgba(8, 37, 55, .22);
+            padding: 0;
+        }
+        .notif-header {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ebf1f7;
+            background: #f8fbff;
+            color: #355673;
+            font-size: .8rem;
+            font-weight: 700;
+        }
+        .notif-empty {
+            padding: 16px;
+            color: #6a8097;
+            font-size: .86rem;
+            text-align: center;
+        }
+        .notif-list {
+            display: grid;
+            gap: 0;
+        }
+        .notif-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            border-bottom: 1px solid #ebf1f7;
+            background: #fff;
+            transition: background .12s ease;
+        }
+        .notif-link:last-child { border-bottom: none; }
+        .notif-link:hover { background: #f7fbff; }
+        .notif-item {
+            padding: 11px 12px;
+            display: grid;
+            gap: 3px;
+        }
+        .notif-item .title {
+            font-size: .82rem;
+            font-weight: 700;
+            color: #1e3f5d;
+        }
+        .notif-item .message {
+            font-size: .8rem;
+            color: #4c6984;
+        }
+        .notif-item .date {
+            font-size: .74rem;
+            color: #7f96ad;
+        }
+        .notif-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: #ffedf1;
+            color: #b83853;
+            font-size: .67rem;
+            font-weight: 700;
+            letter-spacing: .2px;
+            width: fit-content;
+        }
+        .notif-item.pending .title { color: #915f00; }
+        .notif-item.returned .title { color: #2d47a0; }
+        .notif-item.approved .title { color: #1b7245; }
+        .notif-item.refused .title { color: #a23434; }
+        .notif-item.reminder .title { color: #8a5a00; }
+        .notif-item.alert {
+            background: linear-gradient(135deg, #fff4f4 0%, #fffafb 100%);
+            border-left: 4px solid #d43d3d;
+        }
+        .notif-item.alert .title { color: #a11f1f; }
+
+        .notif-popup-host {
+            position: fixed;
+            top: 74px;
+            right: 16px;
+            z-index: 1200;
+            display: grid;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .notif-popup {
+            width: min(360px, calc(100vw - 24px));
+            border-radius: 12px;
+            border: 1px solid #dce8f5;
+            background: #ffffff;
+            box-shadow: 0 12px 28px rgba(12, 40, 61, .24);
+            padding: 11px 14px 12px;
+            position: relative;
+            pointer-events: auto;
+            animation: notifToastIn .22s ease forwards;
+        }
+        .notif-popup.pending  { border-left: 4px solid #c88200; }
+        .notif-popup.returned { border-left: 4px solid #2d47a0; }
+        .notif-popup.approved { border-left: 4px solid #1b7245; }
+        .notif-popup.refused  { border-left: 4px solid #a23434; }
+        .notif-popup.reminder { border-left: 4px solid #c88200; }
+        .notif-popup.alert {
+            width: min(460px, calc(100vw - 24px));
+            border-left: 5px solid #d43d3d;
+            background: linear-gradient(135deg, #fff4f4 0%, #fff8f8 60%, #ffffff 100%);
+            box-shadow: 0 16px 34px rgba(132, 23, 23, .26);
+        }
+        .notif-popup .popup-title {
+            font-size: .84rem;
+            font-weight: 700;
+            color: #173e5c;
+            margin-bottom: 4px;
+            padding-right: 20px;
+        }
+        .notif-popup .popup-message {
+            font-size: .8rem;
+            color: #4d6a84;
+            line-height: 1.35;
+        }
+        .notif-popup.alert .popup-title {
+            font-size: 1rem;
+            color: #981b1b;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+        .notif-popup.alert .popup-message {
+            font-size: .92rem;
+            color: #6b2323;
+            font-weight: 600;
+            line-height: 1.48;
+        }
+        .notif-popup .popup-close {
+            position: absolute;
+            top: 6px;
+            right: 7px;
+            width: 20px;
+            height: 20px;
+            border: none;
+            border-radius: 999px;
+            background: #edf4fb;
+            color: #4f6f8a;
+            cursor: pointer;
+            font-size: .8rem;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .notif-popup.is-hide {
+            animation: notifToastOut .2s ease forwards;
+        }
+
+        @keyframes notifPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 92, 122, .32); }
+            70% { box-shadow: 0 0 0 7px rgba(255, 92, 122, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 92, 122, 0); }
+        }
+        @keyframes notifToastIn {
+            from { opacity: 0; transform: translateX(16px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes notifToastOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(20px); }
+        }
+
+        .btn-logout.ui-button {
+            padding: 7px 18px !important;
+            background: rgba(255,255,255,.15) !important;
+            border: 1.5px solid rgba(255,255,255,.4) !important;
+            border-radius: 6px !important;
+            color: #fff !important;
+            font-size: .82rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+        }
+        .btn-logout.ui-button:hover { background: rgba(255,255,255,.28) !important; }
+
+        /* Content */
+        .container {
+            max-width: 1000px;
+            margin: 48px auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+        .container.is-wide { max-width: 1600px; }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2));
+            border-radius: 12px;
+            padding: 28px 32px;
+            color: #fff;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 24px rgba(0, 123, 174, .22);
+        }
+        .welcome-banner h1 { font-size: 1.55rem; font-weight: 700; margin-bottom: 4px; }
+        .welcome-banner p  { font-size: .88rem; opacity: .8; }
+
+        .card {
+            background: var(--btk-card);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.07);
+        }
+        .card-title {
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--btk-primary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e8f0fb;
+        }
+
+        .form-grid { display: grid; gap: 14px; }
+        .form-grid.two-cols { grid-template-columns: repeat(2, minmax(240px, 1fr)); }
+        @media (max-width: 900px) {
+            .form-grid.two-cols { grid-template-columns: 1fr; }
+        }
+        .form-row { display: grid; gap: 6px; max-width: 420px; }
+        .form-row.full { grid-column: 1 / -1; }
+        .form-section {
+            grid-column: 1 / -1;
+            border: 1px solid var(--btk-border);
+            border-radius: 10px;
+            padding: 16px;
+            background: #f7fafd;
+        }
+        .form-section.half {
+            grid-column: 1 / span 1;
+            width: 100%;
+            max-width: 100%;
+        }
+        .form-section-row {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 16px;
+        }
+        .form-section-row .form-section {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+        .form-section-row .upload-side { order: 1; }
+        .form-section-row .docs-side { order: 2; }
+        .form-section-title {
+            font-size: .8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--btk-primary);
+            margin-bottom: 12px;
+        }
+        .form-section details { width: 100%; }
+        .form-section summary {
+            list-style: none;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--btk-ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-section summary::marker { display: none; }
+        .form-section summary::before {
+            content: "â–¸";
+            font-size: 1rem;
+            transition: transform .12s ease;
+        }
+        .form-section details[open] summary::before { transform: rotate(90deg); }
+        .upload-group-title {
+            grid-column: 1 / -1;
+            font-weight: 700;
+            color: var(--btk-ink);
+            margin-top: 6px;
+        }
+        .upload-list {
+            display: grid;
+            gap: 8px;
+        }
+        .upload-scroll {
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 6px;
+            border: 1px solid var(--btk-border);
+            border-radius: 8px;
+            background: #fff;
+            padding: 10px;
+        }
+        .doc-list {
+            display: grid;
+            gap: 10px;
+        }
+        .doc-card {
+            border: 1px solid var(--btk-border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            background: #fff;
+        }
+        .doc-card .doc-title {
+            font-weight: 700;
+            color: var(--btk-ink);
+            margin-bottom: 6px;
+        }
+        .doc-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(120px, 1fr));
+            gap: 6px 12px;
+            font-size: .85rem;
+            color: var(--btk-muted);
+        }
+        .doc-empty {
+            font-size: .85rem;
+            color: var(--btk-muted);
+            font-style: italic;
+        }
+        .doc-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border: 1px solid var(--btk-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .doc-table th,
+        .doc-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--btk-border);
+            font-size: .85rem;
+            text-align: left;
+        }
+        .doc-table th {
+            background: #f1f6fb;
+            color: var(--btk-ink);
+            font-weight: 700;
+        }
+        .doc-table tr:last-child td { border-bottom: none; }
+        .doc-delete {
+            border: none;
+            background: transparent;
+            color: #b21e1e;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+        }
+        .doc-delete:hover { filter: brightness(1.1); }
+        .upload-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
+            padding: 4px 0;
+        }
+        .upload-item label {
+            font-size: .85rem;
+            color: var(--btk-ink);
+            font-weight: 600;
+        }
+        .upload-item .upload-doc-label {
+            font-size: .85rem;
+            color: var(--btk-ink);
+            font-weight: 600;
+        }
+        .upload-item input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--btk-border);
+            background: #fff;
+        }
+        .upload-item .upload-file {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+        .upload-btn {
+            border: none;
+            background: #2f6fb8;
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(47, 111, 184, .25);
+        }
+        .upload-btn:hover { filter: brightness(1.05); }
+        @media (max-width: 900px) {
+            .upload-item { grid-template-columns: 1fr; align-items: stretch; }
+            .form-section.half { grid-column: 1 / -1; }
+            .form-section-row { flex-direction: column; }
+        }
+        .form-row label { font-size: .85rem; font-weight: 600; }
+        .form-row input,
+        .form-row select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--btk-border);
+            background: #f7fafd;
+            color: var(--btk-ink);
+        }
+        .form-row .ui-selectonemenu {
+            width: 100% !important;
+            border-radius: 8px;
+            border: 1px solid var(--btk-border);
+            background: #f7fafd;
+        }
+        .form-row .ui-selectonemenu .ui-selectonemenu-label {
+            padding: 10px 12px;
+            background: transparent;
+            color: var(--btk-ink);
+        }
+        .form-row .ui-selectonemenu-trigger {
+            background: transparent;
+            border-left: 1px solid var(--btk-border);
+        }
+        .form-row .ui-selectonemenu-panel .ui-selectonemenu-filter-container {
+            padding: 8px;
+        }
+        .form-row input:focus,
+        .form-row select:focus {
+            outline: none;
+            border-color: var(--btk-primary-2);
+            box-shadow: 0 0 0 3px rgba(42, 166, 217, .18);
+            background: #fff;
+        }
+        .form-grid.compact { gap: 10px; }
+        .form-row.small { max-width: 220px; }
+        .form-row.full { max-width: none; }
+        .form-row-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        @media (max-width: 980px) {
+            .form-row-grid { grid-template-columns: repeat(3, minmax(120px, 1fr)); }
+        }
+        @media (max-width: 680px) {
+            .form-row-grid { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+        }
+        @media (max-width: 480px) {
+            .form-row-grid { grid-template-columns: 1fr; }
+        }
+        .form-actions { margin-top: 6px; }
+        .form-actions { grid-column: 1 / -1; }
+        .btn-primary {
+            border: none;
+            background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2));
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0, 123, 174, .25);
+        }
+        .btn-primary:hover { filter: brightness(1.03); transform: translateY(-1px); }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 560px) { .info-grid { grid-template-columns: 1fr; } }
+
+        .info-item {
+            background: #f7fafd;
+            border: 1px solid var(--btk-border);
+            border-radius: 8px;
+            padding: 14px 18px;
+        }
+        .info-item .label {
+            font-size: .72rem;
+            font-weight: 700;
+            color: var(--btk-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .info-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--btk-ink);
+        }
+        .info-item .value.empty {
+            color: #bcc8d4;
+            font-style: italic;
+            font-weight: 400;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .82rem;
+            font-weight: 700;
+            background: #e8f0fb;
+            color: var(--btk-primary);
+        }
+
+        /* Secret fields (masked with reveal button) */
+        .secret-field {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+        .secret-field .secret-plain { display: none; }
+        .secret-field .secret-masked { letter-spacing: 2px; }
+        .secret-field.is-revealed .secret-plain { display: inline; }
+        .secret-field.is-revealed .secret-masked { display: none; }
+        .secret-toggle {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,.10);
+            background: #f3f8ff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        .secret-toggle:hover { background: #eaf3ff; }
+        .secret-toggle svg { width: 18px; height: 18px; stroke: var(--btk-primary); stroke-width: 2; fill: none; }
+
+        /* Mobile drawer behavior */
+        .sidebar-scrim {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.35);
+            z-index: 20;
+        }
+
+        @media (max-width: 780px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 30;
+                transform: translateX(-105%);
+                transition: transform .18s ease;
+                width: 280px;
+                box-shadow: 0 12px 50px rgba(0,0,0,.35);
+            }
+            .sidebar.is-open { transform: translateX(0); }
+            .sidebar.is-collapsed { width: 280px; }
+            .sidebar.is-collapsed .sidebar-brand { display: inline; }
+            .sidebar.is-collapsed .nav .label { display: inline; }
+            .sidebar-scrim.is-open { display: block; }
+        }
+    </style>
+</h:head>
+
+<h:body>
+    <!-- Session guard: redirect to login if not authenticated -->
+    <f:event type="preRenderView" listener="#{loginBean.checkSession}"/>
+
+    <div class="app">
+        <div id="sidebarScrim" class="sidebar-scrim" onclick="BTKNav.close()"></div>
+
+        <aside id="sidebar" class="sidebar" aria-label="Navigation">
+            <div class="sidebar-header">
+                <div class="sidebar-brand"></div>
+            </div>
+
+            <nav class="nav">
+                <h:link outcome="/dashboard" styleClass="nav-item">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <rect x="3" y="3" width="8" height="8" rx="2"/>
+                            <rect x="13" y="3" width="8" height="5" rx="2"/>
+                            <rect x="13" y="10" width="8" height="11" rx="2"/>
+                            <rect x="3" y="13" width="8" height="8" rx="2"/>
+                        </svg>
+                    </span>
+                    <span class="label">Tableau de bord</span>
+                </h:link>
+
+                <div class="nav-group">
+                    <button type="button" class="nav-item nav-toggle" onclick="BTKNav.toggleGroup(this)">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </span>
+                        <span class="label">Consultation dossier</span>
+                        <span class="chev">&#9662;</span>
+                    </button>
+                    <div class="nav-submenu" role="menu" aria-label="Consultation dossier">
+                        <h:link outcome="/consultation-archives" styleClass="nav-item">
+                            <span class="label">Consultation dossier</span>
+                        </h:link>
+                        <h:link outcome="/consultation-boites" styleClass="nav-item">
+                            <span class="label">Consultation boites</span>
+                        </h:link>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <button type="button" class="nav-item nav-toggle" onclick="BTKNav.toggleGroup(this)">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M22 2 11 13"/>
+                                <path d="M22 2 15 22 11 13 2 9 22 2z"/>
+                            </svg>
+                        </span>
+                        <span class="label">Transmission dossiers</span>
+                        <span class="chev">&#9662;</span>
+                    </button>
+                    <div class="nav-submenu" role="menu" aria-label="Transmission dossiers">
+                        <ui:fragment rendered="#{loginBean.transmissionAllowed}">
+                            <h:link outcome="/demande-dossier" styleClass="nav-item">
+                                <span class="label">Demande dossier</span>
+                            </h:link>
+                            <ui:fragment rendered="#{loginBean.consultationRole}">
+                                <h:link outcome="/suivi-demandes" styleClass="nav-item">
+                                    <span class="label">Suivi demande</span>
+                                </h:link>
+                            </ui:fragment>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{not loginBean.transmissionAllowed}">
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Demande dossier</span>
+                            </h:outputLink>
+                        </ui:fragment>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <button type="button" class="nav-item nav-toggle" onclick="BTKNav.toggleGroup(this)">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M12 5v14"/>
+                                <path d="M5 12h14"/>
+                            </svg>
+                        </span>
+                        <span class="label">Gestion des dossiers</span>
+                        <span class="chev">&#9662;</span>
+                    </button>
+                    <div class="nav-submenu" role="menu" aria-label="Ajout dossiers">
+                        <ui:fragment rendered="#{loginBean.archiveManagementAllowed}">
+                            <h:link outcome="/ajouter-dossiers-archives" styleClass="nav-item">
+                                <span class="label">Ajouter dossiers</span>
+                            </h:link>
+                            <h:link outcome="/ajout-archives" styleClass="nav-item">
+                                <span class="label">Gestion des documents</span>
+                            </h:link>
+                            <h:link outcome="/modifier-archives" styleClass="nav-item">
+                                <span class="label">Modifier dossier</span>
+                            </h:link>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{not loginBean.archiveManagementAllowed}">
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Ajouter dossiers</span>
+                            </h:outputLink>
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Gestion des documents</span>
+                            </h:outputLink>
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Modifier dossier</span>
+                            </h:outputLink>
+                        </ui:fragment>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <button type="button" class="nav-item nav-toggle" onclick="BTKNav.toggleGroup(this)">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <path d="M14 2v6h6"/>
+                            </svg>
+                        </span>
+                        <span class="label">Editions</span>
+                        <span class="chev">&#9662;</span>
+                    </button>
+                    <div class="nav-submenu" role="menu" aria-label="Editions">
+                        <ui:fragment rendered="#{loginBean.editionsAllowed}">
+                            <h:link outcome="/fichedossier" styleClass="nav-item">
+                                <span class="label">Fiche dossier</span>
+                            </h:link>
+                            <h:link outcome="/listearchives" styleClass="nav-item">
+                                <span class="label">Liste archives</span>
+                            </h:link>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{not loginBean.editionsAllowed}">
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Fiche dossier</span>
+                            </h:outputLink>
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Liste archives</span>
+                            </h:outputLink>
+                        </ui:fragment>
+                    </div>
+                </div>
+
+                <h:link outcome="/boite" styleClass="nav-item">
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <rect x="3" y="3" width="18" height="18" rx="3"/>
+                            <path d="M7 8h10"/>
+                            <path d="M7 12h10"/>
+                            <path d="M7 16h6"/>
+                        </svg>
+                    </span>
+                    <span class="label">Gestion de boites</span>
+                </h:link>
+
+                <div class="nav-group">
+                    <button type="button" class="nav-item nav-toggle" onclick="BTKNav.toggleGroup(this)">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M3 8h18"/>
+                                <path d="M3 12h18"/>
+                                <path d="M3 16h18"/>
+                            </svg>
+                        </span>
+                        <span class="label">Demande recu</span>
+                        <span class="chev">&#9662;</span>
+                    </button>
+                    <div class="nav-submenu" role="menu" aria-label="Demande recu">
+                        <ui:fragment rendered="#{loginBean.adminRole}">
+                            <h:link outcome="/liste-demandes" styleClass="nav-item">
+                                <span class="label">#{loginBean.pendingDemandesMenuLabel}</span>
+                            </h:link>
+                            <h:link outcome="/suivi-dossiers" styleClass="nav-item">
+                                <span class="label">Suivi dossiers</span>
+                            </h:link>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{not loginBean.adminRole}">
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Liste demande</span>
+                            </h:outputLink>
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Suivi dossiers</span>
+                            </h:outputLink>
+                        </ui:fragment>
+                    </div>
+                </div>
+
+                <div class="nav-group">
+                    <button type="button" class="nav-item nav-toggle" onclick="BTKNav.toggleGroup(this)">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                                <path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2.2 2.2 0 0 1-1.56 3.76 2.2 2.2 0 0 1-1.56-.64l-.04-.04a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.1 1.64V22a2.2 2.2 0 0 1-4.4 0v-.06a1.8 1.8 0 0 0-1.1-1.64 1.8 1.8 0 0 0-1.98.36l-.04.04a2.2 2.2 0 0 1-3.12 0 2.2 2.2 0 0 1 0-3.12l.04-.04A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.64-1.1H2.9a2.2 2.2 0 0 1 0-4.4h.06A1.8 1.8 0 0 0 4.6 8a1.8 1.8 0 0 0-.36-1.98l-.04-.04A2.2 2.2 0 1 1 7.32 2.8l.04.04A1.8 1.8 0 0 0 9.34 3.2 1.8 1.8 0 0 0 10.44 1.56V1.5a2.2 2.2 0 0 1 4.4 0v.06A1.8 1.8 0 0 0 15.94 3.2a1.8 1.8 0 0 0 1.98-.36l.04-.04A2.2 2.2 0 0 1 21.08 6l-.04.04A1.8 1.8 0 0 0 20.68 8a1.8 1.8 0 0 0 1.64 1.1h.06a2.2 2.2 0 0 1 0 4.4h-.06A1.8 1.8 0 0 0 19.4 15z"/>
+                            </svg>
+                        </span>
+                        <span class="label">Parametres</span>
+                        <span class="chev">&#9662;</span>
+                    </button>
+                    <div class="nav-submenu" role="menu" aria-label="Parametres">
+                        <ui:fragment rendered="#{loginBean.userManagementAllowed}">
+                            <h:link outcome="/ajouter-utilisateur" styleClass="nav-item">
+                                <span class="label">Ajouter utilisateur</span>
+                            </h:link>
+                            <h:link outcome="/modifier-utilisateur" styleClass="nav-item">
+                                <span class="label">Modifier utilisateur</span>
+                            </h:link>
+                            <h:link outcome="/liste-utilisateurs" styleClass="nav-item">
+                                <span class="label">Liste utilisateurs</span>
+                            </h:link>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{not loginBean.userManagementAllowed}">
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Ajouter utilisateur</span>
+                            </h:outputLink>
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Modifier utilisateur</span>
+                            </h:outputLink>
+                            <h:outputLink value="#" styleClass="nav-item nav-item-disabled">
+                                <span class="label">Liste utilisateurs</span>
+                            </h:outputLink>
+                        </ui:fragment>
+                    </div>
+                </div>
+            </nav>
+
+        </aside>
+
+        <section class="main">
+            <div class="navbar">
+                <div class="nav-left">
+                    <button type="button" class="hamburger" onclick="BTKNav.toggle()" aria-label="Menu">☰</button>
+                    <span class="brand">BTK Finance - Archives</span>
+                </div>
+                <div class="nav-user">
+                    <span>Connecté : <strong>#{loginBean.utilisateur.unix}</strong></span>
+                    <h:form id="notifForm"
+                            prependId="false"
+                            styleClass="notif-form"
+                            rendered="#{loginBean.adminRole or loginBean.consultationRole}">
+                        <h:inputHidden id="notifUserKey" value="#{loginBean.utilisateur.cuti}"/>
+                        <p:remoteCommand name="refreshNavbarNotifications"
+                                         actionListener="#{loginBean.refreshNotifications}"
+                                         process="@this"
+                                         update="notifBadge notifHeader notifEmpty notifList"/>
+                        <p:remoteCommand name="markNavbarNotificationsSeen"
+                                         actionListener="#{loginBean.markNotificationsAsSeen}"
+                                         process="@this"
+                                         update="notifWrapper"
+                                         oncomplete="if (PF('navbarNotifPoll')) { PF('navbarNotifPoll').start(); }"/>
+                        <p:poll interval="5"
+                                widgetVar="navbarNotifPoll"
+                                listener="#{loginBean.refreshNotifications}"
+                                process="@this"
+                                update="notifBadge notifHeader notifEmpty notifList"
+                                oncomplete="if (window.BTKNotif) { BTKNotif.onPollComplete(); }"
+                                global="false"/>
+                        <h:panelGroup id="notifWrapper" layout="block" styleClass="notif-wrapper">
+                            <h:panelGroup id="notifBell"
+                                          layout="block"
+                                          styleClass="notif-bell #{loginBean.newNotificationsAvailable ? 'has-new' : ''}"
+                                          title="Notifications">
+                                <span class="pi pi-bell"/>
+                                <h:panelGroup id="notifBadge" layout="block">
+                                    <h:panelGroup rendered="#{loginBean.newNotificationCount gt 0}" layout="block" styleClass="notif-badge">
+                                        #{loginBean.notificationBadge}
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </h:panelGroup>
+
+                            <p:overlayPanel id="notifPanel"
+                                            for="notifBell"
+                                            showEffect="fade"
+                                            hideEffect="fade"
+                                            onShow="if (PF('navbarNotifPoll')) { PF('navbarNotifPoll').stop(); } if (window.refreshNavbarNotifications) { refreshNavbarNotifications(); }"
+                                            dismissable="true"
+                                            showCloseIcon="false"
+                                            hideOnEscape="true"
+                                            onHide="if (window.markNavbarNotificationsSeen) { markNavbarNotificationsSeen(); }"
+                                            appendTo="@(body)"
+                                            styleClass="notif-panel">
+                                <h:panelGroup id="notifHeader" layout="block">
+                                    <h:panelGroup rendered="#{not empty loginBean.notifications}" layout="block" styleClass="notif-header">
+                                        #{loginBean.newNotificationCount} nouvelle(s) notification(s)
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                                <h:panelGroup id="notifEmpty" layout="block">
+                                    <h:panelGroup rendered="#{empty loginBean.notifications}" layout="block" styleClass="notif-empty">
+                                        Aucune notification.
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                                <h:panelGroup id="notifList" layout="block">
+                                    <h:panelGroup rendered="#{not empty loginBean.notifications}" layout="block" styleClass="notif-list">
+                                        <ui:repeat value="#{loginBean.notifications}" var="notif">
+                                            <h:link outcome="#{notif.outcome}" styleClass="notif-link">
+                                                <div class="notif-item #{notif.severity}"
+                                                     data-notif-key="#{notif.key}"
+                                                     data-notif-new="#{notif.newNotification}"
+                                                     data-notif-title="#{notif.title}"
+                                                     data-notif-message="#{notif.message}"
+                                                     data-notif-severity="#{notif.severity}">
+                                                    <div class="title">#{notif.title}</div>
+                                                    <h:panelGroup rendered="#{notif.newNotification}" layout="block" styleClass="notif-pill">
+                                                        Nouveau
+                                                    </h:panelGroup>
+                                                    <div class="message">#{notif.message}</div>
+                                                    <div class="date">
+                                                        <h:outputText value="#{notif.date}" rendered="#{not empty notif.date}">
+                                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                                        </h:outputText>
+                                                    </div>
+                                                </div>
+                                            </h:link>
+                                        </ui:repeat>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </p:overlayPanel>
+                        </h:panelGroup>
+                        <div id="notifPopupHost" class="notif-popup-host"/>
+                    </h:form>
+                    <h:form>
+                        <p:commandButton value="Déconnexion"
+                                         action="#{loginBean.logout}"
+                                         styleClass="btn-logout"
+                                         ajax="false"/>
+                    </h:form>
+                </div>
+            </div>
+
+            <ui:insert name="content"/>
+        </section>
+    </div>
+
+    <script type="text/javascript">
+        (function () {
+            function isMobile() { return window.matchMedia &amp;&amp; window.matchMedia('(max-width: 780px)').matches; }
+            function sidebarEl() { return document.getElementById('sidebar'); }
+            function scrimEl() { return document.getElementById('sidebarScrim'); }
+
+            window.BTKNav = {
+                toggle: function () {
+                    var sidebar = sidebarEl();
+                    if (!sidebar) return;
+
+                    if (isMobile()) {
+                        sidebar.classList.toggle('is-open');
+                        var scrim = scrimEl();
+                        if (scrim) scrim.classList.toggle('is-open', sidebar.classList.contains('is-open'));
+                        return;
+                    }
+
+                    sidebar.classList.toggle('is-collapsed');
+                },
+                toggleGroup: function (btn) {
+                    if (!btn) return;
+                    var sidebar = sidebarEl();
+                    if (sidebar) {
+                        if (isMobile()) {
+                            sidebar.classList.add('is-open');
+                            var scrim = scrimEl();
+                            if (scrim) scrim.classList.add('is-open');
+                        } else if (sidebar.classList.contains('is-collapsed')) {
+                            sidebar.classList.remove('is-collapsed');
+                        }
+                    }
+                    var group = btn.closest ? btn.closest('.nav-group') : null;
+                    if (!group) return;
+                    group.classList.toggle('is-open');
+                },
+                close: function () {
+                    var sidebar = sidebarEl();
+                    var scrim = scrimEl();
+                    if (sidebar) sidebar.classList.remove('is-open');
+                    if (scrim) scrim.classList.remove('is-open');
+                }
+            };
+
+            window.BTKSecrets = {
+                toggle: function (btn) {
+                    if (!btn) return;
+                    var root = btn.closest ? btn.closest('.secret-field') : null;
+                    if (!root) return;
+                    root.classList.toggle('is-revealed');
+                }
+            };
+
+            window.BTKNotif = (function () {
+                var shown = {};
+                var hostId = 'notifPopupHost';
+
+                function hostEl() {
+                    return document.getElementById(hostId);
+                }
+
+                function shownStorageKey() {
+                    var userKey = '';
+                    var userField = document.getElementById('notifUserKey');
+                    if (userField) {
+                        userKey = String(userField.value || '').trim();
+                    }
+                    if (!userKey) {
+                        userKey = 'default';
+                    }
+                    return 'btk.notif.shown.' + userKey;
+                }
+
+                function saveShown() {
+                    try {
+                        if (!window.sessionStorage) {
+                            return;
+                        }
+                        window.sessionStorage.setItem(shownStorageKey(), JSON.stringify(shown));
+                    } catch (e) {
+                        // Ignore storage errors.
+                    }
+                }
+
+                function loadShown() {
+                    try {
+                        if (!window.sessionStorage) {
+                            shown = {};
+                            return;
+                        }
+                        var raw = window.sessionStorage.getItem(shownStorageKey());
+                        if (!raw) {
+                            shown = {};
+                            return;
+                        }
+                        var parsed = JSON.parse(raw);
+                        if (parsed &amp;&amp; typeof parsed === 'object') {
+                            shown = parsed;
+                        } else {
+                            shown = {};
+                        }
+                    } catch (e) {
+                        shown = {};
+                    }
+                }
+
+                function resetShown() {
+                    shown = {};
+                    saveShown();
+                }
+
+                function hasNewBadge() {
+                    var badge = document.getElementById('notifBadge');
+                    if (!badge) {
+                        return false;
+                    }
+                    var text = String(badge.textContent || '').trim();
+                    return text.length > 0;
+                }
+
+                function refreshBellState() {
+                    var bell = document.getElementById('notifBell');
+                    var has = hasNewBadge();
+                    if (bell) {
+                        bell.classList.toggle('has-new', has);
+                    }
+                    if (!has) {
+                        resetShown();
+                    }
+                }
+
+                function removePopup(node) {
+                    if (!node) {
+                        return;
+                    }
+                    node.classList.add('is-hide');
+                    window.setTimeout(function () {
+                        if (node.parentNode) {
+                            node.parentNode.removeChild(node);
+                        }
+                    }, 220);
+                }
+
+                function createPopup(title, message, severity) {
+                    var host = hostEl();
+                    if (!host) {
+                        return;
+                    }
+
+                    var popup = document.createElement('div');
+                    popup.className = 'notif-popup ' + (severity || 'pending');
+
+                    var close = document.createElement('button');
+                    close.type = 'button';
+                    close.className = 'popup-close';
+                    close.textContent = 'x';
+                    close.addEventListener('click', function () {
+                        removePopup(popup);
+                    });
+
+                    var popupTitle = document.createElement('div');
+                    popupTitle.className = 'popup-title';
+                    popupTitle.textContent = title || 'Nouvelle notification';
+
+                    var popupMessage = document.createElement('div');
+                    popupMessage.className = 'popup-message';
+                    popupMessage.textContent = message || '';
+
+                    popup.appendChild(close);
+                    popup.appendChild(popupTitle);
+                    popup.appendChild(popupMessage);
+                    host.appendChild(popup);
+
+                    var hideDelay = severity === 'alert' ? 12000 : 6500;
+                    window.setTimeout(function () {
+                        removePopup(popup);
+                    }, hideDelay);
+                }
+
+                function readTextFrom(item, selector) {
+                    if (!item) {
+                        return '';
+                    }
+                    var node = item.querySelector(selector);
+                    if (!node) {
+                        return '';
+                    }
+                    return String(node.textContent || '').trim();
+                }
+
+                function scanAndPopup() {
+                    var items = document.querySelectorAll('#notifList .notif-item');
+                    if (!items || items.length === 0) {
+                        return;
+                    }
+
+                    Array.prototype.forEach.call(items, function (item, index) {
+                        if (!item) {
+                            return;
+                        }
+                        var isNew = String(item.getAttribute('data-notif-new') || '');
+                        if (isNew !== 'true') {
+                            return;
+                        }
+
+                        var key = String(item.getAttribute('data-notif-key') || '').trim();
+                        if (!key) {
+                            key = 'notif_' + String(index);
+                        }
+                        if (shown[key]) {
+                            return;
+                        }
+                        shown[key] = true;
+                        saveShown();
+
+                        var title = String(item.getAttribute('data-notif-title') || '').trim();
+                        var message = String(item.getAttribute('data-notif-message') || '').trim();
+                        var severity = String(item.getAttribute('data-notif-severity') || '').trim();
+                        if (!title) {
+                            title = readTextFrom(item, '.title');
+                        }
+                        if (!message) {
+                            message = readTextFrom(item, '.message');
+                        }
+                        createPopup(title, message, severity);
+                    });
+                }
+
+                loadShown();
+
+                return {
+                    onPollComplete: function () {
+                        refreshBellState();
+                        scanAndPopup();
+                    }
+                };
+            })();
+
+            window.setTimeout(function () {
+                if (window.BTKNotif) {
+                    BTKNotif.onPollComplete();
+                }
+            }, 350);
+
+            // Default: menu open (expanded) on load.
+            // On desktop, ensure it's not collapsed.
+            var sidebar = sidebarEl();
+            var scrim = scrimEl();
+            if (isMobile()) {
+                if (sidebar) sidebar.classList.remove('is-open');
+                if (scrim) scrim.classList.remove('is-open');
+            } else if (sidebar &amp;&amp; !isMobile()) {
+                sidebar.classList.remove('is-collapsed');
+            }
+        })();
+    </script>
+</h:body>
+</html>
+

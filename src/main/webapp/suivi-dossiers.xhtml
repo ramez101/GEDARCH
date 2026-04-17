@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Suivi dossiers</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .suivi-dossiers-toolbar {
+                margin-bottom: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 14px;
+                flex-wrap: wrap;
+            }
+
+            .suivi-dossiers-actions {
+                display: flex;
+                justify-content: flex-end;
+                flex: 0 0 auto;
+            }
+
+            .suivi-dossiers-summary {
+                padding: 10px 12px;
+                border-radius: 8px;
+                background: #eef7ff;
+                border: 1px solid #d4e8fa;
+                color: #245780;
+                font-size: .85rem;
+                display: flex;
+                gap: 16px;
+                flex-wrap: wrap;
+                flex: 1 1 560px;
+            }
+
+            .suivi-dossiers-filterbar {
+                margin-bottom: 14px;
+                padding: 12px 14px;
+                border-radius: 10px;
+                border: 1px solid #dbe7f3;
+                background: linear-gradient(135deg, #f8fbff 0%, #f2f7fd 100%);
+                display: flex;
+                align-items: end;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .suivi-dossiers-filterbar .filter-row {
+                margin: 0;
+                min-width: 280px;
+                max-width: 380px;
+                flex: 1 1 320px;
+            }
+
+            .suivi-dossiers-filterbar label {
+                display: block;
+                margin-bottom: 6px;
+                color: #244e71;
+                font-size: .84rem;
+                font-weight: 700;
+            }
+
+            .suivi-dossiers-filterbar .ui-selectonemenu {
+                width: 100% !important;
+            }
+
+            .suivi-refresh-btn.ui-button {
+                min-width: 38px !important;
+                width: 38px !important;
+                height: 38px !important;
+                border-radius: 10px !important;
+                padding: 0 !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .suivi-refresh-btn .ui-button-text {
+                display: none;
+            }
+
+            .suivi-dossiers-table.ui-datatable .ui-datatable-tablewrapper {
+                border: 1px solid #dbe5ef;
+                border-radius: 10px;
+                overflow: hidden;
+                background: #fff;
+            }
+
+            .suivi-dossiers-table.ui-datatable table {
+                table-layout: fixed;
+            }
+
+            .suivi-dossiers-table.ui-datatable thead th {
+                background: #eef4fa;
+                color: #264c6d;
+                font-weight: 700;
+                padding: 11px 12px;
+                border: 0;
+            }
+
+            .suivi-dossiers-table.ui-datatable tbody td {
+                padding: 11px 12px;
+                border-top: 1px solid #e7eef5;
+                vertical-align: middle;
+            }
+
+            .dossier-status {
+                display: inline-block;
+                padding: 4px 9px;
+                border-radius: 999px;
+                font-size: .78rem;
+                font-weight: 700;
+            }
+
+            .dossier-status.pending {
+                background: #fff6df;
+                color: #9d6f00;
+            }
+
+            .dossier-status.approved {
+                background: #e8f7ef;
+                color: #1d7a49;
+            }
+
+            .dossier-status.refused {
+                background: #fdecec;
+                color: #a33636;
+            }
+
+            .dossier-status.returned {
+                background: #ececff;
+                color: #324aa3;
+            }
+
+            .rappel-btn.ui-button {
+                min-width: 34px !important;
+                height: 34px !important;
+                border-radius: 10px !important;
+                padding: 0 !important;
+                background: #fff4dc !important;
+                border: 1px solid #f2d28f !important;
+                color: #9b6b00 !important;
+            }
+
+            .rappel-btn.ui-button:hover {
+                background: #ffe8be !important;
+                border-color: #d8ae5a !important;
+            }
+
+            .rappel-na {
+                color: #98aab8;
+                font-size: .86rem;
+            }
+
+            .duree-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 74px;
+                padding: 5px 9px;
+                border-radius: 999px;
+                font-size: .78rem;
+                font-weight: 700;
+                line-height: 1.1;
+            }
+
+            .duree-neutral {
+                background: #eef3f8;
+                color: #70869c;
+            }
+
+            .duree-yellow {
+                background: #fff7db;
+                color: #9b7200;
+            }
+
+            .duree-orange {
+                background: #ffe8d8;
+                color: #bf5b07;
+            }
+
+            .duree-red {
+                background: #fde7e7;
+                color: #b02b2b;
+            }
+        </style>
+
+        <div class="container is-wide">
+            <div class="card">
+                <div class="card-title">Transmission dossiers - Suivi dossiers</div>
+
+                <h:form id="suiviDossiersForm" prependId="false">
+                    <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
+
+                    <div class="suivi-dossiers-toolbar">
+                        <div class="suivi-dossiers-summary">
+                            <span>Total: <strong>#{suiviDossiersBean.totalCount}</strong></span>
+                            <span>En attente: <strong>#{suiviDossiersBean.pendingCount}</strong></span>
+                            <span>Approuvee: <strong>#{suiviDossiersBean.approvedCount}</strong></span>
+                            <span>Refusee: <strong>#{suiviDossiersBean.refusedCount}</strong></span>
+                            <span>Restituee: <strong>#{suiviDossiersBean.returnedCount}</strong></span>
+                        </div>
+                        <div class="suivi-dossiers-actions">
+                            <p:commandButton icon="pi pi-refresh"
+                                             title="Actualiser"
+                                             action="#{suiviDossiersBean.reload}"
+                                             process="@this"
+                                             update="@form"
+                                             styleClass="btn-primary ui-button-icon-only suivi-refresh-btn"/>
+                        </div>
+                    </div>
+
+                    <div class="suivi-dossiers-filterbar">
+                        <div class="filter-row">
+                            <h:outputLabel for="selectedCharge" value="Choisir charge"/>
+                            <p:selectOneMenu id="selectedCharge" value="#{suiviDossiersBean.selectedCharge}">
+                                <f:selectItem itemLabel="Tous les charges" itemValue="#{null}"/>
+                                <f:selectItems value="#{suiviDossiersBean.consultationOptions}"
+                                               var="charge"
+                                               itemLabel="#{charge.label}"
+                                               itemValue="#{charge.value}"/>
+                                <p:ajax process="@this"
+                                        listener="#{suiviDossiersBean.onChargeChange}"
+                                        update="@form"/>
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <p:dataTable id="suiviDossiersTable"
+                                 value="#{suiviDossiersBean.dossiers}"
+                                 var="dossier"
+                                 styleClass="suivi-dossiers-table"
+                                 emptyMessage="Aucune demande disponible."
+                                 paginator="true"
+                                 paginatorPosition="bottom"
+                                 rows="20"
+                                 rowsPerPageTemplate="10,20,50,100">
+                        <p:column headerText="ID" style="width: 5%; text-align:center;" sortBy="#{dossier.idDemande}">
+                            <h:outputText value="#{dossier.idDemande}"/>
+                        </p:column>
+                        <p:column headerText="PIN" style="width: 6%; text-align:center;" sortBy="#{dossier.pin}">
+                            <h:outputText value="#{dossier.pin}"/>
+                        </p:column>
+                        <p:column headerText="Boite" style="width: 6%; text-align:center;" sortBy="#{dossier.boite}">
+                            <h:outputText value="#{dossier.boite}"/>
+                        </p:column>
+                        <p:column headerText="Emetteur" style="width: 10%;" sortBy="#{dossier.emetteur}">
+                            <h:outputText value="#{dossier.emetteur}"/>
+                        </p:column>
+                        <p:column headerText="Recepteur" style="width: 10%;" sortBy="#{dossier.recepteur}">
+                            <h:outputText value="#{dossier.recepteur}"/>
+                        </p:column>
+                        <p:column headerText="Date envoi" style="width: 11%; text-align:center;" sortBy="#{dossier.dateEnvoi}">
+                            <h:outputText value="#{dossier.dateEnvoi}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Date approuve" style="width: 11%; text-align:center;" sortBy="#{dossier.dateApprouve}">
+                            <h:outputText value="#{dossier.dateApprouve}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Date restitution" style="width: 11%; text-align:center;" sortBy="#{dossier.dateRestitution}">
+                            <h:outputText value="#{dossier.dateRestitution}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Duree" style="width: 8%; text-align:center;" sortBy="#{dossier.dureeJours}">
+                            <h:panelGroup layout="inline" styleClass="#{dossier.dureeStyleClass}">
+                                <h:outputText value="#{dossier.dureeLabel}"/>
+                            </h:panelGroup>
+                        </p:column>
+                        <p:column headerText="Statut" style="width: 13%; text-align:center;" sortBy="#{dossier.statut}">
+                            <h:panelGroup layout="inline"
+                                          styleClass="dossier-status #{dossier.statut eq 'EN ATTENTE' ? 'pending' : (dossier.statut eq 'APPROUVEE' ? 'approved' : (dossier.statut eq 'REFUSEE' ? 'refused' : 'returned'))}">
+                                <h:outputText value="#{dossier.statut}"/>
+                            </h:panelGroup>
+                        </p:column>
+                        <p:column headerText="Rappel" style="width: 9%; text-align:center;">
+                            <p:commandButton icon="pi pi-bell"
+                                             title="Envoyer rappel"
+                                             actionListener="#{suiviDossiersBean.envoyerRappel(dossier)}"
+                                             process="@this"
+                                             update="messages"
+                                             rendered="#{dossier.rappelable}"
+                                             styleClass="rappel-btn"/>
+                            <h:outputText value="-"
+                                          rendered="#{not dossier.rappelable}"
+                                          styleClass="rappel-na"/>
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

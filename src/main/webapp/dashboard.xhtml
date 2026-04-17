@@ -1,0 +1,562 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Tableau de bord</ui:define>
+
+    <ui:define name="content">
+        <div class="container">
+            <style>
+                .dashboard-slider { display: grid; gap: 16px; }
+                .dashboard-slide { display: none; }
+                .dashboard-slide.is-active {
+                    display: block;
+                    animation: dashboardSlideIn .35s ease;
+                }
+
+                .dashboard-autorotate {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 10px;
+                    padding: 6px 4px;
+                    flex-wrap: wrap;
+                }
+                .dashboard-note {
+                    font-size: .78rem;
+                    letter-spacing: .2px;
+                    color: #607d95;
+                    font-weight: 600;
+                }
+                .dashboard-controls {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-left: auto;
+                }
+                .dashboard-nav {
+                    width: 34px;
+                    height: 34px;
+                    border: 1px solid #cfe1f3;
+                    border-radius: 999px;
+                    background: #ffffff;
+                    color: #0a4e75;
+                    font-size: 1rem;
+                    font-weight: 800;
+                    line-height: 1;
+                    cursor: pointer;
+                    box-shadow: 0 4px 12px rgba(15, 57, 86, .06);
+                    transition: transform .2s ease, background-color .2s ease, border-color .2s ease;
+                }
+                .dashboard-nav:hover {
+                    background: #eef6ff;
+                    border-color: #9fc5e8;
+                    transform: translateY(-1px);
+                }
+                .dashboard-nav:focus-visible,
+                .dashboard-dot:focus-visible {
+                    outline: 2px solid #2aa6d9;
+                    outline-offset: 2px;
+                }
+                .dashboard-dots {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                }
+                .dashboard-dot {
+                    width: 9px;
+                    height: 9px;
+                    border-radius: 999px;
+                    background: #c6d8ea;
+                    border: none;
+                    padding: 0;
+                    cursor: pointer;
+                    transition: all .2s ease;
+                }
+                .dashboard-dot.is-active {
+                    width: 22px;
+                    background: linear-gradient(135deg, #007bae, #2aa6d9);
+                }
+
+                .stats-panel {
+                    background: linear-gradient(150deg, #f5f9ff 0%, #eef5ff 38%, #ffffff 100%);
+                    border-radius: 16px;
+                    padding: 20px;
+                    border: 1px solid #d7e7f8;
+                    box-shadow: 0 10px 28px rgba(11, 47, 69, .08);
+                }
+                .stats-hero {
+                    display: grid;
+                    grid-template-columns: minmax(220px, 1fr) minmax(260px, 1.35fr);
+                    gap: 16px;
+                    background: linear-gradient(135deg, #0b2f45 0%, #0d4669 45%, #007bae 100%);
+                    border-radius: 14px;
+                    padding: 18px;
+                    color: #fff;
+                    margin-bottom: 16px;
+                }
+                .stats-hero-title {
+                    font-size: .78rem;
+                    text-transform: uppercase;
+                    letter-spacing: 1.4px;
+                    opacity: .78;
+                    margin-bottom: 8px;
+                    font-weight: 700;
+                }
+                .stats-hero-value {
+                    font-size: 2.15rem;
+                    font-weight: 900;
+                    line-height: 1;
+                    margin-bottom: 6px;
+                }
+                .stats-hero-sub {
+                    font-size: .88rem;
+                    opacity: .88;
+                    font-weight: 500;
+                }
+                .stats-hero-info {
+                    display: grid;
+                    gap: 10px;
+                    align-content: center;
+                }
+                .stats-track {
+                    width: 100%;
+                    height: 10px;
+                    border-radius: 999px;
+                    background: rgba(255,255,255,.2);
+                    overflow: hidden;
+                }
+                .stats-track .stats-track-fill {
+                    display: block;
+                    height: 100%;
+                    border-radius: inherit;
+                    background: linear-gradient(90deg, #5eead4 0%, #8bffe4 50%, #d6fff5 100%);
+                    box-shadow: 0 0 14px rgba(141, 255, 229, .45);
+                }
+                .stats-hero-row {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 10px;
+                    font-size: .8rem;
+                    font-weight: 600;
+                    opacity: .9;
+                }
+
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+                    gap: 14px;
+                }
+                .stats-item {
+                    border: 1px solid #dde8f4;
+                    background: #fff;
+                    border-radius: 12px;
+                    padding: 12px 14px;
+                    box-shadow: 0 4px 16px rgba(15, 57, 86, .06);
+                    border-top: 4px solid #007bae;
+                }
+                .stats-label {
+                    font-size: .68rem;
+                    text-transform: uppercase;
+                    letter-spacing: 1.1px;
+                    color: #5f7b95;
+                    margin-bottom: 6px;
+                    font-weight: 700;
+                }
+                .stats-value {
+                    font-size: 1.45rem;
+                    line-height: 1;
+                    color: #0b2f45;
+                    font-weight: 900;
+                }
+                .stats-meta {
+                    margin-top: 16px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                }
+                .stats-chip {
+                    border-radius: 999px;
+                    background: #eaf4ff;
+                    color: #0a4e75;
+                    padding: 8px 12px;
+                    font-size: .82rem;
+                    font-weight: 600;
+                    border: 1px solid #d0e3f7;
+                }
+
+                @media (max-width: 900px) {
+                    .stats-hero {
+                        grid-template-columns: 1fr;
+                    }
+                    .dashboard-controls {
+                        margin-left: 0;
+                    }
+                }
+                @keyframes dashboardSlideIn {
+                    from { opacity: 0; transform: translateY(10px) scale(.99); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
+                }
+            </style>
+
+            <div class="welcome-banner">
+                <h1>Bienvenue, #{loginBean.utilisateur.lib}</h1>
+                <p>Tableau de bord - Session #{loginBean.currentFilialeLabel}</p>
+            </div>
+
+            <div class="dashboard-slider" data-current="0">
+                <div class="dashboard-slide is-active">
+                    <div class="card">
+                        <div class="card-title">Informations utilisateur</div>
+
+                        <div class="info-grid">
+
+                            <div class="info-item">
+                                <div class="label">Code Utilisateur (CUTI)</div>
+                                <div class="value">#{loginBean.utilisateur.cuti}</div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="label">Nom complet (LIB)</div>
+                                <div class="value">
+                                    <h:outputText value="#{loginBean.utilisateur.lib}"
+                                                  rendered="#{not empty loginBean.utilisateur.lib}"/>
+                                    <span class="empty">
+                                        <h:outputText value="Non renseigne"
+                                                      rendered="#{empty loginBean.utilisateur.lib}"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="label">Username Unix</div>
+                                <div class="value">
+                                    <h:panelGroup rendered="#{not empty loginBean.utilisateur.unix}">
+                                        <span class="secret-field">
+                                            <span class="secret-masked">********</span>
+                                            <span class="secret-plain">#{loginBean.utilisateur.unix}</span>
+                                            <button type="button" class="secret-toggle" onclick="BTKSecrets.toggle(this)" aria-label="Afficher/Masquer">
+                                                <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                                                    <circle cx="12" cy="12" r="3"/>
+                                                </svg>
+                                            </button>
+                                        </span>
+                                    </h:panelGroup>
+                                    <span class="empty">
+                                        <h:outputText value="Non renseigne"
+                                                      rendered="#{empty loginBean.utilisateur.unix}"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="label">Profil (PUTI)</div>
+                                <div class="value">
+                                    <h:panelGroup rendered="#{not empty loginBean.utilisateur.puti}">
+                                        <span class="badge">#{loginBean.utilisateur.puti}</span>
+                                    </h:panelGroup>
+                                    <span class="empty">
+                                        <h:outputText value="Non renseigne"
+                                                      rendered="#{empty loginBean.utilisateur.puti}"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="label">Role</div>
+                                <div class="value">
+                                    <h:panelGroup rendered="#{not empty loginBean.utilisateur.role}">
+                                        <span class="badge">#{loginBean.utilisateur.role}</span>
+                                    </h:panelGroup>
+                                    <span class="empty">
+                                        <h:outputText value="Non renseigne"
+                                                      rendered="#{empty loginBean.utilisateur.role}"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="label">Agence (AGE)</div>
+                                <div class="value">
+                                    <h:outputText value="#{loginBean.utilisateur.age}"
+                                                  rendered="#{not empty loginBean.utilisateur.age}"/>
+                                    <span class="empty">
+                                        <h:outputText value="Non renseigne"
+                                                      rendered="#{empty loginBean.utilisateur.age}"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <ui:fragment rendered="#{dashboardStatsBean.visible}">
+                    <div class="dashboard-slide">
+                        <div class="stats-panel">
+                            <div class="card-title">
+                                <h:outputText value="Statistiques de la session #{dashboardStatsBean.currentFilialeLabel}"
+                                              rendered="#{loginBean.adminRole}"/>
+                                <h:outputText value="Statistiques de mes demandes"
+                                              rendered="#{dashboardStatsBean.consultationScopedStats}"/>
+                            </div>
+
+                            <div class="stats-hero">
+                                <div>
+                                    <div class="stats-hero-title">
+                                        <h:outputText value="Performance Globale"
+                                                      rendered="#{loginBean.adminRole}"/>
+                                        <h:outputText value="Mes demandes"
+                                                      rendered="#{dashboardStatsBean.consultationScopedStats}"/>
+                                    </div>
+                                    <div class="stats-hero-value">#{dashboardStatsBean.tauxTraitement}%</div>
+                                    <div class="stats-hero-sub">
+                                        <h:outputText value="Taux de traitement des demandes"
+                                                      rendered="#{loginBean.adminRole}"/>
+                                        <h:outputText value="Taux de traitement de mes demandes"
+                                                      rendered="#{dashboardStatsBean.consultationScopedStats}"/>
+                                    </div>
+                                </div>
+                                <div class="stats-hero-info">
+                                    <div class="stats-track">
+                                        <span class="stats-track-fill" data-rate="#{dashboardStatsBean.tauxTraitement}"></span>
+                                    </div>
+                                    <div class="stats-hero-row">
+                                        <span>Traitees: #{dashboardStatsBean.demandesTraitees}</span>
+                                        <span>Total: #{dashboardStatsBean.totalDemandes}</span>
+                                    </div>
+                                    <div class="stats-hero-row">
+                                        <span>En attente: #{dashboardStatsBean.demandesEnAttente}</span>
+                                        <span>Restitues: #{dashboardStatsBean.dossiersRestitues}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stats-grid">
+                                <ui:fragment rendered="#{loginBean.adminRole}">
+                                    <div class="stats-item">
+                                        <div class="stats-label">Dossiers archives</div>
+                                        <div class="stats-value">#{dashboardStatsBean.totalDossiers}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Boites</div>
+                                        <div class="stats-value">#{dashboardStatsBean.totalBoites}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Demandes totales</div>
+                                        <div class="stats-value">#{dashboardStatsBean.totalDemandes}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Demandes en attente</div>
+                                        <div class="stats-value">#{dashboardStatsBean.demandesEnAttente}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Demandes approuvees</div>
+                                        <div class="stats-value">#{dashboardStatsBean.demandesApprouvees}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Demandes refusees</div>
+                                        <div class="stats-value">#{dashboardStatsBean.demandesRefusees}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Dossiers restitues</div>
+                                        <div class="stats-value">#{dashboardStatsBean.dossiersRestitues}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Utilisateurs totaux</div>
+                                        <div class="stats-value">#{dashboardStatsBean.totalUtilisateurs}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Utilisateurs actifs</div>
+                                        <div class="stats-value">#{dashboardStatsBean.utilisateursActifs}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Utilisateurs inactifs</div>
+                                        <div class="stats-value">#{dashboardStatsBean.utilisateursInactifs}</div>
+                                    </div>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{dashboardStatsBean.consultationScopedStats}">
+                                    <div class="stats-item">
+                                        <div class="stats-label">Demandes totales</div>
+                                        <div class="stats-value">#{dashboardStatsBean.totalDemandes}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Demandes en attente</div>
+                                        <div class="stats-value">#{dashboardStatsBean.demandesEnAttente}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Demandes approuvees</div>
+                                        <div class="stats-value">#{dashboardStatsBean.demandesApprouvees}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Demandes refusees</div>
+                                        <div class="stats-value">#{dashboardStatsBean.demandesRefusees}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Dossiers restitues</div>
+                                        <div class="stats-value">#{dashboardStatsBean.dossiersRestitues}</div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-label">Dossiers non restitues</div>
+                                        <div class="stats-value">#{dashboardStatsBean.dossiersNonRestitues}</div>
+                                    </div>
+                                </ui:fragment>
+                            </div>
+
+                            <div class="stats-meta">
+                                <span class="stats-chip">Taux traitement demandes: #{dashboardStatsBean.tauxTraitement}%</span>
+                                <span class="stats-chip">
+                                    Derniere mise a jour:
+                                    <h:outputText value="#{dashboardStatsBean.refreshedAt}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+                                    </h:outputText>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-autorotate">
+                        <span class="dashboard-note">Changement automatique chaque 10 secondes avec navigation manuelle.</span>
+                        <div class="dashboard-controls">
+                            <button type="button" class="dashboard-nav" onclick="BTKDashboardSlider.prev()" aria-label="Afficher le slide precedent">&#8249;</button>
+                            <div class="dashboard-dots" aria-label="Navigation du slider">
+                                <button type="button" class="dashboard-dot is-active" onclick="BTKDashboardSlider.goTo(0)" aria-label="Afficher les informations utilisateur" aria-pressed="true"></button>
+                                <button type="button" class="dashboard-dot" onclick="BTKDashboardSlider.goTo(1)" aria-label="Afficher les statistiques" aria-pressed="false"></button>
+                            </div>
+                            <button type="button" class="dashboard-nav" onclick="BTKDashboardSlider.next()" aria-label="Afficher le slide suivant">&#8250;</button>
+                        </div>
+                    </div>
+                </ui:fragment>
+            </div>
+        </div>
+
+        <h:outputScript target="body">
+            (function () {
+                var AUTO_INTERVAL_MS = 10000;
+                var timer = null;
+                var root = document.querySelector('.dashboard-slider');
+
+                function activate(root, targetIndex) {
+                    if (!root) {
+                        return;
+                    }
+
+                    var slides = root.querySelectorAll('.dashboard-slide');
+                    var dots = root.querySelectorAll('.dashboard-dot');
+                    if (!slides || slides.length === 0) {
+                        return;
+                    }
+
+                    var max = slides.length - 1;
+                    var index = targetIndex;
+                    if (index &lt; 0) {
+                        index = max;
+                    }
+                    if (index &gt; max) {
+                        index = 0;
+                    }
+
+                    var i;
+                    for (i = 0; i &lt; slides.length; i++) {
+                        slides[i].classList.toggle('is-active', i === index);
+                    }
+                    for (i = 0; i &lt; dots.length; i++) {
+                        dots[i].classList.toggle('is-active', i === index);
+                        dots[i].setAttribute('aria-pressed', i === index ? 'true' : 'false');
+                    }
+                    root.setAttribute('data-current', String(index));
+                }
+
+                function next(root) {
+                    if (!root) {
+                        return;
+                    }
+                    var current = Number(root.getAttribute('data-current') || '0');
+                    activate(root, current + 1);
+                }
+
+                function prev(root) {
+                    if (!root) {
+                        return;
+                    }
+                    var current = Number(root.getAttribute('data-current') || '0');
+                    activate(root, current - 1);
+                }
+
+                function startAuto() {
+                    if (!root) {
+                        return;
+                    }
+                    if (timer !== null) {
+                        window.clearInterval(timer);
+                    }
+                    timer = window.setInterval(function () {
+                        next(root);
+                    }, AUTO_INTERVAL_MS);
+                }
+
+                function stopAuto() {
+                    if (timer !== null) {
+                        window.clearInterval(timer);
+                        timer = null;
+                    }
+                }
+
+                function restartAuto() {
+                    stopAuto();
+                    startAuto();
+                }
+
+                function syncStatTrack() {
+                    if (!root) {
+                        return;
+                    }
+                    var fill = root.querySelector('.stats-track-fill');
+                    if (!fill) {
+                        return;
+                    }
+                    var rate = Number(fill.getAttribute('data-rate') || '0');
+                    if (isNaN(rate)) {
+                        rate = 0;
+                    }
+                    if (rate &lt; 0) {
+                        rate = 0;
+                    }
+                    if (rate &gt; 100) {
+                        rate = 100;
+                    }
+                    fill.style.width = String(rate) + '%';
+                }
+
+                window.BTKDashboardSlider = {
+                    goTo: function (index) {
+                        activate(root, index);
+                        restartAuto();
+                    },
+                    next: function () {
+                        next(root);
+                        restartAuto();
+                    },
+                    prev: function () {
+                        prev(root);
+                        restartAuto();
+                    }
+                };
+
+                syncStatTrack();
+                startAuto();
+                document.addEventListener('visibilitychange', function () {
+                    if (document.hidden) {
+                        stopAuto();
+                    } else {
+                        startAuto();
+                    }
+                });
+            })();
+        </h:outputScript>
+    </ui:define>
+
+</ui:composition>

@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Fiche dossier</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .fiche-search-actions {
+                padding-top: 22px;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .danger-icon-btn.ui-button.ui-widget {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #d34a4a;
+                background: linear-gradient(180deg, #da5656, #bf3434);
+                color: #fff;
+                width: 34px;
+                height: 34px;
+                min-width: 34px;
+                padding: 0;
+                border-radius: 999px;
+                font-weight: 700;
+                cursor: pointer;
+                box-shadow: 0 6px 16px rgba(191, 52, 52, .24);
+            }
+
+            .danger-icon-btn.ui-button.ui-widget .ui-button-text {
+                display: none;
+            }
+
+            .fiche-result {
+                margin-top: 16px;
+            }
+
+            .fiche-preview-actions {
+                margin-top: 18px;
+                display: flex;
+                justify-content: center;
+            }
+
+            .fiche-preview-btn.ui-button.ui-widget {
+                border: 1px solid #7ea6d3;
+                background: #fff;
+                color: #153b5a;
+                font-weight: 700;
+                min-width: 160px;
+                border-radius: 4px;
+            }
+
+            .fiche-preview-btn.ui-button.ui-widget .ui-button-text {
+                font-size: .82rem;
+                padding: 8px 12px;
+            }
+
+            .fiche-preview-card {
+                border: 1px solid var(--btk-border);
+                border-radius: 10px;
+                background: #f9fcff;
+                padding: 14px;
+                margin-bottom: 16px;
+            }
+
+            .fiche-preview-title {
+                font-size: .9rem;
+                font-weight: 700;
+                color: var(--btk-ink);
+                margin-bottom: 10px;
+            }
+
+            .fiche-dialog-actions {
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 10px;
+            }
+        </style>
+
+        <div class="container">
+            <div class="card">
+                <div class="card-title">Fiche dossier</div>
+                <h:form id="ficheDossierForm" prependId="false">
+                    <p:defaultCommand target="searchFicheBtn"/>
+                    <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
+
+                    <div class="form-grid two-cols">
+                        <div class="form-row full" style="display: flex; gap: 12px; align-items: end; flex-wrap: wrap;">
+                            <div style="flex: 0 0 180px;">
+                                <h:outputLabel for="searchType" value="Recherche par"/>
+                                <h:selectOneMenu id="searchType" value="#{ficheDossierBean.searchType}">
+                                    <f:selectItem itemLabel="Pin Client" itemValue="pin"/>
+                                    <f:selectItem itemLabel="Relation" itemValue="relation"/>
+                                    <p:ajax process="@this searchValueWrapper" update="searchValueWrapper"/>
+                                </h:selectOneMenu>
+                            </div>
+
+                            <h:panelGroup id="searchValueWrapper" layout="block" style="flex: 1 1 320px;">
+                                <h:outputLabel value="Valeur"/>
+                                <ui:fragment rendered="#{ficheDossierBean.searchType ne 'relation'}">
+                                    <p:inputText id="searchValuePin"
+                                                 value="#{ficheDossierBean.searchPinValue}"
+                                                 placeholder="Saisir pin client"
+                                                 autocomplete="off"
+                                                 style="width: 100%"/>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{ficheDossierBean.searchType eq 'relation'}">
+                                    <p:autoComplete id="searchValueRelation"
+                                                    value="#{ficheDossierBean.searchRelationValue}"
+                                                    completeMethod="#{ficheDossierBean.completeRelation}"
+                                                    placeholder="Saisir relation"
+                                                    minQueryLength="2"
+                                                    queryDelay="250"
+                                                    dropdown="false"
+                                                    forceSelection="false"
+                                                    scrollHeight="200"
+                                                    style="width: 100%"/>
+                                </ui:fragment>
+                            </h:panelGroup>
+
+                            <div class="fiche-search-actions">
+                                <p:commandButton id="searchFicheBtn"
+                                                 value="Rechercher"
+                                                 action="#{ficheDossierBean.search}"
+                                                 process="@form"
+                                                 update="@form"/>
+                                <p:commandButton value=""
+                                                 action="#{ficheDossierBean.clear}"
+                                                 process="@this"
+                                                 update="@form"
+                                                 icon="pi pi-times"
+                                                 title="Clean"
+                                                 styleClass="danger-icon-btn"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fiche-preview-actions">
+                        <p:commandButton value="Apercu fiche"
+                                         type="button"
+                                         styleClass="fiche-preview-btn"
+                                         disabled="#{not ficheDossierBean.resultLoaded}"
+                                         onclick="PF('fichePreviewDialog').show();"/>
+                    </div>
+
+                    <p:dialog header="Dossier introuvable"
+                              widgetVar="ficheNotFoundDialog"
+                              modal="true"
+                              resizable="false"
+                              closable="true"
+                              appendTo="@(body)">
+                        <h:outputText value="Le pin ou la relation saisi n'existe pas."/>
+                    </p:dialog>
+
+                    <p:dialog header="Apercu fiche dossier"
+                              widgetVar="fichePreviewDialog"
+                              modal="true"
+                              resizable="false"
+                              closable="true"
+                              width="980"
+                              appendTo="@(form)">
+                        <div class="fiche-dialog-actions">
+                            <p:commandButton value="Telecharger PDF"
+                                             action="#{ficheDossierBean.downloadPdf}"
+                                             ajax="false"
+                                             process="@this"
+                                             styleClass="fiche-preview-btn"/>
+                        </div>
+                        <div class="fiche-preview-card">
+                            <div class="fiche-preview-title">Resume dossier</div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="label">Portefeuille</div>
+                                    <div class="value">#{ficheDossierBean.portefeuille}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">Pin Client</div>
+                                    <div class="value">#{ficheDossierBean.pin}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">Relation</div>
+                                    <div class="value">#{ficheDossierBean.relation}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">Filiale</div>
+                                    <div class="value">#{ficheDossierBean.filiale}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">Boites</div>
+                                    <div class="value">#{ficheDossierBean.boite}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p:dataTable value="#{ficheDossierBean.documents}"
+                                     var="doc"
+                                     emptyMessage="Aucun document trouve pour ce dossier.">
+                            <p:column headerText="Nom document" style="width: 20%;">
+                                <h:outputText value="#{doc.nomDocument}"/>
+                            </p:column>
+                            <p:column headerText="Copie" style="width: 10%;">
+                                <h:outputText value="#{doc.copie}"/>
+                            </p:column>
+                            <p:column headerText="Nombre" style="width: 10%;">
+                                <h:outputText value="#{doc.nombre}"/>
+                            </p:column>
+                            <p:column headerText="Description" style="width: 35%;">
+                                <h:outputText value="#{doc.description}"/>
+                            </p:column>
+                            <p:column headerText="Fichier" style="width: 25%;">
+                                <h:outputText value="#{doc.fichier}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:dialog>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

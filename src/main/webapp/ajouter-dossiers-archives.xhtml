@@ -1,0 +1,526 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Ajouter dossiers </ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .boite-picker {
+                display: flex;
+                align-items: flex-end;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .boite-picker-field {
+                flex: 0 0 180px;
+                max-width: 180px;
+            }
+
+            .boite-picker-field .ui-autocomplete,
+            .boite-picker-field .ui-autocomplete-input,
+            .boite-picker-field input {
+                width: 100%;
+            }
+
+            .boite-add-btn.ui-button.ui-widget {
+                min-width: 42px;
+                width: 42px;
+                height: 42px;
+                border-radius: 10px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .boite-add-btn.ui-button.ui-widget .ui-button-text {
+                padding: 0;
+            }
+
+            .boite-help {
+                margin-top: 8px;
+                font-size: .78rem;
+                color: #55748d;
+            }
+
+            .boite-inline-summary {
+                margin-top: 0;
+                align-self: center;
+                white-space: nowrap;
+            }
+
+            .boite-chip-list {
+                margin-top: 10px;
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .boite-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 8px 6px 10px;
+                border-radius: 999px;
+                background: #eef6ff;
+                border: 1px solid #c8def6;
+                color: #174a73;
+                font-weight: 700;
+            }
+
+            .boite-chip-remove.ui-button.ui-widget {
+                width: 24px;
+                height: 24px;
+                min-width: 24px;
+                border-radius: 999px;
+                background: #d94b4b;
+                border-color: #d94b4b;
+            }
+
+            .boite-chip-remove.ui-button.ui-widget .ui-button-text {
+                display: none;
+            }
+
+            .boite-chip-remove.ui-button.ui-widget .ui-icon,
+            .boite-chip-remove.ui-button.ui-widget .pi {
+                color: #ffffff;
+                font-size: 1rem;
+            }
+
+            .boite-chip-empty {
+                margin-top: 10px;
+                font-size: .82rem;
+                color: #6b7d8b;
+            }
+
+            .upload-dialog-overlay {
+                position: fixed;
+                inset: 0;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+                background: rgba(11, 47, 69, 0.45);
+                z-index: 2000;
+            }
+
+            .upload-dialog-overlay.is-open {
+                display: flex;
+            }
+
+            .upload-dialog-panel {
+                width: min(560px, 100%);
+                max-height: calc(100vh - 48px);
+                overflow-y: auto;
+                background: #fff;
+                border-radius: 14px;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+                border: 1px solid #dce8f5;
+            }
+
+            .upload-dialog-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 18px 20px 12px;
+                border-bottom: 1px solid #e8f0fb;
+            }
+
+            .upload-dialog-title {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #132a3a;
+            }
+
+            .upload-dialog-close {
+                border: none;
+                background: transparent;
+                color: #5c7287;
+                font-size: 1.2rem;
+                line-height: 1;
+                cursor: pointer;
+            }
+
+            .upload-dialog-body {
+                padding: 18px 20px 20px;
+            }
+
+        </style>
+
+        <div class="container is-wide">
+            <div class="card is-wide">
+                <div class="card-title">Ajouter dossiers</div>
+                <p:growl id="growl" showSummary="true" showDetail="false" life="3000" />
+                <h:form id="ajoutDossierForm"
+                        enctype="multipart/form-data"
+                        prependId="false"
+                        onsubmit="return btkHandleFormSubmit(event);">
+                    <div class="form-grid two-cols">
+                        <div class="form-row">
+                            <h:outputLabel for="portefeuille" value="Portefeuille"/>
+                            <h:selectOneMenu id="portefeuille"
+                                             value="#{ajoutDossiersArchivesBean.portefeuille}"
+                                             required="true"
+                                             requiredMessage="Portefeuille obligatoire.">
+                                <f:selectItem itemLabel="Choisir" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItem itemLabel="BTK - Cédé" itemValue="BTK - Cédé"/>
+                                <f:selectItem itemLabel="BTK - Radié" itemValue="BTK - Radié"/>
+                                <f:selectItem itemLabel="BTK - Géré" itemValue="BTK - Géré"/>
+                                <f:selectItem itemLabel="BTK Leasing - Cédé" itemValue="BTK Leasing - Cédé"/>
+                            </h:selectOneMenu>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="pin" value="Pin Client"/>
+                            <h:inputText id="pin" value="#{ajoutDossiersArchivesBean.pin}" required="true" requiredMessage="Pin obligatoire."/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="relation" value="Relation"/>
+                            <h:inputText id="relation" value="#{ajoutDossiersArchivesBean.relation}" required="true" requiredMessage="Relation obligatoire."/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="charge" value="Chargé Dossier"/>
+                            <h:inputText id="charge" value="#{ajoutDossiersArchivesBean.charge}" required="true" requiredMessage="Charge obligatoire."/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="typeArchive" value="Type archive"/>
+                            <h:selectOneMenu id="typeArchive" value="#{ajoutDossiersArchivesBean.typeArchive}" required="true" requiredMessage="Type archive obligatoire.">
+                                <f:selectItem itemLabel="Choisir" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItem itemLabel="Courant" itemValue="courant"/>
+                                <f:selectItem itemLabel="Intermediaire" itemValue="intermediaire"/>
+                                <f:selectItem itemLabel="Finale" itemValue="finale"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div class="form-row">
+                            <h:outputLabel for="filiale" value="Filiale"/>
+                            <h:inputText id="filiale"
+                                         value="#{ajoutDossiersArchivesBean.filialeLabel}"
+                                         readonly="true"/>
+                        </div>
+                        <div class="form-row full">
+                            <h:outputLabel for="boite" value="Boite"/>
+                            <h:panelGroup id="boitesPanel" layout="block">
+                                <div class="boite-picker">
+                                    <div class="boite-picker-field">
+                                        <p:autoComplete id="boite"
+                                                        value="#{ajoutDossiersArchivesBean.boite}"
+                                                        completeMethod="#{ajoutDossiersArchivesBean.completeBoite}"
+                                                        forceSelection="false"
+                                                        dropdown="false"
+                                                        minQueryLength="0"
+                                                        scrollHeight="220"
+                                                        converterMessage="Boite invalide."
+                                                        placeholder="Saisir num boite">
+                                            <f:converter converterId="jakarta.faces.Integer"/>
+                                        </p:autoComplete>
+                                    </div>
+                                    <p:commandButton id="addBoiteBtn"
+                                                     icon="pi pi-plus"
+                                                     title="Ajouter boite"
+                                                     action="#{ajoutDossiersArchivesBean.addBoiteSelection}"
+                                                     process="@this boite"
+                                                     update="boitesPanel boite :growl"
+                                                     styleClass="boite-add-btn btn-primary"/>
+                                    <ui:fragment rendered="#{not empty ajoutDossiersArchivesBean.boitesSummary}">
+                                        <div class="boite-help boite-inline-summary">Boites associees : #{ajoutDossiersArchivesBean.boitesSummary}</div>
+                                    </ui:fragment>
+                                </div>
+                                <ui:fragment rendered="#{not empty ajoutDossiersArchivesBean.selectedBoites}">
+                                    <div class="boite-chip-list">
+                                        <ui:repeat value="#{ajoutDossiersArchivesBean.selectedBoites}" var="item">
+                                            <div class="boite-chip">
+                                                <span>Boite #{item}</span>
+                                                <p:commandButton icon="pi pi-times"
+                                                                 title="Retirer cette boite"
+                                                                 action="#{ajoutDossiersArchivesBean.removeBoiteSelection}"
+                                                                 process="@this"
+                                                                 update="boitesPanel boite :growl"
+                                                                 styleClass="boite-chip-remove ui-button-icon-only">
+                                                    <f:setPropertyActionListener target="#{ajoutDossiersArchivesBean.boiteToRemove}" value="#{item}"/>
+                                                </p:commandButton>
+                                            </div>
+                                        </ui:repeat>
+                                    </div>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{empty ajoutDossiersArchivesBean.selectedBoites}">
+                                    <div class="boite-chip-empty">Aucune boite ajoutee pour le moment.</div>
+                                </ui:fragment>
+                            </h:panelGroup>
+                        </div>
+
+                        <input id="docsPayload" name="docsPayload" type="hidden" />
+                        <div id="docsFilesContainer" style="display:none;"></div>
+
+                        <div class="form-section-row">
+                        <div class="form-section half upload-side">
+    <details open="open">
+        <summary>Upload joints</summary>
+        <div class="upload-scroll" style="margin-top: 12px;">
+            <div class="upload-list">
+                <div class="upload-group-title">Dossier juridique :</div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Convention d'ouverture compte</span>
+                    <button type="button" class="upload-btn" data-doc="Convention d&apos;ouverture compte" data-target="conventionCompteName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Spécimen de signature</span>
+                    <button type="button" class="upload-btn" data-doc="Spécimen de signature" data-target="specimenSignatureName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">CIN</span>
+                    <button type="button" class="upload-btn" data-doc="CIN" data-target="cinName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Statuts</span>
+                    <button type="button" class="upload-btn" data-doc="Statuts" data-target="statutsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">RNE</span>
+                    <button type="button" class="upload-btn" data-doc="RNE" data-target="rneName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Pouvoirs</span>
+                    <button type="button" class="upload-btn" data-doc="Pouvoirs" data-target="pouvoirsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Patente</span>
+                    <button type="button" class="upload-btn" data-doc="Patente" data-target="patenteName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+
+                <div class="upload-group-title">Escomptes :</div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Traites</span>
+                    <button type="button" class="upload-btn" data-doc="Traites" data-target="traitesName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Avis de rejets</span>
+                    <button type="button" class="upload-btn" data-doc="Avis de rejets" data-target="avisRejetsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Protets</span>
+                    <button type="button" class="upload-btn" data-doc="Protets" data-target="protetsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+
+                <div class="upload-group-title">Engagement par signature :</div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Cautions bancaires</span>
+                    <button type="button" class="upload-btn" data-doc="Cautions bancaires" data-target="cautionsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Marchés</span>
+                    <button type="button" class="upload-btn" data-doc="Marchés" data-target="marchesName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+
+                <div class="upload-group-title">Contrats :</div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Contrat de prets</span>
+                    <button type="button" class="upload-btn" data-doc="Contrat de prets" data-target="contratPretsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Contrat d'hypothéque</span>
+                    <button type="button" class="upload-btn" data-doc="Contrat d&apos;hypothéque" data-target="contratHypothequeName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Titre de credit</span>
+                    <button type="button" class="upload-btn" data-doc="Titre de credit" data-target="titreCreditName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+
+                <div class="upload-group-title">Avance sur factures :</div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Note ponctuelle</span>
+                    <button type="button" class="upload-btn" data-doc="Note ponctuelle" data-target="notePonctuelleName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+
+                <div class="upload-group-title">Dossier contentieux :</div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Jugement 1ére instance</span>
+                    <button type="button" class="upload-btn" data-doc="Jugement 1ére instance" data-target="jugement1Name" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Jugement appel</span>
+                    <button type="button" class="upload-btn" data-doc="Jugement appel" data-target="jugementAppelName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Jugement cassation</span>
+                    <button type="button" class="upload-btn" data-doc="Jugement cassation" data-target="jugementCassationName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">PV</span>
+                    <button type="button" class="upload-btn" data-doc="PV" data-target="pvName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Ordonnance sur requete</span>
+                    <button type="button" class="upload-btn" data-doc="Ordonnance sur requete" data-target="ordonnanceName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Expertises</span>
+                    <button type="button" class="upload-btn" data-doc="Expertises" data-target="expertisesName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+
+                <div class="upload-group-title">Dossier divers :</div>
+                <div class="upload-item">
+                    <span class="upload-doc-label">Divers</span>
+                    <button type="button" class="upload-btn" data-doc="Divers" data-target="diversName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                </div>
+            </div>
+        </div>
+    </details>
+                        </div>
+
+                        <div class="form-section half docs-side">
+                            <div class="form-section-title">Documents ajoutés</div>
+                            <table class="doc-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nom document</th>
+                                        <th>Date d'ajout</th>
+                                        <th>Copie</th>
+                                        <th>Nombre</th>
+                                        <th>Description</th>
+                                        <th>Fichier</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="docsBody">
+                                    <tr id="docsEmptyRow">
+                                        <td colspan="7" class="doc-empty">Aucun document ajouté.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+
+                        <div id="uploadDialogOverlay" class="upload-dialog-overlay" onclick="btkOverlayClick(event);">
+                            <div class="upload-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="uploadDialogTitle" onclick="event.stopPropagation();">
+                                <div class="upload-dialog-header">
+                                    <span id="uploadDialogTitle" class="upload-dialog-title">Upload document</span>
+                                    <button type="button" class="upload-dialog-close" onclick="return btkCloseUploadDialog();">x</button>
+                                </div>
+                                <div class="upload-dialog-body">
+                                    <ui:include src="/jointure.xhtml"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <h:commandButton value="Valider" styleClass="btn-primary"
+                                             action="#{ajoutDossiersArchivesBean.save}"/>
+                        </div>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+
+        <h:outputScript library="js" name="ajouter-dossiers-archives-v3.js" target="body"/>
+        <h:outputScript target="body">
+            (function () {
+                function byIdOrSuffix(id) {
+                    var exact = document.getElementById(id);
+                    if (exact) {
+                        return exact;
+                    }
+                    return document.querySelector('[id$="' + id + '"]');
+                }
+
+                function fallbackOpen(btn) {
+                    if (!btn) {
+                        return false;
+                    }
+                    var label = btn.getAttribute('data-doc') || '';
+                    var target = btn.getAttribute('data-target') || '';
+                    var nameInput = byIdOrSuffix('dialogDocName');
+                    var targetInput = byIdOrSuffix('dialogTarget');
+                    var overlay = byIdOrSuffix('uploadDialogOverlay');
+
+                    if (nameInput) {
+                        nameInput.value = label;
+                    }
+                    if (targetInput) {
+                        targetInput.value = target;
+                    }
+                    if (overlay) {
+                        overlay.classList.add('is-open');
+                    }
+                    return false;
+                }
+
+                function fallbackClose() {
+                    var overlay = byIdOrSuffix('uploadDialogOverlay');
+                    if (overlay) {
+                        overlay.classList.remove('is-open');
+                    }
+                    return false;
+                }
+
+                var originalShow = window.btkShowUploadDialog;
+                window.btkShowUploadDialog = function () {
+                    try {
+                        if (typeof originalShow === 'function') {
+                            originalShow();
+                            return;
+                        }
+                    } catch (e) {}
+                    var overlay = byIdOrSuffix('uploadDialogOverlay');
+                    if (overlay) {
+                        overlay.classList.add('is-open');
+                    }
+                };
+
+                var originalClose = window.btkCloseUploadDialog;
+                window.btkCloseUploadDialog = function () {
+                    try {
+                        if (typeof originalClose === 'function') {
+                            return originalClose();
+                        }
+                    } catch (e) {}
+                    return fallbackClose();
+                };
+
+                var originalOverlayClick = window.btkOverlayClick;
+                window.btkOverlayClick = function (event) {
+                    try {
+                        if (typeof originalOverlayClick === 'function') {
+                            return originalOverlayClick(event);
+                        }
+                    } catch (e) {}
+                    var overlay = byIdOrSuffix('uploadDialogOverlay');
+                    if (overlay &amp;&amp; event &amp;&amp; event.target === overlay) {
+                        return window.btkCloseUploadDialog();
+                    }
+                    return false;
+                };
+
+                var originalOpen = window.btkOpenUploadDialog;
+                window.btkOpenUploadDialog = function (btn) {
+                    try {
+                        if (typeof originalOpen === 'function') {
+                            var result = originalOpen(btn);
+                            var overlay = byIdOrSuffix('uploadDialogOverlay');
+                            if (overlay &amp;&amp; overlay.classList.contains('is-open')) {
+                                return false;
+                            }
+                            return result;
+                        }
+                    } catch (e) {}
+                    return fallbackOpen(btn);
+                };
+            })();
+        </h:outputScript>
+    </ui:define>
+
+</ui:composition>
+
+
+
+

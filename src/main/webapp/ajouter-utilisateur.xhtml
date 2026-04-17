@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Ajouter utilisateur</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .user-form-shell {
+                border: 1px solid #dce8f5;
+                border-radius: 12px;
+                background: #f7fbff;
+                padding: 18px;
+            }
+
+            .user-form-actions {
+                margin-top: 40px;
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .user-form-actions .ui-button {
+                min-width: 125px;
+                border-radius: 7px;
+            }
+
+            .user-form-actions .ui-button .ui-button-text {
+                padding: 7px 12px;
+                font-size: .8rem;
+                font-weight: 700;
+            }
+        </style>
+
+        <div class="container">
+            <div class="card">
+                <div class="card-title">Parametres - Ajouter utilisateur</div>
+
+                <h:form id="ajouterUserForm" prependId="false">
+                    <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
+
+                    <div class="user-form-shell">
+                        <div class="form-grid two-cols">
+                            <div class="form-row">
+                                <h:outputLabel for="cuti" value="Utilisateur (CUTI)"/>
+                                <p:inputText id="cuti"
+                                             value="#{ajouterUtilisateurBean.cuti}"
+                                             required="true"
+                                             requiredMessage="CUTI est obligatoire."
+                                             maxlength="24"
+                                             placeholder="Ex: 445566"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="unix" value="Mot de passe (UNIX)"/>
+                                <p:password id="unix"
+                                            value="#{ajouterUtilisateurBean.unix}"
+                                            required="true"
+                                            requiredMessage="Mot de passe obligatoire."
+                                            feedback="false"
+                                            maxlength="20"
+                                            placeholder="Saisir mot de passe"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="lib" value="Nom (LIB)"/>
+                                <p:inputText id="lib"
+                                             value="#{ajouterUtilisateurBean.lib}"
+                                             required="true"
+                                             requiredMessage="Nom obligatoire."
+                                             maxlength="20"
+                                             placeholder="Nom utilisateur"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="age" value="Agence (AGE)"/>
+                                <p:inputText id="age"
+                                             value="#{ajouterUtilisateurBean.age}"
+                                             maxlength="8"
+                                             placeholder="Ex: 0123"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="puti" value="Profil (PUTI)"/>
+                                <h:selectOneMenu id="puti" value="#{ajouterUtilisateurBean.puti}" required="true">
+                                    <f:selectItem itemLabel="Choisir profil" itemValue="" noSelectionOption="true"/>
+                                    <f:selectItem itemLabel="Finance" itemValue="Finance"/>
+                                    <f:selectItem itemLabel="Bank" itemValue="Bank"/>
+                                </h:selectOneMenu>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="role" value="Role"/>
+                                <h:selectOneMenu id="role" value="#{ajouterUtilisateurBean.role}" required="true">
+                                    <f:selectItem itemLabel="Choisir role" itemValue="" noSelectionOption="true"/>
+                                    <f:selectItem itemLabel="admin" itemValue="admin"/>
+                                    <f:selectItem itemLabel="Super_admin" itemValue="Super_admin"/>
+                                    <f:selectItem itemLabel="Consultation" itemValue="Consultation"/>
+                                </h:selectOneMenu>
+                            </div>
+                        </div>
+
+                        <div class="user-form-actions">
+                            <p:commandButton value="Ajouter utilisateur"
+                                             action="#{ajouterUtilisateurBean.save}"
+                                             process="@form"
+                                             update="@form"
+                                             styleClass="btn-primary"/>
+                            <p:commandButton value="Vider"
+                                             action="#{ajouterUtilisateurBean.clear}"
+                                             process="@this"
+                                             update="@form"
+                                             styleClass="ui-button-secondary"/>
+                        </div>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>BTK - Gestionnaire des documents</title>
+    <style>
+        :root {
+            --login-primary: #146da5;
+            --login-primary-2: #2f90cb;
+            --login-primary-deep: #0d567f;
+            --login-primary-soft: #d8ebf6;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                radial-gradient(circle at 18% 24%, rgba(42, 166, 217, .32), transparent 22%),
+                radial-gradient(circle at 78% 18%, rgba(20, 109, 165, .20), transparent 18%),
+                radial-gradient(circle at 82% 74%, rgba(42, 166, 217, .22), transparent 22%),
+                radial-gradient(circle at 20% 82%, rgba(20, 109, 165, .18), transparent 26%),
+                linear-gradient(135deg, #d8ebf6 0%, #e2f0f8 58%, #edf7fc 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 34px 24px;
+            overflow-x: hidden;
+        }
+
+        .split-shell {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: minmax(320px, 1.14fr) minmax(320px,1.1fr);
+            align-items: center;
+            position: relative;
+        }
+
+        .hero-panel {
+            position: relative;
+            z-index: 2;
+            min-height: 550px;
+            padding: 38px 38px 33px;
+            border-radius: 24px;
+            overflow: hidden;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--login-primary-2) 0%, var(--login-primary) 100%);
+            box-shadow: 0 34px 68px rgba(20, 109, 165, .24);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .hero-panel::before,
+        .hero-panel::after {
+            content: "";
+            position: absolute;
+            border-radius: 999px;
+            pointer-events: none;
+        }
+
+        .hero-panel::before {
+            width: 520px;
+            height: 520px;
+            right: -190px;
+            bottom: -150px;
+            background: rgba(42, 166, 217, .34);
+        }
+
+        .hero-panel::after {
+            width: 340px;
+            height: 340px;
+            left: -120px;
+            bottom: -120px;
+            background: rgba(11, 95, 136, .22);
+        }
+
+        .hero-mark {
+            position: relative;
+            z-index: 1;
+            width: 100px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .12);
+            backdrop-filter: blur(4px);
+        }
+
+        .hero-mark img {
+            max-width: 75px;
+            height: auto;
+        }
+
+        .hero-copy {
+            position: relative;
+            z-index: 1;
+            max-width: 470px;
+            margin-top: 24px;
+        }
+
+        .hero-kicker {
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .72);
+            margin-bottom: 14px;
+        }
+
+        .hero-copy h1 {
+            font-size: clamp(1.65rem, 3.4vw, 3.5rem);
+            font-weight: 300;
+            letter-spacing: -.04em;
+            margin-bottom: 22px;
+        }
+
+        .hero-copy h1 strong {
+            display: block;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .hero-copy p {
+            max-width: 460px;
+            font-size: .82rem;
+            line-height: 1.65;
+            color: rgba(255, 255, 255, .78);
+        }
+
+        .hero-meta {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 13px;
+            margin-top: 29px;
+            flex-wrap: wrap;
+        }
+
+        .hero-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 14px;
+            border: 1px solid rgba(255, 255, 255, .7);
+            border-radius: 9px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .hero-link .arrow {
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .hero-dots {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .hero-dots span {
+            display: block;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .28);
+        }
+
+        .hero-dots span:nth-child(1) {
+            width: 32px;
+            background: rgba(255, 255, 255, .92);
+        }
+
+        .hero-dots span:nth-child(2),
+        .hero-dots span:nth-child(3) {
+            width: 13px;
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, .97);
+            border-radius: 24px;
+            padding: 46px 38px 33px 90px;
+            width: 100%;
+            min-height: 620px;
+            margin-left: -52px;
+            box-shadow: 0 28px 70px rgba(20, 109, 165, .12);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-header {
+            margin-bottom: 25px;
+        }
+
+        .login-header .eyebrow {
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: #141516;
+            margin-bottom: 7px;
+        }
+
+        .login-header .headline {
+            font-size: clamp(1.5rem, 1.85vw, 2.1rem);
+            line-height: 1;
+            font-weight: 800;
+            color: var(--login-primary);
+            margin-bottom: 13px;
+        }
+
+        .login-header .subtitle {
+            max-width: 350px;
+            font-size: .86rem;
+            line-height: 1.38;
+            color: #141516;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            font-size: .68rem;
+            font-weight: 700;
+            color: #141516;
+            margin-bottom: 7px;
+            letter-spacing: .95px;
+            text-transform: uppercase;
+        }
+
+        .field input::placeholder {
+            color: #535f6c;
+            opacity: 1;
+        }
+
+        .field .ui-inputfield {
+            width: 100% !important;
+            min-height: 49px !important;
+            padding: 13px 14px !important;
+            border: 1px solid #edf1f6 !important;
+            border-radius: 0 !important;
+            font-size: .88rem !important;
+            color: #4e5866 !important;
+            background: #f8fafc !important;
+            box-shadow: none !important;
+        }
+
+        .field.field-accent .ui-inputfield {
+            border-left: 4px solid var(--login-primary-2) !important;
+            background: #fcfdff !important;
+        }
+
+        .field .ui-inputfield:focus {
+            border-color: #d6e6f6 !important;
+            background: #ffffff !important;
+            box-shadow: 0 14px 28px rgba(154, 184, 223, .16) !important;
+        }
+
+        .password-wrap {
+            position: relative;
+        }
+
+        .password-wrap .ui-password {
+            display: block;
+            width: 100%;
+        }
+
+        .password-wrap .ui-inputfield {
+            padding-right: 52px !important;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: background-color .2s ease, transform .2s ease;
+        }
+
+        .password-toggle:hover {
+            background: rgba(20, 109, 165, .08);
+        }
+
+        .password-toggle:focus {
+            outline: none;
+            background: rgba(20, 109, 165, .12);
+        }
+
+        .password-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--login-primary-deep);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            font-size: .68rem;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .ui-messages-error {
+            background: #fff3f3 !important;
+            border-left: 4px solid #e74c3c !important;
+            border-radius: 7px !important;
+            margin-bottom: 14px !important;
+            padding: 9px 11px !important;
+            color: #c0392b !important;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            margin-top: 14px;
+            background: linear-gradient(90deg, var(--login-primary), var(--login-primary-2));
+            color: #fff;
+            border: none;
+            border-radius: 0;
+            font-size: .88rem;
+            font-weight: 800;
+            letter-spacing: 1.6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 17px 26px rgba(20, 109, 165, .16);
+        }
+
+        .btn-login:hover {
+            filter: brightness(1.03);
+        }
+
+        .hero-footer {
+            position: relative;
+            z-index: 1;
+            margin-top: 26px;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, .86);
+            letter-spacing: .2px;
+        }
+
+        @media (max-width: 1180px) {
+            .split-shell {
+                max-width: 850px;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            }
+
+            .hero-panel {
+                min-height: 550px;
+                padding: 38px 33px 31px;
+            }
+
+            .login-card {
+                min-height: 570px;
+                margin-left: -37px;
+                padding: 51px 33px 33px 70px;
+            }
+        }
+
+        @media (max-width: 980px) {
+            .split-shell {
+                max-width: 710px;
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .hero-panel {
+                min-height: 245px;
+                padding: 28px 25px 25px;
+            }
+
+            .login-card {
+                min-height: 0;
+                margin-left: 0;
+                padding: 36px 28px 28px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px 11px;
+            }
+
+            .hero-panel {
+                padding: 25px 21px 23px;
+                min-height: 0;
+            }
+
+            .hero-copy h1 {
+                font-size: 1.72rem;
+            }
+
+            .hero-copy p {
+                font-size: .78rem;
+            }
+
+            .hero-meta {
+                margin-top: 19px;
+            }
+
+            .login-card {
+                padding: 25px 18px 21px;
+                border-radius: 16px;
+            }
+
+            .login-header .headline {
+                font-size: 1.62rem;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 9px;
+            }
+
+            .split-shell {
+                gap: 9px;
+            }
+
+            .hero-panel {
+                display: none;
+            }
+
+            .login-card {
+                border-radius: 13px;
+                padding: 19px 13px 16px;
+                box-shadow: 0 9px 24px rgba(20, 109, 165, .12);
+            }
+
+            .field .ui-inputfield {
+                min-height: 45px !important;
+                padding: 11px 11px !important;
+            }
+
+            .btn-login {
+                padding: 12px;
+                margin-top: 9px;
+            }
+        }
+    </style>
+</h:head>
+
+<h:body>
+    <div class="split-shell">
+        <div class="hero-panel">
+            <div>
+                <div class="hero-mark">
+                    <h:graphicImage library="images" name="btk.png" alt="BTK"/>
+                </div>
+
+                <div class="hero-copy">
+                    <h1>Bienvenue sur <strong>Plateforme de gestion des archives</strong></h1>
+                </div>
+            </div>
+
+            <div class="hero-footer">&copy;2026 BTK. Tous droits réservés.</div>
+        </div>
+
+        <div class="login-card">
+            <div class="login-header">
+                <div class="headline">Connexion</div>
+                <div class="subtitle">Veuillez vous connecter à votre compte</div>
+            </div>
+
+            <h:form id="loginForm">
+                <p:messages id="messages" showSummary="false" showDetail="true" closable="false"/>
+
+                <div class="field field-accent">
+                    <p:outputLabel for="cuti" value="Utilisateur"/>
+                    <p:inputText id="cuti"
+                                 value="#{loginBean.cuti}"
+                                 required="true"
+                                 requiredMessage="L'utilisateur est obligatoire."
+                                 maxlength="24"
+                                 placeholder="Saisir utilisateur"/>
+                    <p:message for="cuti" styleClass="error-msg"/>
+                </div>
+
+                <div class="field">
+                    <p:outputLabel for="password" value="Mot de passe"/>
+                    <div class="password-wrap">
+                        <p:password id="password"
+                                    value="#{loginBean.password}"
+                                    required="true"
+                                    requiredMessage="Le mot de passe est obligatoire."
+                                    feedback="false"
+                                    placeholder="Mot de passe"/>
+                        <button type="button"
+                                class="password-toggle"
+                                onclick="BTKPassword.toggle('loginForm:password', this)"
+                                aria-label="Afficher le mot de passe"
+                                title="Afficher le mot de passe">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p:message for="password" styleClass="error-msg"/>
+                </div>
+
+                <p:commandButton value="Se connecter"
+                                 action="#{loginBean.login}"
+                                 styleClass="btn-login"
+                                 process="@form"
+                                 ajax="false"/>
+            </h:form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var BTKPassword = {
+            eyeIcon: function () {
+                return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+                    '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"></path>' +
+                    '<circle cx="12" cy="12" r="3"></circle>' +
+                    '</svg>';
+            },
+            eyeOffIcon: function () {
+                return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+                    '<path d="M3 3l18 18"></path>' +
+                    '<path d="M10.6 10.7A3 3 0 0 0 12 15a3 3 0 0 0 2.3-1.1"></path>' +
+                    '<path d="M9.9 5.1A11.5 11.5 0 0 1 12 5c6.5 0 10 7 10 7a16.8 16.8 0 0 1-4 4.9"></path>' +
+                    '<path d="M6.7 6.7C4.1 8.3 2 12 2 12a16.8 16.8 0 0 0 7.1 5.8"></path>' +
+                    '</svg>';
+            },
+            toggle: function (inputId, button) {
+                var input = document.getElementById(inputId);
+                if (!input) return;
+
+                var isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+
+                if (button) {
+                    var label = isPassword
+                        ? 'Masquer le mot de passe'
+                        : 'Afficher le mot de passe';
+                    button.setAttribute('aria-label', label);
+                    button.setAttribute('title', label);
+                    button.innerHTML = isPassword
+                        ? BTKPassword.eyeOffIcon()
+                        : BTKPassword.eyeIcon();
+                }
+            }
+        };
+    </script>
+</h:body>
+
+</html>

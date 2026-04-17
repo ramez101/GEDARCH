@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Modifier utilisateur</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .user-form-shell {
+                border: 1px solid #dce8f5;
+                border-radius: 12px;
+                background: #f7fbff;
+                padding: 18px;
+            }
+
+            .user-form-actions {
+                margin-top: 40px;
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .user-form-actions .ui-button {
+                min-width: 125px;
+                border-radius: 7px;
+            }
+
+            .user-form-actions .ui-button .ui-button-text {
+                padding: 7px 12px;
+                font-size: .8rem;
+                font-weight: 700;
+            }
+        </style>
+
+        <div class="container">
+            <div class="card">
+                <div class="card-title">Parametres - Modifier utilisateur</div>
+
+                <h:form id="modifierUserForm" prependId="false">
+                    <p:defaultCommand target="searchModifierUserBtn"/>
+                    <p:messages id="messagesMod" showSummary="true" showDetail="false" closable="true"/>
+
+                    <div class="user-form-shell">
+                        <div class="form-grid two-cols">
+                            <div class="form-row">
+                                <h:outputLabel for="modSearchType" value="Recherche par"/>
+                                <h:selectOneMenu id="modSearchType" value="#{ajouterUtilisateurBean.modSearchType}">
+                                    <f:selectItem itemLabel="Utilisateur (CUTI)" itemValue="cuti"/>
+                                    <f:selectItem itemLabel="Nom (LIB)" itemValue="lib"/>
+                                </h:selectOneMenu>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="modSearchValue" value="Valeur recherche"/>
+                                <p:inputText id="modSearchValue"
+                                             value="#{ajouterUtilisateurBean.modSearchValue}"
+                                             maxlength="24"
+                                             placeholder="Saisir CUTI ou LIB"/>
+                            </div>
+                        </div>
+
+                        <div class="user-form-actions" style="margin-top: 14px;">
+                            <p:commandButton id="searchModifierUserBtn"
+                                             value="Rechercher"
+                                             action="#{ajouterUtilisateurBean.searchForUpdate}"
+                                             process="@this modSearchType modSearchValue"
+                                             update="@form"
+                                             styleClass="btn-primary"/>
+                        </div>
+
+                        <div class="form-grid two-cols" style="margin-top: 16px;">
+                            <div class="form-row">
+                                <h:outputLabel for="modCuti" value="Utilisateur (CUTI)"/>
+                                <p:inputText id="modCuti"
+                                             value="#{ajouterUtilisateurBean.modCuti}"
+                                             required="true"
+                                             requiredMessage="CUTI est obligatoire."
+                                             maxlength="24"
+                                             readonly="true"
+                                             disabled="#{not ajouterUtilisateurBean.modResultLoaded}"
+                                             placeholder="CUTI a modifier"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="modUnix" value="Mot de passe (UNIX)"/>
+                                <p:password id="modUnix"
+                                            value="#{ajouterUtilisateurBean.modUnix}"
+                                            required="true"
+                                            requiredMessage="Mot de passe obligatoire."
+                                            feedback="false"
+                                            maxlength="20"
+                                            disabled="#{not ajouterUtilisateurBean.modResultLoaded}"
+                                            placeholder="Nouveau mot de passe"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="modLib" value="Nom (LIB)"/>
+                                <p:inputText id="modLib"
+                                             value="#{ajouterUtilisateurBean.modLib}"
+                                             required="true"
+                                             requiredMessage="Nom obligatoire."
+                                             maxlength="20"
+                                             disabled="#{not ajouterUtilisateurBean.modResultLoaded}"
+                                             placeholder="Nouveau nom utilisateur"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="modAge" value="Agence (AGE)"/>
+                                <p:inputText id="modAge"
+                                             value="#{ajouterUtilisateurBean.modAge}"
+                                             maxlength="8"
+                                             disabled="#{not ajouterUtilisateurBean.modResultLoaded}"
+                                             placeholder="Nouvelle agence"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="modPuti" value="Profil (PUTI)"/>
+                                <h:selectOneMenu id="modPuti"
+                                                 value="#{ajouterUtilisateurBean.modPuti}"
+                                                 required="true"
+                                                 disabled="#{not ajouterUtilisateurBean.modResultLoaded}">
+                                    <f:selectItem itemLabel="Choisir profil" itemValue="" noSelectionOption="true"/>
+                                    <f:selectItem itemLabel="Finance" itemValue="Finance"/>
+                                    <f:selectItem itemLabel="Bank" itemValue="Bank"/>
+                                </h:selectOneMenu>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="modRole" value="Role"/>
+                                <h:selectOneMenu id="modRole"
+                                                 value="#{ajouterUtilisateurBean.modRole}"
+                                                 required="true"
+                                                 disabled="#{not ajouterUtilisateurBean.modResultLoaded}">
+                                    <f:selectItem itemLabel="Choisir role" itemValue="" noSelectionOption="true"/>
+                                    <f:selectItem itemLabel="admin" itemValue="admin"/>
+                                    <f:selectItem itemLabel="Super_admin" itemValue="Super_admin"/>
+                                    <f:selectItem itemLabel="Consultation" itemValue="Consultation"/>
+                                </h:selectOneMenu>
+                            </div>
+                        </div>
+
+                        <div class="user-form-actions">
+                            <p:commandButton id="updateModifierUserBtn"
+                                             value="Valider"
+                                             action="#{ajouterUtilisateurBean.update}"
+                                             process="@this modCuti modUnix modLib modAge modPuti modRole"
+                                             update="@form"
+                                             disabled="#{not ajouterUtilisateurBean.modResultLoaded}"
+                                             styleClass="btn-primary"/>
+                            <p:commandButton value="Vider"
+                                             action="#{ajouterUtilisateurBean.clearModification}"
+                                             process="@this"
+                                             update="@form"
+                                             styleClass="ui-button-secondary"/>
+                        </div>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

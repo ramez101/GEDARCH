@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Gestion des documents</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .ajout-search-actions {
+                padding-top: 22px;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .dossier-info {
+                margin-top: 15px;
+                margin-bottom: 15px;
+            }
+
+            .dossier-info input[readonly] {
+                background: #eef5fc;
+                color: #12314a;
+                font-weight: 600;
+            }
+
+            .doc-existing-row td {
+                background: #f8fbff;
+            }
+
+            .doc-existing-chip {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 84px;
+                padding: 3px 8px;
+                border-radius: 999px;
+                font-size: .76rem;
+                font-weight: 700;
+                color: #0d4f85;
+                background: #e4f0ff;
+                border: 1px solid #bad6f5;
+            }
+
+            .doc-existing-delete {
+                border: none;
+                background: transparent;
+                color: #b22929;
+                font-size: 1rem;
+                line-height: 1;
+                cursor: pointer;
+                padding: 2px 4px;
+            }
+
+            .doc-existing-delete.ui-button.ui-widget {
+                width: 28px;
+                height: 28px;
+                min-width: 28px;
+                padding: 0;
+                border-radius: 6px;
+                border: 1px solid #e8bdc1;
+                background: #fff5f6;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .doc-existing-delete.ui-button.ui-widget .ui-button-text {
+                display: none;
+            }
+
+            .doc-existing-delete.ui-button.ui-widget::before {
+                content: "🗑";
+                font-size: .95rem;
+                line-height: 1;
+            }
+
+            .doc-existing-delete:hover {
+                filter: brightness(1.1);
+            }
+
+            .doc-existing-delete.ui-button.ui-widget::before {
+                content: "\1F5D1";
+            }
+
+            .docs-side .doc-delete {
+                font-size: 0;
+            }
+
+            .docs-side .doc-delete::before {
+                content: "\1F5D1";
+                font-size: 1rem;
+                line-height: 1;
+            }
+
+            .upload-dialog-overlay {
+                position: fixed;
+                inset: 0;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+                background: rgba(11, 47, 69, 0.45);
+                z-index: 2000;
+            }
+
+            .upload-dialog-overlay.is-open {
+                display: flex;
+            }
+
+            .upload-dialog-panel {
+                width: min(560px, 100%);
+                max-height: calc(100vh - 48px);
+                overflow-y: auto;
+                background: #fff;
+                border-radius: 14px;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+                border: 1px solid #dce8f5;
+            }
+
+            .upload-dialog-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 18px 20px 12px;
+                border-bottom: 1px solid #e8f0fb;
+            }
+
+            .upload-dialog-title {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #132a3a;
+            }
+
+            .upload-dialog-close {
+                border: none;
+                background: transparent;
+                color: #5c7287;
+                font-size: 1.2rem;
+                line-height: 1;
+                cursor: pointer;
+            }
+
+            .upload-dialog-body {
+                padding: 18px 20px 20px;
+            }
+
+            .btn-secondary {
+                border: 1px solid #9fb5cb;
+                background: #f3f7fc;
+                color: #17476d;
+                padding: 10px 18px;
+                border-radius: 8px;
+                font-weight: 700;
+                letter-spacing: .3px;
+                cursor: pointer;
+            }
+
+            .btn-secondary:hover {
+                background: #e9f1fb;
+            }
+        </style>
+
+        <div class="container is-wide">
+            <div class="card is-wide">
+                <div class="card-title">Gestion des documents</div>
+                <h:form id="ajoutArchivesForm"
+                        enctype="multipart/form-data"
+                        prependId="false"
+                        onsubmit="return btkHandleFormSubmit(event);">
+                    <p:defaultCommand target="searchAjoutDocsBtn"/>
+                    <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
+
+                    <div class="form-grid two-cols">
+                        <div class="form-row full" style="display: flex; gap: 12px; align-items: end; flex-wrap: wrap;">
+                            <div style="flex: 0 0 180px;">
+                                <h:outputLabel for="searchType" value="Recherche par"/>
+                                <h:selectOneMenu id="searchType" value="#{ajoutArchivesBean.searchType}">
+                                    <f:selectItem itemLabel="Pin" itemValue="pin"/>
+                                    <f:selectItem itemLabel="Relation" itemValue="relation"/>
+                                    <p:ajax process="@this searchValueWrapper" update="searchValueWrapper"/>
+                                </h:selectOneMenu>
+                            </div>
+
+                            <h:panelGroup id="searchValueWrapper" layout="block" style="flex: 1 1 360px;">
+                                <h:outputLabel value="Valeur"/>
+                                <ui:fragment rendered="#{ajoutArchivesBean.searchType ne 'relation'}">
+                                    <p:inputText id="searchValuePin"
+                                                 value="#{ajoutArchivesBean.searchPinValue}"
+                                                 placeholder="Saisir pin"
+                                                 autocomplete="off"
+                                                 style="width: 100%"/>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{ajoutArchivesBean.searchType eq 'relation'}">
+                                    <p:autoComplete id="searchValueRelation"
+                                                    value="#{ajoutArchivesBean.searchRelationValue}"
+                                                    completeMethod="#{ajoutArchivesBean.completeRelation}"
+                                                    placeholder="Saisir relation"
+                                                    minQueryLength="2"
+                                                    queryDelay="250"
+                                                    dropdown="false"
+                                                    forceSelection="false"
+                                                    scrollHeight="200"
+                                                    style="width: 100%"/>
+                                </ui:fragment>
+                            </h:panelGroup>
+
+                            <div class="ajout-search-actions">
+                                <p:commandButton id="searchAjoutDocsBtn"
+                                                 value="Rechercher"
+                                                 action="#{ajoutArchivesBean.search}"
+                                                 process="@form"
+                                                 update="@form"/>
+                                <p:commandButton value="Clean"
+                                                 action="#{ajoutArchivesBean.clear}"
+                                                 process="@this"
+                                                 update="@form"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section dossier-info">
+                        <div class="form-section-title">Dossier trouvé</div>
+                        <div class="form-row-grid">
+                            <div class="form-row small">
+                                <h:outputLabel for="pin" value="Pin"/>
+                                <h:inputText id="pin" value="#{ajoutArchivesBean.pin}" readonly="true"/>
+                            </div>
+                            <div class="form-row small">
+                                <h:outputLabel for="relation" value="Relation"/>
+                                <h:inputText id="relation" value="#{ajoutArchivesBean.relation}" readonly="true"/>
+                            </div>
+                            <div class="form-row small">
+                                <h:outputLabel for="boite" value="Boites"/>
+                                <h:inputText id="boite" value="#{ajoutArchivesBean.boite}" readonly="true"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h:inputHidden id="docsPayload" value="#{ajoutArchivesBean.docsPayload}"/>
+                    <div id="docsFilesContainer" style="display:none;"></div>
+
+                    <div class="form-section-row">
+                        <div class="form-section half upload-side">
+                            <details open="open">
+                                <summary>Upload joints</summary>
+                                <div class="upload-scroll" style="margin-top: 12px;">
+                                    <div class="upload-list">
+                                        <div class="upload-group-title">Dossier juridique :</div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Convention d'ouverture compte</span>
+                                            <button type="button" class="upload-btn" data-doc="Convention d&apos;ouverture compte" data-target="conventionCompteName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Spécimen de signature</span>
+                                            <button type="button" class="upload-btn" data-doc="Spécimen de signature" data-target="specimenSignatureName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">CIN</span>
+                                            <button type="button" class="upload-btn" data-doc="CIN" data-target="cinName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Statuts</span>
+                                            <button type="button" class="upload-btn" data-doc="Statuts" data-target="statutsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">RNE</span>
+                                            <button type="button" class="upload-btn" data-doc="RNE" data-target="rneName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Pouvoirs</span>
+                                            <button type="button" class="upload-btn" data-doc="Pouvoirs" data-target="pouvoirsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Patente</span>
+                                            <button type="button" class="upload-btn" data-doc="Patente" data-target="patenteName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+
+                                        <div class="upload-group-title">Escomptes :</div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Traites</span>
+                                            <button type="button" class="upload-btn" data-doc="Traites" data-target="traitesName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Avis de rejets</span>
+                                            <button type="button" class="upload-btn" data-doc="Avis de rejets" data-target="avisRejetsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Protets</span>
+                                            <button type="button" class="upload-btn" data-doc="Protets" data-target="protetsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+
+                                        <div class="upload-group-title">Engagement par signature :</div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Cautions bancaires</span>
+                                            <button type="button" class="upload-btn" data-doc="Cautions bancaires" data-target="cautionsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Marchés</span>
+                                            <button type="button" class="upload-btn" data-doc="Marchés" data-target="marchesName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+
+                                        <div class="upload-group-title">Contrats :</div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Contrat de prets</span>
+                                            <button type="button" class="upload-btn" data-doc="Contrat de prets" data-target="contratPretsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Contrat d'hypothéque</span>
+                                            <button type="button" class="upload-btn" data-doc="Contrat d&apos;hypothéque" data-target="contratHypothequeName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Titre de credit</span>
+                                            <button type="button" class="upload-btn" data-doc="Titre de credit" data-target="titreCreditName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+
+                                        <div class="upload-group-title">Avance sur factures :</div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Note ponctuelle</span>
+                                            <button type="button" class="upload-btn" data-doc="Note ponctuelle" data-target="notePonctuelleName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+
+                                        <div class="upload-group-title">Dossier contentieux :</div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Jugement 1ére instance</span>
+                                            <button type="button" class="upload-btn" data-doc="Jugement 1ére instance" data-target="jugement1Name" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Jugement appel</span>
+                                            <button type="button" class="upload-btn" data-doc="Jugement appel" data-target="jugementAppelName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Jugement cassation</span>
+                                            <button type="button" class="upload-btn" data-doc="Jugement cassation" data-target="jugementCassationName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">PV</span>
+                                            <button type="button" class="upload-btn" data-doc="PV" data-target="pvName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Ordonnance sur requete</span>
+                                            <button type="button" class="upload-btn" data-doc="Ordonnance sur requete" data-target="ordonnanceName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Expertises</span>
+                                            <button type="button" class="upload-btn" data-doc="Expertises" data-target="expertisesName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+
+                                        <div class="upload-group-title">Dossier divers :</div>
+                                        <div class="upload-item">
+                                            <span class="upload-doc-label">Divers</span>
+                                            <button type="button" class="upload-btn" data-doc="Divers" data-target="diversName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <div class="form-section half docs-side">
+                            <div class="form-section-title">Documents ajoutés</div>
+                            <h:panelGroup id="existingDocumentsSection" layout="block">
+                                <table class="doc-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nom document</th>
+                                        <th>Date d'ajout</th>
+                                        <th>Copie</th>
+                                        <th>Nombre</th>
+                                        <th>Description</th>
+                                        <th>Fichier</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <ui:fragment rendered="#{not empty ajoutArchivesBean.existingDocuments}">
+                                        <ui:repeat value="#{ajoutArchivesBean.existingDocuments}" var="doc">
+                                            <tr class="doc-existing-row">
+                                                <td><h:outputText value="#{doc.nomDocument}"/></td>
+                                                <td>
+                                                    <h:outputText value="#{doc.dateCreation}">
+                                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                                    </h:outputText>
+                                                </td>
+                                                <td><h:outputText value="#{empty doc.copie ? '-' : doc.copie}"/></td>
+                                                <td><h:outputText value="#{empty doc.nombre ? '-' : doc.nombre}"/></td>
+                                                <td><h:outputText value="#{empty doc.description ? '-' : doc.description}"/></td>
+                                                <td><h:outputText value="#{doc.document}"/></td>
+                                                <td>
+                                                    <p:commandButton value="🗑"
+                                                                     title="Supprimer document"
+                                                                     action="#{ajoutArchivesBean.stageDeleteExistingDocument(doc)}"
+                                                                     process="@this"
+                                                                     update="messages existingDocumentsSection"
+                                                                     onclick="return confirm('Confirmer la suppression de ce document ?');"
+                                                                     oncomplete="if (window.btkRenderDocs) { window.btkRenderDocs(); }"
+                                                                     styleClass="doc-existing-delete"/>
+                                                </td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{empty ajoutArchivesBean.existingDocuments}">
+                                        <tr>
+                                            <td colspan="7" class="doc-empty">Aucun document déjà ajouté pour ce dossier.</td>
+                                        </tr>
+                                    </ui:fragment>
+                                </tbody>
+                                <tbody id="docsBody">
+                                    <tr id="docsEmptyRow">
+                                        <td colspan="7" class="doc-empty">Aucun nouveau document ajouté.</td>
+                                    </tr>
+                                </tbody>
+                                </table>
+                            </h:panelGroup>
+                        </div>
+                    </div>
+
+                    <div id="uploadDialogOverlay" class="upload-dialog-overlay" onclick="btkOverlayClick(event);">
+                        <div class="upload-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="uploadDialogTitle" onclick="event.stopPropagation();">
+                            <div class="upload-dialog-header">
+                                <span id="uploadDialogTitle" class="upload-dialog-title">Upload document</span>
+                                <button type="button" class="upload-dialog-close" onclick="return btkCloseUploadDialog();">x</button>
+                            </div>
+                            <div class="upload-dialog-body">
+                                <ui:include src="/jointure.xhtml"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions" style="display: flex;margin-top: 15px; gap: 10px; justify-content: flex-end;">
+                        <h:commandButton value="Confirmer"
+                                         styleClass="btn-primary"
+                                         action="#{ajoutArchivesBean.confirm}"/>
+                        <h:commandButton value="Annuler"
+                                         styleClass="btn-secondary"
+                                         immediate="true"
+                                         action="#{ajoutArchivesBean.cancel}"/>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+
+        <h:outputScript library="js" name="ajouter-dossiers-archives-v3.js" target="body"/>
+        <h:outputScript target="body">
+            (function () {
+                function byIdOrSuffix(id) {
+                    var exact = document.getElementById(id);
+                    if (exact) {
+                        return exact;
+                    }
+                    return document.querySelector('[id$="' + id + '"]');
+                }
+
+                function fallbackOpen(btn) {
+                    if (!btn) {
+                        return false;
+                    }
+                    var label = btn.getAttribute('data-doc') || '';
+                    var target = btn.getAttribute('data-target') || '';
+                    var nameInput = byIdOrSuffix('dialogDocName');
+                    var targetInput = byIdOrSuffix('dialogTarget');
+                    var overlay = byIdOrSuffix('uploadDialogOverlay');
+
+                    if (nameInput) {
+                        nameInput.value = label;
+                    }
+                    if (targetInput) {
+                        targetInput.value = target;
+                    }
+                    if (overlay) {
+                        overlay.classList.add('is-open');
+                    }
+                    return false;
+                }
+
+                function fallbackClose() {
+                    var overlay = byIdOrSuffix('uploadDialogOverlay');
+                    if (overlay) {
+                        overlay.classList.remove('is-open');
+                    }
+                    return false;
+                }
+
+                var originalShow = window.btkShowUploadDialog;
+                window.btkShowUploadDialog = function () {
+                    try {
+                        if (typeof originalShow === 'function') {
+                            originalShow();
+                            return;
+                        }
+                    } catch (e) {}
+                    var overlay = byIdOrSuffix('uploadDialogOverlay');
+                    if (overlay) {
+                        overlay.classList.add('is-open');
+                    }
+                };
+
+                var originalClose = window.btkCloseUploadDialog;
+                window.btkCloseUploadDialog = function () {
+                    try {
+                        if (typeof originalClose === 'function') {
+                            return originalClose();
+                        }
+                    } catch (e) {}
+                    return fallbackClose();
+                };
+
+                var originalOverlayClick = window.btkOverlayClick;
+                window.btkOverlayClick = function (event) {
+                    try {
+                        if (typeof originalOverlayClick === 'function') {
+                            return originalOverlayClick(event);
+                        }
+                    } catch (e) {}
+                    var overlay = byIdOrSuffix('uploadDialogOverlay');
+                    if (overlay &amp;&amp; event &amp;&amp; event.target === overlay) {
+                        return window.btkCloseUploadDialog();
+                    }
+                    return false;
+                };
+
+                var originalOpen = window.btkOpenUploadDialog;
+                window.btkOpenUploadDialog = function (btn) {
+                    try {
+                        if (typeof originalOpen === 'function') {
+                            var result = originalOpen(btn);
+                            var overlay = byIdOrSuffix('uploadDialogOverlay');
+                            if (overlay &amp;&amp; overlay.classList.contains('is-open')) {
+                                return false;
+                            }
+                            return result;
+                        }
+                    } catch (e) {}
+                    return fallbackOpen(btn);
+                };
+            })();
+        </h:outputScript>
+    </ui:define>
+
+</ui:composition>

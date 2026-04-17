@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Suivi demande</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .suivi-toolbar {
+                margin-bottom: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .suivi-actions {
+                display: flex;
+                justify-content: flex-end;
+                flex: 0 0 auto;
+            }
+
+            .suivi-summary {
+                padding: 10px 12px;
+                border-radius: 8px;
+                background: #eef7ff;
+                border: 1px solid #d4e8fa;
+                color: #245780;
+                font-size: .85rem;
+                flex: 1 1 320px;
+            }
+
+            .suivi-refresh-btn.ui-button {
+                min-width: 38px !important;
+                width: 38px;
+                height: 38px !important;
+                border-radius: 9px !important;
+                padding: 0 !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .suivi-refresh-btn .ui-button-text {
+                display: none;
+            }
+
+            .suivi-table.ui-datatable .ui-datatable-tablewrapper {
+                border: 1px solid #dbe5ef;
+                border-radius: 10px;
+                overflow: hidden;
+                background: #fff;
+            }
+
+            .suivi-table.ui-datatable thead th {
+                background: #eef4fa;
+                color: #264c6d;
+                font-weight: 700;
+                padding: 11px 12px;
+                border: 0;
+            }
+
+            .suivi-table.ui-datatable tbody td {
+                padding: 11px 12px;
+                border-top: 1px solid #e7eef5;
+                vertical-align: middle;
+            }
+
+            .suivi-status {
+                display: inline-block;
+                padding: 4px 9px;
+                border-radius: 999px;
+                font-size: .78rem;
+                font-weight: 700;
+            }
+
+            .suivi-status.waiting {
+                background: #fff6df;
+                color: #9d6f00;
+            }
+
+            .suivi-status.approved {
+                background: #e8f7ef;
+                color: #1d7a49;
+            }
+
+            .suivi-status.restituted {
+                background: #ececff;
+                color: #324aa3;
+            }
+        </style>
+
+        <div class="container is-wide">
+            <div class="card">
+                <div class="card-title">Transmission dossiers - Suivi demande</div>
+
+                <h:form id="suiviDemandesForm" prependId="false">
+                    <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
+
+                    <div class="suivi-toolbar">
+                        <div class="suivi-summary">
+                            Demandes a restituer: <strong>#{suiviDemandesBean.restituableCount}</strong>
+                        </div>
+                        <div class="suivi-actions">
+                            <p:commandButton icon="pi pi-refresh"
+                                             title="Actualiser"
+                                             action="#{suiviDemandesBean.reload}"
+                                             process="@this"
+                                             update="@form"
+                                             styleClass="btn-primary ui-button-icon-only suivi-refresh-btn"/>
+                        </div>
+                    </div>
+
+                    <p:dataTable id="suiviTable"
+                                 value="#{suiviDemandesBean.demandes}"
+                                 var="demande"
+                                 styleClass="suivi-table"
+                                 emptyMessage="Aucune demande envoyee.">
+                        <p:column headerText="ID" style="width: 80px;">
+                            <h:outputText value="#{demande.idDemande}"/>
+                        </p:column>
+                        <p:column headerText="PIN">
+                            <h:outputText value="#{demande.pin}"/>
+                        </p:column>
+                        <p:column headerText="Boite">
+                            <h:outputText value="#{demande.boite}"/>
+                        </p:column>
+                        <p:column headerText="Recepteur">
+                            <h:outputText value="#{demande.recepteur}"/>
+                        </p:column>
+                        <p:column headerText="Date envoi">
+                            <h:outputText value="#{demande.dateEnvoi}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Statut" style="width: 140px;">
+                            <h:panelGroup layout="inline"
+                                          styleClass="suivi-status #{demande.statut eq 'EN ATTENTE' ? 'waiting' : (demande.statut eq 'APPROUVEE' ? 'approved' : 'restituted')}">
+                                <h:outputText value="#{demande.statut}"/>
+                            </h:panelGroup>
+                        </p:column>
+                        <p:column headerText="Action" style="width: 150px;">
+                            <p:commandButton value="Restituer"
+                                             action="#{suiviDemandesBean.restituer(demande)}"
+                                             process="@this"
+                                             update="@form"
+                                             styleClass="ui-button-secondary"
+                                             disabled="#{not demande.restituable}"/>
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

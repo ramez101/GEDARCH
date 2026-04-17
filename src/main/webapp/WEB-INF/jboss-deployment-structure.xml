@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.2">
+    <deployment>
+        <!-- Exclude WildFly's JPA/Hibernate so yours takes over -->
+        <exclusions>
+            <module name="org.hibernate"/>
+            <module name="org.hibernate.envers"/>
+        </exclusions>
+        <!-- Use your own Hibernate + Oracle JARs from pom.xml -->
+        <dependencies>
+            <module name="jakarta.persistence.api"/>
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>

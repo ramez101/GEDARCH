@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Liste utilisateurs</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .user-list-actions {
+                margin-bottom: 14px;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .users-table.ui-datatable {
+                border: 0;
+            }
+
+            .users-table.ui-datatable .ui-datatable-tablewrapper {
+                border: 1px solid #dbe5ef;
+                border-radius: 10px;
+                overflow: hidden;
+                background: #fff;
+            }
+
+            .users-table.ui-datatable table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .users-table.ui-datatable thead th {
+                background: #eef4fa;
+                color: #264c6d;
+                font-weight: 700;
+                padding: 11px 12px;
+                border: 0;
+            }
+
+            .users-table.ui-datatable tbody td {
+                padding: 11px 12px;
+                border-top: 1px solid #e7eef5;
+            }
+
+            .users-table.ui-datatable tbody tr:nth-child(even) td {
+                background: #fbfdff;
+            }
+
+            .status-toggle {
+                display: inline-flex;
+                width: 36px;
+                height: 36px;
+                align-items: center;
+                justify-content: center;
+                border-radius: 999px;
+                text-decoration: none;
+                font-size: 1.05rem;
+                border: 1px solid transparent;
+                transition: transform .12s ease, filter .12s ease;
+            }
+
+            .status-toggle:hover {
+                transform: translateY(-1px);
+                filter: brightness(1.03);
+            }
+
+            .status-toggle.status-on {
+                background: #e7f8ef;
+                border-color: #b8e6cb;
+            }
+
+            .status-toggle.status-off {
+                background: #fdecec;
+                border-color: #f2c0c0;
+            }
+
+            .active-warning {
+                margin-top: 12px;
+                padding: 10px 12px;
+                border-radius: 8px;
+                background: #fff6e8;
+                border: 1px solid #f0d8ac;
+                color: #926100;
+                font-size: .84rem;
+            }
+        </style>
+
+        <div class="container is-wide">
+            <div class="card">
+                <div class="card-title">Parametres - Liste utilisateurs</div>
+
+                <h:form id="listeUsersForm" prependId="false">
+                    <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
+
+                    <div class="user-list-actions">
+                        <p:commandButton value="Actualiser"
+                                         action="#{listeUtilisateursBean.refresh}"
+                                         process="@this"
+                                         update="@form"
+                                         styleClass="btn-primary"/>
+                    </div>
+
+                    <p:dataTable id="usersTable"
+                                 value="#{listeUtilisateursBean.utilisateurs}"
+                                 var="user"
+                                 styleClass="users-table"
+                                 emptyMessage="Aucun utilisateur trouve.">
+                        <p:column headerText="CUTI">
+                            <h:outputText value="#{user.cuti}"/>
+                        </p:column>
+                        <p:column headerText="Nom">
+                            <h:outputText value="#{user.lib}"/>
+                        </p:column>
+                        <p:column headerText="UNIX">
+                            <h:outputText value="#{user.unix}"/>
+                        </p:column>
+                        <p:column headerText="Profil">
+                            <h:outputText value="#{user.puti}"/>
+                        </p:column>
+                        <p:column headerText="Agence">
+                            <h:outputText value="#{user.age}"/>
+                        </p:column>
+                        <p:column headerText="Role">
+                            <h:outputText value="#{user.role}"/>
+                        </p:column>
+                        <p:column headerText="Active" style="width: 90px; text-align: center;">
+                            <p:commandLink action="#{listeUtilisateursBean.toggleActive(user)}"
+                                           process="@this"
+                                           update="@form"
+                                           title="#{user.actif ? 'Desactiver utilisateur' : 'Activer utilisateur'}"
+                                           styleClass="status-toggle #{user.actif ? 'status-on' : 'status-off'}">
+                                <h:outputText value="&#9989;" escape="false" rendered="#{user.actif}"/>
+                                <h:outputText value="&#10060;" escape="false" rendered="#{not user.actif}"/>
+                            </p:commandLink>
+                        </p:column>
+                    </p:dataTable>
+
+                    <h:panelGroup rendered="#{not listeUtilisateursBean.activeColumnAvailable}"
+                                  layout="block"
+                                  styleClass="active-warning">
+                        La colonne ACTIVE n'existe pas encore dans ARCH_UTILISATEURS. Ajoutez-la pour activer/desactiver les comptes.
+                    </h:panelGroup>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

@@ -1,0 +1,284 @@
+.decision-actions .ui-button {
+    min-width: 50px;
+    height: 38px;
+    border-radius: 8px !important;
+}
+
+.demande-search-head {
+    margin-bottom: 12px;
+    display: grid;
+    gap: 2px;
+}
+
+.demande-search-head .title {
+    font-size: .83rem;
+    font-weight: 700;
+    color: #1f537c;
+    text-transform: uppercase;
+    letter-spacing: .9px;
+}
+
+.demande-search-head .hint {
+    font-size: .8rem;
+    color: #6e8599;
+}
+
+.demande-actions {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.demande-actions .ui-button {
+    min-width: 130px;
+    border-radius: 7px;
+}
+
+.demande-search-line {
+    display: grid;
+    grid-template-columns: minmax(180px, 220px) minmax(260px, 1fr) auto;
+    gap: 10px;
+    align-items: flex-end;
+    padding: 12px;
+    border: 1px solid #d9e8f8;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(11, 47, 69, .05);
+}
+
+.demande-search-line .form-row {
+    margin: 0;
+    min-width: 0;
+    max-width: none;
+}
+
+.demande-search-line .form-row label {
+    margin-bottom: 6px;
+    color: #194b73;
+}
+
+.demande-search-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex: 0 0 auto;
+    padding-bottom: 1px;
+}
+
+.demande-search-buttons .ui-button {
+    min-width: 118px;
+    height: 43px;
+    border-radius: 7px;
+}
+
+.demande-search-buttons .btn-search-inline.ui-button {
+    min-width: 132px;
+}
+
+.demande-search-buttons .btn-clear-compact.ui-button {
+    min-width: 84px;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    font-size: .82rem !important;
+    box-shadow: none !important;
+}
+
+.demande-search-buttons .ui-button.ui-button-icon-only {
+    min-width: 44px !important;
+    width: 44px;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.demande-search-line .ui-inputfield,
+.demande-search-line .ui-selectonemenu {
+    width: 100% !important;
+}
+
+.demande-search-line .ui-inputfield {
+    height: 44px;
+}
+
+.demande-search-line .ui-selectonemenu {
+    border-radius: 8px;
+}
+
+.demande-search-line .ui-selectonemenu .ui-selectonemenu-label {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.demande-result {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #deebf7;
+}
+
+.demandes-toolbar {
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.demandes-summary {
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #eff7ff 0%, #e8f2fd 100%);
+    border: 1px solid #cfe2f6;
+    color: #1f547d;
+    font-size: .88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.demandes-summary .count {
+    min-width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    padding: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #0e7fb9;
+    color: #fff;
+    font-weight: 700;
+    font-size: .8rem;
+}
+
+.demandes-actions {
+    margin: 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.demandes-actions .ui-button {
+    min-width: 130px;
+    height: 42px;
+    border-radius: 9px !important;
+}
+
+.demandes-actions .ui-button.ui-button-icon-only.btn-refresh-icon {
+    min-width: 42px !important;
+    width: 42px;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.demandes-table.ui-datatable .ui-datatable-tablewrapper {
+    border: 1px solid #d7e4f2;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(16, 52, 79, .08);
+}
+
+.demandes-table.ui-datatable table {
+    table-layout: fixed;
+}
+
+.demandes-table.ui-datatable thead th {
+    background: #eef4fb;
+    color: #1f4f79;
+    font-weight: 700;
+    padding: 12px 12px;
+    border: 0;
+    font-size: .86rem;
+}
+
+.demandes-table.ui-datatable tbody tr:hover td {
+    background: #f9fcff;
+}
+
+.demandes-table.ui-datatable tbody td {
+    padding: 12px;
+    border-top: 1px solid #e7eef5;
+    vertical-align: middle;
+    font-size: .88rem;
+    color: #254a69;
+}
+
+.cell-type,
+.cell-comment {
+    max-width: 220px;
+    white-space: normal;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.cell-empty {
+    color: #9caebe;
+    font-style: italic;
+}
+
+.demande-status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: .76rem;
+    font-weight: 700;
+}
+
+.demande-status.pending {
+    background: #fff6df;
+    color: #9d6f00;
+}
+
+.demande-status.accepted {
+    background: #e8f7ef;
+    color: #1d7a49;
+}
+
+.demande-status.refused {
+    background: #fdecec;
+    color: #a33636;
+}
+
+.decision-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+
+.decision-done {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #edf3f9;
+    color: #60798f;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+@media (max-width: 980px) {
+    .demande-search-line {
+        grid-template-columns: 1fr 1fr;
+    }
+    .demande-search-buttons {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 900px) {
+    .demandes-toolbar {
+        align-items: stretch;
+    }
+    .demandes-actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 640px) {
+    .demande-search-line {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Modifier archives</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .modifier-result {
+                margin-top: 18px;
+                padding: 16px;
+                border: 1px solid #d5e1ee;
+                border-radius: 12px;
+                transition: background .18s ease, border-color .18s ease;
+            }
+
+            .modifier-result.modifier-empty {
+                background: #f1f6fb;
+            }
+
+            .modifier-result.modifier-ready {
+                background: #fff;
+                border-color: #c7d7e8;
+            }
+
+            .modifier-actions {
+                margin-top: 16px;
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .modifier-btn.ui-button.ui-widget {
+                min-height: 34px;
+                border-radius: 8px;
+                padding: 0;
+                font-weight: 700;
+            }
+
+            .modifier-btn.ui-button.ui-widget .ui-button-text {
+                padding: 7px 16px;
+                font-size: .82rem;
+            }
+
+            .modifier-boite-picker {
+                display: flex;
+                align-items: flex-end;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .modifier-boite-picker-field {
+                flex: 0 0 180px;
+                max-width: 180px;
+            }
+
+            .modifier-boite-picker-field .ui-autocomplete,
+            .modifier-boite-picker-field .ui-autocomplete-input,
+            .modifier-boite-picker-field input {
+                width: 100%;
+            }
+
+            .modifier-boite-add-btn.ui-button.ui-widget {
+                min-width: 42px;
+                width: 42px;
+                height: 42px;
+                border-radius: 10px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .modifier-boite-add-btn.ui-button.ui-widget .ui-button-text {
+                padding: 0;
+            }
+
+            .modifier-boite-help {
+                margin-top: 8px;
+                font-size: .78rem;
+                color: #55748d;
+            }
+
+            .modifier-boite-inline-summary {
+                margin-top: 0;
+                align-self: center;
+                white-space: nowrap;
+            }
+
+            .modifier-boite-chip-list {
+                margin-top: 10px;
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .modifier-boite-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 8px 6px 10px;
+                border-radius: 999px;
+                background: #eef6ff;
+                border: 1px solid #c8def6;
+                color: #174a73;
+                font-weight: 700;
+            }
+
+            .modifier-boite-chip-remove.ui-button.ui-widget {
+                width: 24px;
+                height: 24px;
+                min-width: 24px;
+                border-radius: 999px;
+                background: #d94b4b;
+                border-color: #d94b4b;
+            }
+
+            .modifier-boite-chip-remove.ui-button.ui-widget .ui-button-text {
+                display: none;
+            }
+
+            .modifier-boite-chip-remove.ui-button.ui-widget .ui-icon,
+            .modifier-boite-chip-remove.ui-button.ui-widget .pi {
+                color: #ffffff;
+                font-size: 1rem;
+            }
+
+            .modifier-boite-chip-empty {
+                margin-top: 10px;
+                font-size: .82rem;
+                color: #6b7d8b;
+            }
+
+            .modifier-confirm.ui-dialog {
+                border: 0;
+                box-shadow: 0 18px 45px rgba(0, 0, 0, .18);
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            .modifier-confirm.ui-dialog .ui-dialog-titlebar {
+                background: #ffffff;
+                color: #eb0a0a;
+                border: 0;
+                border-bottom: 1px solid #e3e3e3;
+                font-weight: 700;
+                padding: 12px 16px;
+            }
+
+            .modifier-confirm.ui-dialog .ui-dialog-content {
+                border: none;
+                padding: 18px 20px 12px;
+                color: #3f3f3f;
+            }
+
+            .modifier-confirm .ui-dialog-titlebar .ui-dialog-title {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .modifier-confirm .ui-dialog-titlebar .ui-dialog-title:before {
+                content: "⚠";
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 22px;
+                height: 30px;
+                border-radius: 999px;
+                color: #b12b2b;
+            }
+
+            .modifier-confirm .ui-button.ui-widget {
+                border-radius: 8px;
+                font-weight: 700;
+                min-width: 120px;
+            }
+
+            .modifier-confirm .confirm-yes.ui-button.ui-widget {
+                background: #ffffff;
+                border: 1px solid #5bb6b3;
+                color: #4aa6a3;
+                box-shadow: none;
+            }
+
+            .modifier-confirm .confirm-no.ui-button.ui-widget {
+                background: #ffffff;
+                border: 1px solid #eb0a0a;
+                color: #eb0a0a;
+                box-shadow: none;
+            }
+
+            .modifier-confirm .confirm-yes.ui-button.ui-widget:hover,
+            .modifier-confirm .confirm-no.ui-button.ui-widget:hover {
+                filter: brightness(0.98);
+            }
+        </style>
+
+        <div class="container">
+            <div class="card">
+                <div class="card-title">Modifier archives</div>
+                <h:form id="modifierForm" prependId="false">
+                    <p:messages id="messages" closable="true" />
+
+                    <div class="form-grid two-cols">
+                        <div class="form-row full" style="display: flex; gap: 12px; align-items: end; flex-wrap: wrap;">
+                            <div style="flex: 0 0 180px;">
+                                <h:outputLabel for="searchType" value="Recherche par"/>
+                                <h:selectOneMenu id="searchType"
+                                                 value="#{modifierArchivesBean.searchType}">
+                                    <f:selectItem itemLabel="Pin Client" itemValue="pin"/>
+                                    <f:selectItem itemLabel="Relation" itemValue="relation"/>
+                                </h:selectOneMenu>
+                            </div>
+                            <div style="flex: 1 1 320px;">
+                                <h:outputLabel for="searchValue" value="Valeur"/>
+                                <p:inputText id="searchValue"
+                                             value="#{modifierArchivesBean.searchValue}"
+                                             placeholder="Saisir valeur"
+                                             autocomplete="off"
+                                             style="width: 100%"/>
+                            </div>
+                            <div class="modifier-actions" style="margin-top: 0;">
+                                <p:commandButton value="Rechercher"
+                                                 styleClass="modifier-btn"
+                                                 action="#{modifierArchivesBean.search}"
+                                                 process="@form"
+                                                 update="@form"/>
+                                <p:commandButton value="Effacer"
+                                                 styleClass="modifier-btn"
+                                                 action="#{modifierArchivesBean.clear}"
+                                                 process="@this"
+                                                 update="@form"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modifier-result #{modifierArchivesBean.resultLoaded ? 'modifier-ready' : 'modifier-empty'}">
+                        <div class="form-section-title">Informations client</div>
+                        <div class="form-grid two-cols">
+                            <div class="form-row">
+                                <h:outputLabel for="portefeuille" value="Portefeuille"/>
+                                <h:selectOneMenu id="portefeuille"
+                                                 value="#{modifierArchivesBean.portefeuille}"
+                                                 disabled="#{not modifierArchivesBean.resultLoaded}">
+                                    <f:selectItem itemLabel="Choisir" itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItem itemLabel="BTK - Cédé" itemValue="BTK - Cédé"/>
+                                    <f:selectItem itemLabel="BTK - Radié" itemValue="BTK - Radié"/>
+                                    <f:selectItem itemLabel="BTK - Géré" itemValue="BTK - Géré"/>
+                                    <f:selectItem itemLabel="BTK Leasing - Cédé" itemValue="BTK Leasing - Cédé"/>
+                                </h:selectOneMenu>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="pin" value="Pin Client"/>
+                                <h:inputText id="pin"
+                                             value="#{modifierArchivesBean.pin}"
+                                             disabled="#{not modifierArchivesBean.resultLoaded}"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="relation" value="Relation"/>
+                                <h:inputText id="relation"
+                                             value="#{modifierArchivesBean.relation}"
+                                             disabled="#{not modifierArchivesBean.resultLoaded}"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="charge" value="Charge"/>
+                                <h:inputText id="charge"
+                                             value="#{modifierArchivesBean.charge}"
+                                             disabled="#{not modifierArchivesBean.resultLoaded}"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="typeArchive" value="Type archive"/>
+                                <h:selectOneMenu id="typeArchive"
+                                                 value="#{modifierArchivesBean.typeArchive}"
+                                                 disabled="#{not modifierArchivesBean.resultLoaded}">
+                                    <f:selectItem itemLabel="Choisir" itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItem itemLabel="Courant" itemValue="courant"/>
+                                    <f:selectItem itemLabel="Intermediaire" itemValue="intermediaire"/>
+                                    <f:selectItem itemLabel="Finale" itemValue="finale"/>
+                                </h:selectOneMenu>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="filialeId" value="Filiale"/>
+                                <h:inputText id="filialeId"
+                                             value="#{modifierArchivesBean.filialeLabel}"
+                                             readonly="true"
+                                             disabled="#{not modifierArchivesBean.resultLoaded}"/>
+                            </div>
+
+                            <div class="form-row full">
+                                <h:outputLabel for="boite" value="Boite"/>
+                                <h:panelGroup id="boitesPanel" layout="block">
+                                    <div class="modifier-boite-picker">
+                                        <div class="modifier-boite-picker-field">
+                                            <p:autoComplete id="boite"
+                                                            value="#{modifierArchivesBean.boite}"
+                                                            completeMethod="#{modifierArchivesBean.completeBoite}"
+                                                            forceSelection="false"
+                                                            dropdown="false"
+                                                            minQueryLength="0"
+                                                            scrollHeight="220"
+                                                            converterMessage="Boite invalide."
+                                                            disabled="#{not modifierArchivesBean.resultLoaded}"
+                                                            placeholder="Saisir num boite">
+                                                <f:converter converterId="jakarta.faces.Integer"/>
+                                            </p:autoComplete>
+                                        </div>
+                                        <p:commandButton id="addBoiteModifierBtn"
+                                                         icon="pi pi-plus"
+                                                         title="Ajouter boite"
+                                                         action="#{modifierArchivesBean.addBoiteSelection}"
+                                                         process="@this boite"
+                                                         update="boitesPanel boite messages"
+                                                         disabled="#{not modifierArchivesBean.resultLoaded}"
+                                                         styleClass="modifier-boite-add-btn modifier-btn"/>
+                                        <ui:fragment rendered="#{not empty modifierArchivesBean.boitesSummary}">
+                                            <div class="modifier-boite-help modifier-boite-inline-summary">Boites associees : #{modifierArchivesBean.boitesSummary}</div>
+                                        </ui:fragment>
+                                    </div>
+                                    <ui:fragment rendered="#{not empty modifierArchivesBean.selectedBoites}">
+                                        <div class="modifier-boite-chip-list">
+                                            <ui:repeat value="#{modifierArchivesBean.selectedBoites}" var="item">
+                                                <div class="modifier-boite-chip">
+                                                    <span>Boite #{item}</span>
+                                                    <p:commandButton icon="pi pi-times"
+                                                                     title="Retirer cette boite"
+                                                                     action="#{modifierArchivesBean.removeBoiteSelection}"
+                                                                     process="@this"
+                                                                     update="boitesPanel boite messages"
+                                                                     styleClass="modifier-boite-chip-remove ui-button-icon-only">
+                                                        <f:setPropertyActionListener target="#{modifierArchivesBean.boiteToRemove}" value="#{item}"/>
+                                                    </p:commandButton>
+                                                </div>
+                                            </ui:repeat>
+                                        </div>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{empty modifierArchivesBean.selectedBoites}">
+                                        <div class="modifier-boite-chip-empty">Aucune boite associee pour le moment.</div>
+                                    </ui:fragment>
+                                </h:panelGroup>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modifier-actions">
+                        <p:commandButton value="Confirmer"
+                                         styleClass="modifier-btn"
+                                         type="button"
+                                         disabled="#{not modifierArchivesBean.resultLoaded}"
+                                         onclick="PF('confirmModificationDialog').show()"/>
+                    </div>
+
+                    <p:confirmDialog header="Confirmation"
+                                     widgetVar="confirmModificationDialog"
+                                     styleClass="modifier-confirm"
+                                     modal="true"
+                                     resizable="false"
+                                     appendTo="@(body)">
+                        <p:outputPanel style="margin-bottom: 12px;">
+                            Confirmer la modification du dossier ?
+                        </p:outputPanel>
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <p:commandButton value="Oui"
+                                             styleClass="modifier-btn confirm-yes"
+                                             action="#{modifierArchivesBean.save}"
+                                             process="@form"
+                                             update="@form"
+                                             oncomplete="PF('confirmModificationDialog').hide()"/>
+                            <p:commandButton value="Annuler"
+                                             styleClass="modifier-btn confirm-no"
+                                             action="#{modifierArchivesBean.clear}"
+                                             process="@this"
+                                             update="@form"
+                                             oncomplete="PF('confirmModificationDialog').hide()"/>
+                        </div>
+                    </p:confirmDialog>
+
+                    <p:dialog header="Information"
+                              widgetVar="modifierNotFoundDialog"
+                              modal="true"
+                              resizable="false"
+                              closable="true"
+                              appendTo="@(body)">
+                        <h:outputText value="Aucun dossier trouve."/>
+                    </p:dialog>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Transmission dossiers</ui:define>
+
+    <ui:define name="content">
+        <div class="container">
+            <div class="card">
+                <div class="card-title">Transmission dossiers</div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">Action</div>
+                        <div class="value">
+                            <h:link outcome="/demande-dossier">Demande dossier</h:link>
+                        </div>
+                    </div>
+                    <ui:fragment rendered="#{loginBean.adminRole}">
+                        <div class="info-item">
+                            <div class="label">Admin</div>
+                            <div class="value">
+                                <h:link outcome="/liste-demandes">Liste demande</h:link>
+                                <span> | </span>
+                                <h:link outcome="/suivi-dossiers">Suivi dossiers</h:link>
+                            </div>
+                        </div>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{loginBean.consultationRole}">
+                        <div class="info-item">
+                            <div class="label">Consultation</div>
+                            <div class="value">
+                                <h:link outcome="/suivi-demandes">Suivi demande</h:link>
+                            </div>
+                        </div>
+                    </ui:fragment>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

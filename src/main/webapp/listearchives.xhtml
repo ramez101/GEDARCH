@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Liste archives</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .liste-actions {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-bottom: 16px;
+            }
+
+            .liste-btn.ui-button.ui-widget {
+                border: 1px solid #7ea6d3;
+                background: #fff;
+                color: #153b5a;
+                font-weight: 700;
+                border-radius: 4px;
+                min-height: 36px;
+            }
+
+            .liste-btn.ui-button.ui-widget .ui-button-text {
+                padding: 8px 12px;
+                font-size: .82rem;
+            }
+
+            .doc-yes,
+            .doc-no {
+                display: inline-block;
+                min-width: 48px;
+                text-align: center;
+                border-radius: 12px;
+                padding: 3px 8px;
+                font-size: .76rem;
+                font-weight: 700;
+            }
+
+            .doc-yes {
+                background: #e6f6eb;
+                color: #1d6b3a;
+                border: 1px solid #b7e6c8;
+            }
+
+            .doc-no {
+                background: #fff0f0;
+                color: #9e2c2c;
+                border: 1px solid #efc0c0;
+            }
+
+            @media print {
+                .liste-actions {
+                    display: none !important;
+                }
+            }
+        </style>
+
+        <div class="container is-wide">
+            <div class="card">
+                <div class="card-title">Liste archives</div>
+                <h:form id="listeArchivesForm">
+                    <div class="liste-actions">
+                        <p:commandButton value="Rafraichir"
+                                         action="#{listeArchivesBean.reload}"
+                                         process="@this"
+                                         update="@form"
+                                         styleClass="liste-btn"/>
+
+                        <p:commandButton value="Exporter Excel" ajax="false" styleClass="liste-btn">
+                            <p:dataExporter type="xlsx" target="archivesTable" fileName="liste_archives"/>
+                        </p:commandButton>
+
+                        <p:commandButton value="Exporter PDF"
+                                         action="#{listeArchivesBean.downloadPdf}"
+                                         ajax="false"
+                                         styleClass="liste-btn"/>
+
+                        <p:commandButton value="Imprimer"
+                                         type="button"
+                                         onclick="window.print(); return false;"
+                                         styleClass="liste-btn"/>
+                    </div>
+
+                    <p:dataTable id="archivesTable"
+                                 value="#{listeArchivesBean.archives}"
+                                 var="item"
+                                 rows="15"
+                                 paginator="true"
+                                 paginatorPosition="bottom"
+                                 emptyMessage="Aucun dossier archive trouve."
+                                 rowIndexVar="idx">
+                        <p:column headerText="#">
+                            <h:outputText value="#{idx + 1}"/>
+                        </p:column>
+                        <p:column headerText="Portefeuille" sortBy="#{item.portefeuille}">
+                            <h:outputText value="#{item.portefeuille}"/>
+                        </p:column>
+                        <p:column headerText="Pin" sortBy="#{item.pin}">
+                            <h:outputText value="#{item.pin}"/>
+                        </p:column>
+                        <p:column headerText="Relation" sortBy="#{item.relation}">
+                            <h:outputText value="#{item.relation}"/>
+                        </p:column>
+                        <p:column headerText="Charge" sortBy="#{item.charge}">
+                            <h:outputText value="#{item.charge}"/>
+                        </p:column>
+                        <p:column headerText="Type archive" sortBy="#{item.typeArchive}">
+                            <h:outputText value="#{item.typeArchive}"/>
+                        </p:column>
+                        <p:column headerText="Filiale" sortBy="#{item.filiale}">
+                            <h:outputText value="#{item.filiale}"/>
+                        </p:column>
+                        <p:column headerText="Boite" sortBy="#{item.boite}">
+                            <h:outputText value="#{item.boite}"/>
+                        </p:column>
+                        <p:column headerText="Documents" sortBy="#{item.documents}">
+                            <h:outputText value="#{item.documents}"
+                                          styleClass="#{item.documents eq 'Oui' ? 'doc-yes' : 'doc-no'}"/>
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

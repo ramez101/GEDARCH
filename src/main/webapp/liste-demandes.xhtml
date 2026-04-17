@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Liste demande</ui:define>
+
+    <ui:define name="content">
+        <div class="container is-wide">
+            <div class="card">
+                <div class="card-title">Transmission dossiers - Liste demande</div>
+
+                <h:form id="listeDemandesForm" prependId="false">
+                    <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
+
+                    <div class="demandes-toolbar">
+                        <div class="demandes-summary">
+                            Demandes en attente
+                            <span class="count">#{listeDemandesBean.pendingCount}</span>
+                        </div>
+                        <div class="demandes-actions">
+                            <p:commandButton icon="pi pi-refresh"
+                                             title="Actualiser"
+                                             action="#{listeDemandesBean.reload}"
+                                             process="@this"
+                                             update="@form"
+                                             styleClass="btn-primary ui-button-icon-only btn-refresh-icon"/>
+                        </div>
+                    </div>
+
+                    <p:dataTable id="demandesTable"
+                                 value="#{listeDemandesBean.demandes}"
+                                 var="demande"
+                                 styleClass="demandes-table"
+                                 emptyMessage="Aucune demande disponible."
+                                 reflow="true"
+                                 rowHover="true"
+                                 paginator="true"
+                                 paginatorPosition="bottom"
+                                 rows="15"
+                                 rowsPerPageTemplate="10,15,30,50">
+                        <p:column headerText="ID" style="width: 5%; text-align:center;">
+                            <h:outputText value="#{demande.idDemande}"/>
+                        </p:column>
+                        <p:column headerText="PIN" style="width: 6%; text-align:center;">
+                            <h:outputText value="#{demande.pin}"/>
+                        </p:column>
+                        <p:column headerText="Boite" style="width: 6%; text-align:center;">
+                            <h:outputText value="#{demande.boite}"/>
+                        </p:column>
+                        <p:column headerText="Emetteur" style="width: 10%;">
+                            <h:outputText value="#{demande.emetteur}"/>
+                        </p:column>
+                        <p:column headerText="Recepteur" style="width: 10%;">
+                            <h:outputText value="#{demande.recepteur}" rendered="#{not empty demande.recepteur}"/>
+                            <h:outputText value="-" rendered="#{empty demande.recepteur}" styleClass="cell-empty"/>
+                        </p:column>
+                        <p:column headerText="Type demande" style="width: 15%;">
+                            <h:panelGroup layout="block" styleClass="cell-type">
+                                <h:outputText value="#{demande.typeDemande}"/>
+                            </h:panelGroup>
+                        </p:column>
+                        <p:column headerText="Justification" style="width: 18%;">
+                            <h:panelGroup layout="block" styleClass="cell-comment">
+                                <h:outputText value="#{demande.commentaire}" rendered="#{not empty demande.commentaire}"/>
+                                <h:outputText value="-" rendered="#{empty demande.commentaire}" styleClass="cell-empty"/>
+                            </h:panelGroup>
+                        </p:column>
+                        <p:column headerText="Date envoi" style="width: 10%; text-align:center;">
+                            <h:outputText value="#{demande.dateEnvoi}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Statut" style="width: 8%; text-align:center;">
+                            <h:panelGroup layout="inline"
+                                          styleClass="demande-status #{demande.pending ? 'pending' : (demande.statut eq 'ACCEPTEE' ? 'accepted' : 'refused')}">
+                                <h:outputText value="#{demande.statut}"/>
+                            </h:panelGroup>
+                        </p:column>
+                        <p:column headerText="Decision" style="width: 12%; text-align:center;">
+                            <h:panelGroup rendered="#{demande.pending}">
+                                <div class="decision-actions">
+                                    <p:commandButton icon="pi pi-check"
+                                                     title="Accepter"
+                                                     action="#{listeDemandesBean.accepter(demande)}"
+                                                     process="@this"
+                                                     update="@form"
+                                                     styleClass="btn-primary ui-button-icon-only"/>
+                                    <p:commandButton icon="pi pi-times"
+                                                     title="Refuser"
+                                                     action="#{listeDemandesBean.refuser(demande)}"
+                                                     process="@this"
+                                                     update="@form"
+                                                     styleClass="ui-button-danger ui-button-icon-only"/>
+                                </div>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{not demande.pending}" styleClass="decision-done">
+                                Traitee
+                            </h:panelGroup>
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

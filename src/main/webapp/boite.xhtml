@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Boites</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .boite-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 12px;
+            }
+
+            .boite-actions {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .boite-btn.ui-button.ui-widget {
+                min-height: 32px;
+                padding: 0;
+                border-radius: 8px;
+            }
+
+            .boite-btn.ui-button.ui-widget .ui-button-text {
+                padding: 7px 14px;
+                font-size: 1.1rem;
+                font-weight: 700;
+            }
+
+            .boite-add-btn.ui-button.ui-widget {
+                border: none;
+                background: linear-gradient(135deg, #146da5, #1786c9);
+                color: #fff;
+                box-shadow: 0 6px 16px rgba(20, 109, 165, .22);
+            }
+
+            .boite-delete-btn.ui-button.ui-widget {
+                border: 1px solid #e5b4b4;
+                background: #fff7f7;
+                color: #b33636;
+            }
+
+            .boite-table.ui-datatable {
+                border: 0;
+            }
+
+            .boite-table.ui-datatable .ui-datatable-tablewrapper {
+                border: 1px solid #dbe5ef;
+                border-radius: 10px;
+                overflow: hidden;
+                background: #fff;
+            }
+
+            .boite-table.ui-datatable thead th {
+                background: #eef4fa;
+                color: #264c6d;
+                font-weight: 700;
+                padding: 11px 12px;
+                border: 0;
+            }
+
+            .boite-table.ui-datatable tbody td {
+                padding: 11px 12px;
+                border-top: 1px solid #e7eef5;
+            }
+
+            .boite-table.ui-datatable tbody tr:nth-child(even) td {
+                background: #fbfdff;
+            }
+
+            .boite-row-delete.ui-button.ui-widget {
+                width: 32px;
+                height: 32px;
+                min-width: 32px;
+                padding: 0;
+                border-radius: 8px;
+                border: 1px solid #ff0000;
+                background: #fff5f5;
+                color: #ff0000;
+                box-shadow: none;
+                line-height: 1;
+            }
+
+            .boite-row-delete.ui-button.ui-widget .ui-button-text {
+                display: block;
+                padding: 0;
+            }
+
+            .boite-row-print.ui-button.ui-widget {
+                width: 32px;
+                height: 32px;
+                min-width: 32px;
+                padding: 0;
+                border-radius: 8px;
+                border: 1px solid #b9d0e2;
+                background: #f3f9ff;
+                color: #1d638f;
+                box-shadow: none;
+                line-height: 1;
+            }
+
+            .boite-row-print.ui-button.ui-widget .ui-button-text {
+                display: none;
+            }
+
+            .boite-row-view.ui-button.ui-widget {
+                width: 32px;
+                height: 32px;
+                min-width: 32px;
+                padding: 0;
+                border-radius: 8px;
+                border: 1px solid #b7dbcb;
+                background: #f1fbf6;
+                color: #1f7f55;
+                box-shadow: none;
+                line-height: 1;
+            }
+
+            .boite-row-view.ui-button.ui-widget .ui-button-text {
+                display: none;
+            }
+
+            .boite-row-edit.ui-button.ui-widget {
+                width: 32px;
+                height: 32px;
+                min-width: 32px;
+                padding: 0;
+                border-radius: 8px;
+                border: 1px solid #f1d48b;
+                background: #fff9ea;
+                color: #a66b00;
+                box-shadow: none;
+                line-height: 1;
+            }
+
+            .boite-row-edit.ui-button.ui-widget .ui-button-text {
+                display: none;
+            }
+
+            .boite-info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 12px;
+                margin-top: 8px;
+            }
+
+            .boite-info-item {
+                border: 1px solid #dce8f5;
+                border-radius: 8px;
+                padding: 10px 12px;
+                background: #f9fcff;
+            }
+
+            .boite-info-label {
+                font-size: .78rem;
+                text-transform: uppercase;
+                letter-spacing: .4px;
+                color: #5d7a93;
+                font-weight: 700;
+                margin-bottom: 4px;
+            }
+
+            .boite-info-value {
+                color: #1f3447;
+                font-weight: 600;
+            }
+
+            .modifier-confirm.ui-dialog {
+                border: 0;
+                box-shadow: 0 18px 45px rgba(0, 0, 0, .18);
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            .modifier-confirm.ui-dialog .ui-dialog-titlebar {
+                background: #ffffff;
+                color: #b12b2b;
+                border: 0;
+                border-bottom: 1px solid #e3e3e3;
+                font-weight: 700;
+                padding: 12px 16px;
+            }
+
+            .modifier-confirm.ui-dialog .ui-dialog-content {
+                border: none;
+                padding: 18px 20px 12px;
+                color: #3f3f3f;
+            }
+
+            .modifier-confirm .ui-dialog-titlebar .ui-dialog-title {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .modifier-confirm .ui-dialog-titlebar .ui-dialog-title:before {
+                content: "\26A0";
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 22px;
+                height: 22px;
+                border-radius: 999px;
+                background: #f8d7da;
+                color: #b12b2b;
+                font-size: .8rem;
+            }
+
+            .modifier-confirm .ui-button.ui-widget {
+                border-radius: 8px;
+                font-weight: 700;
+                min-width: 120px;
+            }
+
+            .modifier-confirm .confirm-yes.ui-button.ui-widget {
+                background: #ffffff;
+                border: 1px solid #5bb6b3;
+                color: #4aa6a3;
+                box-shadow: none;
+            }
+
+            .modifier-confirm .confirm-no.ui-button.ui-widget {
+                background: #ffffff;
+                border: 1px solid #c45b5b;
+                color: #b24a4a;
+                box-shadow: none;
+            }
+
+            .modifier-confirm .confirm-yes.ui-button.ui-widget:hover,
+            .modifier-confirm .confirm-no.ui-button.ui-widget:hover {
+                filter: brightness(0.98);
+            }
+
+            .boite-messages .ui-messages-info {
+                background: #e8f6ee;
+                border-color: #a6e3bf;
+                color: #1d6b3a;
+            }
+
+            .boite-messages .ui-messages-warn {
+                background: #eaf2ff;
+                border-color: #b8d1ff;
+                color: #1f4a8a;
+            }
+
+            .boite-messages .ui-messages-error {
+                background: #fff1f1;
+                border-color: #f0b1b1;
+                color: #9e2c2c;
+            }
+
+            .boite-dialog-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 8px;
+                margin-top: 12px;
+            }
+
+            .boite-readonly-note {
+                margin-bottom: 14px;
+                padding: 10px 12px;
+                border: 1px solid #cfe0f3;
+                border-radius: 8px;
+                background: #f4f9ff;
+                color: #1f4a73;
+                font-weight: 600;
+            }
+        </style>
+
+        <div class="container is-wide">
+            <div class="card">
+                <h:form id="boiteForm">
+                    <h:panelGroup rendered="#{loginBean.readOnlyBoiteMode}" layout="block" styleClass="boite-readonly-note">
+                        Mode consultation : affichage seulement, sans ajout ni suppression.
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" styleClass="boite-readonly-note">
+                        Filiale active : #{boiteBean.currentFilialeLabel}
+                    </h:panelGroup>
+
+                    <div class="boite-header">
+                        <div class="card-title">Boites</div>
+                        <h:panelGroup layout="block" styleClass="boite-actions" rendered="#{loginBean.boiteManageAllowed}">
+                            <p:commandButton type="button"
+                                             value="Ajouter"
+                                             styleClass="boite-btn boite-add-btn"
+                                             onclick="PF('addBoiteDialog').show()"/>
+                        </h:panelGroup>
+                    </div>
+
+                    <p:messages id="messages" autoUpdate="true" closable="true" styleClass="boite-messages"/>
+
+                    <p:dataTable id="boiteTable"
+                                 value="#{boiteBean.emplacements}"
+                                 var="emp"
+                                 rows="10"
+                                 paginator="true"
+                                 paginatorPosition="bottom"
+                                 styleClass="boite-table"
+                                 emptyMessage="Aucune boite trouvee.">
+                        <p:column headerText="Etage" sortBy="#{emp.etage}">
+                            <h:outputText value="#{emp.etage}"/>
+                        </p:column>
+                        <p:column headerText="Salle" sortBy="#{emp.salle}">
+                            <h:outputText value="#{emp.salle}"/>
+                        </p:column>
+                        <p:column headerText="Rayon" sortBy="#{emp.rayon}">
+                            <h:outputText value="#{emp.rayon}"/>
+                        </p:column>
+                        <p:column headerText="Rangee" sortBy="#{emp.rangee}">
+                            <h:outputText value="#{emp.rangee}"/>
+                        </p:column>
+                        <p:column headerText="Boite"
+                                  sortBy="#{emp.boite}"
+                                  sortOrder="descending"
+                                  filterBy="#{emp.boite}"
+                                  filterMatchMode="contains">
+                            <h:outputText value="#{emp.boite}"/>
+                        </p:column>
+                        <p:column headerText="Imprimer" style="width: 90px; text-align: center;">
+                            <p:commandButton type="button"
+                                             icon="pi pi-print"
+                                             title="Imprimer les coordonnees de la boite"
+                                             styleClass="boite-row-print ui-button-icon-only"
+                                             onclick="BTKBoitePrint.printCard(#{emp.boite}, #{emp.etage}, #{emp.salle}, #{emp.rayon}, #{emp.rangee});"/>
+                        </p:column>
+                        <p:column headerText="Visualiser" style="width: 90px; text-align: center;">
+                            <p:commandButton icon="pi pi-eye"
+                                             title="Visualiser les informations de creation et modification"
+                                             process="@this"
+                                             update=":boiteForm:boiteInfoPanel"
+                                             oncomplete="PF('boiteInfoDialog').show();"
+                                             styleClass="boite-row-view ui-button-icon-only">
+                                <f:setPropertyActionListener target="#{boiteBean.selectedEmplacement}" value="#{emp}"/>
+                            </p:commandButton>
+                        </p:column>
+                        <p:column headerText="Modifier" style="width: 90px; text-align: center;" rendered="#{loginBean.boiteManageAllowed}">
+                            <p:commandButton icon="pi pi-pencil"
+                                             title="Modifier l'emplacement de la boite"
+                                             process="@this"
+                                             action="#{boiteBean.prepareEditEmplacement}"
+                                             update=":editBoiteForm :boiteForm:messages"
+                                             oncomplete="if (!args.validationFailed) PF('editBoiteDialog').show();"
+                                             styleClass="boite-row-edit ui-button-icon-only">
+                                <f:setPropertyActionListener target="#{boiteBean.selectedEmplacement}" value="#{emp}"/>
+                            </p:commandButton>
+                        </p:column>
+                        <p:column headerText="Suppression" style="width: 90px; text-align: center;" rendered="#{loginBean.boiteManageAllowed}">
+                            <p:commandButton value="&#128465;"
+                                             styleClass="boite-row-delete"
+                                             process="@this"
+                                             oncomplete="PF('deleteBoiteRowDialog').show()">
+                                <f:setPropertyActionListener target="#{boiteBean.deleteBoite}" value="#{emp.boite}"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+
+                    <p:dialog header="Informations de tracabilite"
+                              widgetVar="boiteInfoDialog"
+                              modal="true"
+                              resizable="false"
+                              closable="true"
+                              width="760"
+                              appendTo="@(form)">
+                        <h:panelGroup id="boiteInfoPanel" layout="block">
+                            <ui:fragment rendered="#{not empty boiteBean.selectedEmplacement}">
+                                <div class="boite-info-grid">
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">Date ajout</div>
+                                        <div class="boite-info-value">
+                                            <ui:fragment rendered="#{not empty boiteBean.selectedEmplacement.dateAjout}">
+                                                <h:outputText value="#{boiteBean.selectedEmplacement.dateAjout}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+                                                </h:outputText>
+                                            </ui:fragment>
+                                            <ui:fragment rendered="#{empty boiteBean.selectedEmplacement.dateAjout}">
+                                                <h:outputText value="-"/>
+                                            </ui:fragment>
+                                        </div>
+                                    </div>
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">Date modification</div>
+                                        <div class="boite-info-value">
+                                            <ui:fragment rendered="#{not empty boiteBean.selectedEmplacement.dateModification}">
+                                                <h:outputText value="#{boiteBean.selectedEmplacement.dateModification}">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+                                                </h:outputText>
+                                            </ui:fragment>
+                                            <ui:fragment rendered="#{empty boiteBean.selectedEmplacement.dateModification}">
+                                                <h:outputText value="-"/>
+                                            </ui:fragment>
+                                        </div>
+                                    </div>
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">User cree</div>
+                                        <div class="boite-info-value">
+                                            <h:outputText value="#{empty boiteBean.selectedEmplacement.userCree ? '-' : boiteBean.selectedEmplacement.userCree}"/>
+                                        </div>
+                                    </div>
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">User modifie</div>
+                                        <div class="boite-info-value">
+                                            <h:outputText value="#{empty boiteBean.selectedEmplacement.userModifie ? '-' : boiteBean.selectedEmplacement.userModifie}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{empty boiteBean.selectedEmplacement}">
+                                <div class="boite-readonly-note">Aucune boite selectionnee.</div>
+                            </ui:fragment>
+                        </h:panelGroup>
+                    </p:dialog>
+                </h:form>
+            </div>
+        </div>
+
+        <ui:fragment rendered="#{loginBean.boiteManageAllowed}">
+            <p:confirmDialog header="Confirmation"
+                             widgetVar="deleteBoiteRowDialog"
+                             styleClass="modifier-confirm"
+                             modal="true"
+                             resizable="false"
+                             appendTo="@(body)">
+                <p:outputPanel style="margin-bottom: 12px;">
+                    Confirmer la suppression de la boite ?
+                </p:outputPanel>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <p:commandButton value="Oui"
+                                     styleClass="modifier-btn confirm-yes"
+                                     action="#{boiteBean.deleteBoite}"
+                                     process="@this"
+                                     update=":boiteForm:boiteTable :boiteForm:messages"
+                                     oncomplete="PF('deleteBoiteRowDialog').hide()"/>
+                    <p:commandButton value="Annuler"
+                                     type="button"
+                                     styleClass="modifier-btn confirm-no"
+                                     onclick="PF('deleteBoiteRowDialog').hide()"/>
+                </div>
+            </p:confirmDialog>
+
+            <p:dialog header="Modifier emplacement boite"
+                      widgetVar="editBoiteDialog"
+                      modal="true"
+                      resizable="false"
+                      closable="true"
+                      appendTo="@(body)">
+                <h:form id="editBoiteForm">
+                    <div class="form-row-grid">
+                        <div class="form-row">
+                            <h:outputLabel for="editBoiteNo" value="Numero boite"/>
+                            <h:inputText id="editBoiteNo"
+                                         value="#{boiteBean.selectedEmplacement.boite}"
+                                         disabled="true"/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="editEtage" value="Etage"/>
+                            <h:inputText id="editEtage" value="#{boiteBean.editEtage}"/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="editSalle" value="Salle"/>
+                            <h:inputText id="editSalle" value="#{boiteBean.editSalle}"/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="editRayon" value="Rayon"/>
+                            <h:inputText id="editRayon" value="#{boiteBean.editRayon}"/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="editRangee" value="Rangee"/>
+                            <h:inputText id="editRangee" value="#{boiteBean.editRangee}"/>
+                        </div>
+                    </div>
+
+                    <div class="boite-dialog-actions">
+                        <p:commandButton value="Valider"
+                                         styleClass="boite-btn boite-add-btn"
+                                         action="#{boiteBean.updateEmplacement}"
+                                         process="@form"
+                                         update=":boiteForm:boiteTable :boiteForm:boiteInfoPanel :boiteForm:messages editBoiteForm"
+                                         oncomplete="if (!args.validationFailed) PF('editBoiteDialog').hide();"/>
+                        <p:commandButton value="Annuler"
+                                         type="button"
+                                         styleClass="boite-btn boite-delete-btn"
+                                         onclick="PF('editBoiteDialog').hide()"/>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Ajouter une boite"
+                      widgetVar="addBoiteDialog"
+                      modal="true"
+                      resizable="false"
+                      closable="true"
+                      appendTo="@(body)">
+                <h:form id="addBoiteForm">
+                    <div class="form-row-grid">
+                        <div class="form-row">
+                            <h:outputLabel for="etage" value="Etage"/>
+                            <h:inputText id="etage" value="#{boiteBean.etage}"/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="salle" value="Salle"/>
+                            <h:inputText id="salle" value="#{boiteBean.salle}"/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="rayon" value="Rayon"/>
+                            <h:inputText id="rayon" value="#{boiteBean.rayon}"/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="rangee" value="Rangee"/>
+                            <h:inputText id="rangee" value="#{boiteBean.rangee}"/>
+                        </div>
+
+                        <div class="form-row">
+                            <h:outputLabel for="newBoite" value="Numero boite"/>
+                            <h:inputText id="newBoite" value="#{boiteBean.newBoite}"/>
+                        </div>
+                    </div>
+
+                    <div class="boite-dialog-actions">
+                        <p:commandButton value="Ajouter"
+                                         styleClass="boite-btn boite-add-btn"
+                                         action="#{boiteBean.addBoite}"
+                                         process="@form"
+                                         update=":boiteForm:boiteTable :boiteForm:messages addBoiteForm"
+                                         oncomplete="if (!args.validationFailed) PF('addBoiteDialog').hide();"/>
+                        <p:commandButton value="Annuler"
+                                         type="button"
+                                         styleClass="boite-btn boite-delete-btn"
+                                         onclick="PF('addBoiteDialog').hide()"/>
+                    </div>
+                </h:form>
+            </p:dialog>
+        </ui:fragment>
+
+        <script type="text/javascript">
+            //<![CDATA[
+            (function () {
+                var logoUrl = "#{resource['images:btk.png']}";
+                var sessionFilialeLabel = "#{boiteBean.currentFilialeLabel}";
+
+                function esc(value) {
+                    var node = document.createElement('div');
+                    node.textContent = String(value == null ? '' : value);
+                    return node.innerHTML;
+                }
+
+                window.BTKBoitePrint = {
+                    printCard: function (boite, etage, salle, rayon, rangee) {
+                        var printWindow = window.open('', '_blank', 'width=1100,height=900');
+                        if (!printWindow) {
+                            window.alert("Impossible d'ouvrir la fenetre d'impression.");
+                            return;
+                        }
+
+                        var html = ''
+                            + '<!DOCTYPE html>'
+                            + '<html><head><meta charset="UTF-8"/>'
+                            + '<title>Impression boite ' + esc(boite) + '</title>'
+                            + '<style>'
+                            + '@page { size: 240mm 320mm; margin: 0; }'
+                            + 'html, body { width: 240mm; height: 320mm; margin: 0; padding: 0; background: #f7f9fc; font-family: Segoe UI, Arial, sans-serif; }'
+                            + 'body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }'
+                            + '.sheet { width: 240mm; height: 320mm; background: #fff; color: #163b57; box-sizing: border-box; display: flex; align-items: center; justify-content: center; overflow: hidden; }'
+                            + '.sheet-content { width: 87mm; height: 160mm; box-sizing: border-box; padding: 8mm; display: grid; grid-template-rows: auto auto 1fr; gap: 5mm; border: 0.5mm solid #cfddec; border-radius: 4mm; background: #fff; }'
+                            + '.header { display: flex; align-items: center; justify-content: flex-start; gap: 4mm; }'
+                            + '.logo-wrap { display: flex; align-items: center; gap: 4mm; }'
+                            + '.logo { width: 15mm; height: auto; object-fit: contain; }'
+                            + '.brand { font-size: 11pt; font-weight: 800; letter-spacing: .8px; color: #0f4f78; text-transform: uppercase; }'
+                            + '.subtitle { font-size: 7pt; color: #5c7890; margin-top: 1mm; }'
+                            + '.boite-title { padding: 5mm 4mm; border-radius: 3mm; background: linear-gradient(135deg, #eef7ff 0%, #e3f0fb 100%); border: 0.5mm solid #c8dff1; text-align: center; }'
+                            + '.boite-title .label { display: block; font-size: 8pt; letter-spacing: .8px; color: #55748d; text-transform: uppercase; margin-bottom: 2mm; font-weight: 700; }'
+                            + '.boite-title .value { display: block; font-size: 53pt; font-weight: 900; color: #0b4570; }'
+                            + '.section-block { display: grid; grid-template-rows: auto 1fr; gap: 4mm; }'
+                            + '.section-title { font-size: 8.5pt; font-weight: 800; color: #16527b; text-transform: uppercase; letter-spacing: .8px; }'
+                            + '.fields-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4mm; align-content: start; }'
+                            + '.field-card { min-height: 26mm; padding: 4mm; border-radius: 2.5mm; border: 0.35mm solid #d4e3ef; background: linear-gradient(180deg, #f9fcff 0%, #eef5fb 100%); box-sizing: border-box; }'
+                            + '.field-label { display: block; font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: #55748d; margin-bottom: 1.4mm; }'
+                            + '.field-value { display: block; font-size: 39pt; font-weight: 800; color: #173f5e; word-break: break-word; }'
+                            + '@media print { html, body { background: #fff; min-height: auto; } body { display: block; } .sheet { display: flex; align-items: center; justify-content: center; } }'
+                            + '</style></head><body>'
+                            + '<div class="sheet">'
+                            + '<div class="sheet-content">'
+                            + '<div class="header">'
+                            + '<div class="logo-wrap">'
+                            + '<img class="logo" src="' + esc(logoUrl) + '" alt="BTK logo"/>'
+                            + '<div><div class="brand">' + esc(sessionFilialeLabel) + '</div><div class="subtitle">Coordonnees de la boite d archive</div></div>'
+                            + '</div>'
+                            + '</div>'
+                            + '<div class="boite-title">'
+                            + '<span class="label">Boite num =</span>'
+                            + '<span class="value">' + esc(boite) + '</span>'
+                            + '</div>'
+                            + '<div class="section-block">'
+                            + '<div class="section-title">Emplacement</div>'
+                            + '<div class="fields-grid">'
+                            + '<div class="field-card"><span class="field-label">Etage</span><span class="field-value">' + esc(etage) + '</span></div>'
+                            + '<div class="field-card"><span class="field-label">Salle</span><span class="field-value">' + esc(salle) + '</span></div>'
+                            + '<div class="field-card"><span class="field-label">Rayon</span><span class="field-value">' + esc(rayon) + '</span></div>'
+                            + '<div class="field-card"><span class="field-label">Rangee</span><span class="field-value">' + esc(rangee) + '</span></div>'
+                            + '</div>'
+                            + '</div>'
+                            + '</div>'
+                            + '</div>'
+                            + '</body></html>';
+
+                        printWindow.document.open();
+                        printWindow.document.write(html);
+                        printWindow.document.close();
+
+                        printWindow.onload = function () {
+                            printWindow.focus();
+                            printWindow.print();
+                        };
+                    }
+                };
+            })();
+            //]]>
+        </script>
+
+    </ui:define>
+
+</ui:composition>

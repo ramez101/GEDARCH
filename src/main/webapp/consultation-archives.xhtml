@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Consultation dossier</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .consultation-result {
+                margin-top: 16px;
+            }
+
+            .consultation-search-actions {
+                padding-top: 22px;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .danger-icon-btn.ui-button.ui-widget {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #d34a4a;
+                background: linear-gradient(180deg, #da5656, #bf3434);
+                color: #fff;
+                width: 34px;
+                height: 34px;
+                min-width: 34px;
+                padding: 0;
+                border-radius: 999px;
+                font-weight: 700;
+                cursor: pointer;
+                box-shadow: 0 6px 16px rgba(191, 52, 52, .24);
+            }
+
+            .danger-icon-btn.ui-button.ui-widget .ui-button-icon-left,
+            .danger-icon-btn.ui-button.ui-widget .ui-icon,
+            .danger-icon-btn.ui-button.ui-widget .pi {
+                position: static;
+                margin: 0;
+                font-size: .82rem;
+            }
+
+            .danger-icon-btn.ui-button.ui-widget .ui-button-text {
+                display: none;
+            }
+
+            .danger-icon-btn.ui-button.ui-widget:hover,
+            .danger-icon-btn.ui-button.ui-widget:focus {
+                filter: brightness(1.04);
+                background: linear-gradient(180deg, #e06262, #c63f3f);
+                border-color: #cf4747;
+            }
+
+            .danger-icon-btn.ui-button.ui-widget:not(.ui-state-disabled) {
+                background: linear-gradient(180deg, #da5656, #bf3434);
+                border-color: #d34a4a;
+                color: #fff;
+            }
+
+            .consultation-result .form-section-title {
+                margin-bottom: 16px;
+            }
+
+            .consultation-result.consultation-empty input[readonly] {
+                background: #f1f6fb;
+            }
+
+            .consultation-result.consultation-ready input[readonly] {
+                background: #fff;
+            }
+
+            .consultation-bottom-actions {
+                margin-top: 22px;
+                display: flex;
+                justify-content: center;
+                gap: 12px;
+                flex-wrap: nowrap;
+            }
+
+            .consultation-action-btn.ui-button.ui-widget {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 152px;
+                min-width: 152px;
+                min-height: 36px;
+                padding: 0;
+                border-radius: 2px;
+                border: 1px solid #7ea6d3;
+                background: #fff;
+                color: #153b5a;
+                font-weight: 700;
+                cursor: pointer;
+                box-shadow: none;
+                transition: filter .12s ease, transform .12s ease;
+            }
+
+            .consultation-action-btn.ui-button.ui-widget .ui-button-text {
+                display: block;
+                padding: 7px 8px;
+                white-space: normal;
+                line-height: 1.1;
+                font-size: .73rem;
+                color: inherit;
+            }
+
+            .consultation-action-btn.ui-button.ui-widget .ui-icon {
+                display: none;
+            }
+
+            .consultation-action-btn.ui-button.ui-widget:not(.ui-state-disabled):hover,
+            .consultation-action-btn.ui-button.ui-widget:not(.ui-state-disabled):focus {
+                background: #f5f9ff;
+                border-color: #6794c8;
+                color: #0f3554;
+                transform: translateY(-1px);
+            }
+
+            .consultation-action-btn.ui-button.ui-widget.ui-state-disabled {
+                opacity: .55;
+                cursor: not-allowed;
+                background: #f5f7fa;
+                border-color: #c6d4e4;
+                color: #8aa0b6;
+            }
+
+            .doc-actions {
+                display: flex;
+                gap: 6px;
+                justify-content: center;
+            }
+
+            .doc-actions .ui-button.ui-widget.doc-action-icon {
+                width: 32px;
+                height: 32px;
+                min-width: 32px;
+                padding: 0;
+                border-radius: 6px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .doc-actions .ui-button.ui-widget.doc-action-icon .ui-button-text {
+                display: none;
+            }
+
+            .doc-actions .ui-button.ui-widget.doc-action-icon .ui-icon,
+            .doc-actions .ui-button.ui-widget.doc-action-icon .pi {
+                position: static;
+                margin: 0;
+                font-size: .95rem;
+            }
+
+            .history-table.ui-datatable .ui-datatable-tablewrapper {
+                margin-top: 8px;
+                border: 1px solid #dbe5ef;
+                border-radius: 10px;
+                overflow: hidden;
+                background: #fff;
+            }
+
+            .history-table.ui-datatable thead th {
+                background: #eef4fa;
+                color: #264c6d;
+                font-weight: 700;
+                padding: 10px 12px;
+                border: 0;
+            }
+
+            .history-table.ui-datatable tbody td {
+                padding: 11px 12px;
+                border-top: 1px solid #e7eef5;
+                color: #244a69;
+            }
+        </style>
+
+        <div class="container">
+            <div class="card">
+                <div class="card-title">Consultation dossier</div>
+                <h:form id="consultationForm" prependId="false">
+                    <p:defaultCommand target="searchArchivesBtn" />
+                    <p:messages id="messages" showSummary="false" showDetail="true" closable="true" />
+
+                    <div class="form-grid two-cols">
+                        <div class="form-row full" style="display: flex; gap: 12px; align-items: end; flex-wrap: wrap;">
+                            <div style="flex: 0 0 180px;">
+                                <h:outputLabel for="searchType" value="Recherche par"/>
+                                <h:selectOneMenu id="searchType"
+                                                 value="#{consultationArchivesBean.searchType}">
+                                    <f:selectItem itemLabel="Pin Client" itemValue="pin"/>
+                                    <f:selectItem itemLabel="Relation" itemValue="relation"/>
+                                    <p:ajax process="@this searchValueWrapper" update="searchValueWrapper"/>
+                                </h:selectOneMenu>
+                            </div>
+                            <h:panelGroup id="searchValueWrapper" layout="block" style="flex: 1 1 320px;">
+                                <h:outputLabel value="Valeur"/>
+                                <ui:fragment rendered="#{consultationArchivesBean.searchType ne 'relation'}">
+                                    <p:inputText id="searchValuePin"
+                                                 value="#{consultationArchivesBean.searchPinValue}"
+                                                 placeholder="Saisir valeur"
+                                                 autocomplete="off"
+                                                 style="width: 100%"/>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{consultationArchivesBean.searchType eq 'relation'}">
+                                    <p:autoComplete id="searchValueRelation"
+                                                    value="#{consultationArchivesBean.searchRelationValue}"
+                                                    completeMethod="#{consultationArchivesBean.completeRelation}"
+                                                    placeholder="Saisir relation"
+                                                    minQueryLength="2"
+                                                    queryDelay="250"
+                                                    dropdown="false"
+                                                    forceSelection="false"
+                                                    scrollHeight="200"
+                                                    style="width: 100%"/>
+                                </ui:fragment>
+                            </h:panelGroup>
+                            <div class="consultation-search-actions">
+                                <p:commandButton id="searchArchivesBtn"
+                                                 value="Rechercher"
+                                                 action="#{consultationArchivesBean.search}"
+                                                 process="@form"
+                                                 update="@form"/>
+                                <p:commandButton value=""
+                                 action="#{consultationArchivesBean.clear}"
+                                                 process="@this"
+                                                 update="@form"
+                                                 icon="pi pi-times"
+                                                 title="Clean"
+                                                 styleClass="danger-icon-btn"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section consultation-result #{consultationArchivesBean.resultLoaded ? 'consultation-ready' : 'consultation-empty'}">
+                        <div class="form-section-title">Informations archive</div>
+                        <div class="form-grid two-cols">
+                            <div class="form-row">
+                                <h:outputLabel for="portefeuille" value="Portefeuille"/>
+                                <h:inputText id="portefeuille" value="#{consultationArchivesBean.portefeuille}" readonly="true"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="pin" value="Pin Client"/>
+                                <h:inputText id="pin" value="#{consultationArchivesBean.pin}" readonly="true"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="relation" value="Relation"/>
+                                <h:inputText id="relation" value="#{consultationArchivesBean.relation}" readonly="true"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="charge" value="Chargé"/>
+                                <h:inputText id="charge" value="#{consultationArchivesBean.charge}" readonly="true"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="typeArchive" value="Type archive"/>
+                                <h:inputText id="typeArchive" value="#{consultationArchivesBean.typeArchive}" readonly="true"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="filiale" value="Filiale"/>
+                                <h:inputText id="filiale" value="#{consultationArchivesBean.filiale}" readonly="true"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="boite" value="Boite"/>
+                                <h:inputText id="boite" value="#{consultationArchivesBean.boite}" readonly="true"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="consultation-bottom-actions">
+                        <p:commandButton value="Documents scanes"
+                                         actionListener="#{consultationArchivesBean.loadScannedDocuments}"
+                                         process="@this"
+                                         update="messages scannedDocsContent"
+                                         oncomplete="PF('scannedDocsDialog').show();"
+                                         disabled="#{not consultationArchivesBean.resultLoaded}"
+                                         styleClass="consultation-action-btn"/>
+                        <p:commandButton value="Historique transmission dossier"
+                                         actionListener="#{consultationArchivesBean.loadTransmissionHistory}"
+                                         process="@this"
+                                         update="messages transmissionHistoryContent"
+                                         oncomplete="PF('transmissionHistoryDialog').show();"
+                                         disabled="#{not consultationArchivesBean.resultLoaded}"
+                                         styleClass="consultation-action-btn"/>
+                    </div>
+
+                    <p:dialog header="Archive introuvable"
+                              widgetVar="archiveNotFoundDialog"
+                              modal="true"
+                              resizable="false"
+                              closable="true"
+                              appendTo="@(body)">
+                        <h:outputText value="Le pin ou la relation saisi n'existe pas."/>
+                    </p:dialog>
+
+                    <p:dialog header="Documents scannes"
+                              widgetVar="scannedDocsDialog"
+                              modal="true"
+                              resizable="false"
+                              closable="true"
+                              width="980"
+                              appendTo="@(form)">
+                        <h:panelGroup id="scannedDocsContent" layout="block">
+                            <p:dataTable value="#{consultationArchivesBean.scannedDocuments}"
+                                         var="doc"
+                                         emptyMessage="Aucun document scanne pour ce client."
+                                         style="margin-top: 8px;">
+                                <p:column headerText="Nom document" style="width: 20%;">
+                                    <h:outputText value="#{doc.nomDocument}"/>
+                                </p:column>
+                                <p:column headerText="Copie" style="width: 10%;">
+                                    <h:outputText value="#{empty doc.copie ? '-' : doc.copie}"/>
+                                </p:column>
+                                <p:column headerText="Nombre" style="width: 10%;">
+                                    <h:outputText value="#{empty doc.nombre ? '-' : doc.nombre}"/>
+                                </p:column>
+                                <p:column headerText="Description" style="width: 28%;">
+                                    <h:outputText value="#{empty doc.description ? '-' : doc.description}"/>
+                                </p:column>
+                                <p:column headerText="Fichier" style="width: 16%;">
+                                    <h:outputText value="#{doc.document}"/>
+                                </p:column>
+                                <p:column headerText="Actions" style="width: 16%; text-align: center;">
+                                    <div class="doc-actions">
+                                        <p:commandButton value=""
+                                                         title="Visualiser"
+                                                         icon="pi pi-eye"
+                                                         action="#{consultationArchivesBean.viewDocument(doc)}"
+                                                         ajax="false"
+                                                         process="@this"
+                                                         onclick="var f=this.form; f.target='_blank'; setTimeout(function(){f.target='';}, 300);"
+                                                         styleClass="doc-action-icon"/>
+                                        <p:commandButton value=""
+                                                         title="Telecharger"
+                                                         icon="pi pi-download"
+                                                         action="#{consultationArchivesBean.downloadDocument(doc)}"
+                                                         ajax="false"
+                                                         process="@this"
+                                                         onclick="this.form.target='';"
+                                                         styleClass="doc-action-icon"/>
+                                    </div>
+                                </p:column>
+                            </p:dataTable>
+                        </h:panelGroup>
+                    </p:dialog>
+
+                    <p:dialog header="Historique transmission dossier"
+                              widgetVar="transmissionHistoryDialog"
+                              modal="true"
+                              resizable="false"
+                              closable="true"
+                              width="900"
+                              appendTo="@(form)">
+                        <h:panelGroup id="transmissionHistoryContent" layout="block">
+                            <p:dataTable value="#{consultationArchivesBean.transmissionHistory}"
+                                         var="history"
+                                         emptyMessage="Aucun historique de transmission pour ce dossier."
+                                         styleClass="history-table">
+                                <p:column headerText="Emetteur" style="width: 26%;">
+                                    <h:outputText value="#{empty history.emetteur ? '-' : history.emetteur}"/>
+                                </p:column>
+                                <p:column headerText="Recepteur" style="width: 26%;">
+                                    <h:outputText value="#{empty history.recepteur ? '-' : history.recepteur}"/>
+                                </p:column>
+                                <p:column headerText="Date sortie" style="width: 24%; text-align: center;">
+                                    <h:outputText value="#{history.dateSortie}" rendered="#{not empty history.dateSortie}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                    </h:outputText>
+                                    <h:outputText value="-" rendered="#{empty history.dateSortie}"/>
+                                </p:column>
+                                <p:column headerText="Date restitution" style="width: 24%; text-align: center;">
+                                    <h:outputText value="#{history.dateRestitution}" rendered="#{not empty history.dateRestitution}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                    </h:outputText>
+                                    <h:outputText value="-" rendered="#{empty history.dateRestitution}"/>
+                                </p:column>
+                            </p:dataTable>
+                        </h:panelGroup>
+                    </p:dialog>
+
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

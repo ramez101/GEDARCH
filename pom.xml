@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+ http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>jsf-primefaces-app</artifactId>
+  <version>1.0</version>
+  <packaging>war</packaging>
+  <name>jsf-primefaces-app-1.0</name>
+
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+
+    <!-- ── Jakarta EE 9.1 API (provided by server) ─────────────────── -->
+    <dependency>
+      <groupId>jakarta.platform</groupId>
+      <artifactId>jakarta.jakartaee-api</artifactId>
+      <version>9.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- ── PrimeFaces 13 (Jakarta) ──────────────────────────────────── -->
+    <dependency>
+      <groupId>org.primefaces</groupId>
+      <artifactId>primefaces</artifactId>
+      <version>13.0.0</version>
+      <classifier>jakarta</classifier>
+    </dependency>
+
+    <!-- ── Hibernate 6 (Jakarta namespace) ──────────────────────────── -->
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>6.2.7.Final</version>
+    </dependency>
+
+    <!-- ── Oracle JDBC Driver ───────────────────────────────────────── -->
+    <dependency>
+      <groupId>com.oracle.database.jdbc</groupId>
+      <artifactId>ojdbc11</artifactId>
+      <version>21.9.0.0</version>
+    </dependency>
+
+    <!-- PrimeFaces DataExporter dependencies -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>5.2.5</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.librepdf</groupId>
+      <artifactId>openpdf</artifactId>
+      <version>1.3.39</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <finalName>jsf-primefaces-app-1.0</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.3.2</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

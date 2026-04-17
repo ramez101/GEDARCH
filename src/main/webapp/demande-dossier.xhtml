@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Demande dossier</ui:define>
+
+    <ui:define name="content">
+        <div class="container">
+            <div class="card">
+                <div class="card-title">Transmission dossiers - Demande dossier</div>
+
+                <h:form id="demandeForm" prependId="false">
+                    <p:defaultCommand target="searchDemandeBtn"/>
+                    <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
+
+                    <div class="demande-shell">
+                        <div class="demande-search-line">
+                            <div class="form-row">
+                                <h:outputLabel for="searchType" value="Recherche par"/>
+                                <p:selectOneMenu id="searchType" value="#{demandeDossierBean.searchType}">
+                                    <f:selectItem itemLabel="PIN Client" itemValue="pin"/>
+                                    <f:selectItem itemLabel="Relation" itemValue="relation"/>
+                                </p:selectOneMenu>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="searchValue" value="PIN Client / Relation"/>
+                                <p:inputText id="searchValue"
+                                             value="#{demandeDossierBean.searchValue}"
+                                             maxlength="40"
+                                             placeholder="Saisir PIN ou RELATION"/>
+                            </div>
+
+                            <div class="demande-search-buttons">
+                                <p:commandButton id="searchDemandeBtn"
+                                                 icon="pi pi-search"
+                                                 title="Rechercher"
+                                                 action="#{demandeDossierBean.search}"
+                                                 process="@form"
+                                                 update="@form"
+                                                 styleClass="btn-primary btn-search-inline ui-button-icon-only"/>
+                                <p:commandButton
+                                                 icon="pi pi-times"
+                                                 title="Vider"
+                                                 action="#{demandeDossierBean.clear}"
+                                                 process="@this"
+                                                 update="@form"
+                                                 styleClass="ui-button-secondary btn-clear-compact ui-button-icon-only"/>
+                            </div>
+                        </div>
+
+                        <h:panelGroup rendered="#{demandeDossierBean.dossierLoaded}" layout="block" styleClass="demande-result">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="label">PIN Client</div>
+                                    <div class="value">#{demandeDossierBean.pin}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">Relation</div>
+                                    <div class="value">#{demandeDossierBean.relation}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">Boite</div>
+                                    <div class="value">#{demandeDossierBean.boite}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="label">Statut</div>
+                                    <div class="value">Pret pour envoi</div>
+                                </div>
+                            </div>
+
+                            <div class="form-grid two-cols" style="margin-top: 14px;">
+                                <div class="form-row full">
+                                    <h:outputLabel for="typeDemande" value="Type demande"/>
+                                    <p:selectOneMenu id="typeDemande" value="#{demandeDossierBean.typeDemande}" required="true">
+                                        <f:selectItem itemLabel="Demande dossier complet" itemValue="demande dossier complet"/>
+                                        <f:selectItem itemLabel="Demande document du dossier" itemValue="demande document du dossier"/>
+                                    </p:selectOneMenu>
+                                </div>
+                                <div class="form-row full">
+                                    <h:outputLabel for="commentaire" value="Justification"/>
+                                    <p:inputTextarea id="commentaire"
+                                                     value="#{demandeDossierBean.commentaire}"
+                                                     required="true"
+                                                     requiredMessage="La justification est obligatoire."
+                                                     maxlength="255"
+                                                     autoResize="false"
+                                                     rows="3"
+                                                     placeholder="Expliquer pourquoi vous allez prendre ce dossier"/>
+                                </div>
+                            </div>
+
+                            <div class="demande-actions">
+                                <p:commandButton value="Submit"
+                                                 action="#{demandeDossierBean.submit}"
+                                                 process="@form"
+                                                 update="@form"
+                                                 styleClass="btn-primary"/>
+                            </div>
+                        </h:panelGroup>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
