@@ -45,6 +45,34 @@
                 box-shadow: 0 6px 16px rgba(20, 109, 165, .22);
             }
 
+            .boite-add-trigger.ui-button.ui-widget {
+                min-width: 42px;
+                width: 42px;
+                height: 42px;
+                border-radius: 10px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .boite-add-trigger.ui-button.ui-widget .ui-button-text {
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-size: 1.45rem;
+                font-weight: 800;
+                line-height: 1;
+            }
+
+            .boite-add-trigger.ui-button.ui-widget:hover {
+                filter: brightness(1.03);
+            }
+
             .boite-delete-btn.ui-button.ui-widget {
                 border: 1px solid #e5b4b4;
                 background: #fff7f7;
@@ -93,7 +121,7 @@
             }
 
             .boite-row-delete.ui-button.ui-widget .ui-button-text {
-                display: block;
+                display: none;
                 padding: 0;
             }
 
@@ -146,6 +174,14 @@
 
             .boite-row-edit.ui-button.ui-widget .ui-button-text {
                 display: none;
+            }
+
+            .boite-row-actions {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                flex-wrap: nowrap;
             }
 
             .boite-info-grid {
@@ -284,16 +320,12 @@
                     <h:panelGroup rendered="#{loginBean.readOnlyBoiteMode}" layout="block" styleClass="boite-readonly-note">
                         Mode consultation : affichage seulement, sans ajout ni suppression.
                     </h:panelGroup>
-                    <h:panelGroup layout="block" styleClass="boite-readonly-note">
-                        Filiale active : #{boiteBean.currentFilialeLabel}
-                    </h:panelGroup>
-
                     <div class="boite-header">
-                        <div class="card-title">Boites</div>
+                        <div class="card-title">Gestion des boîtes</div>
                         <h:panelGroup layout="block" styleClass="boite-actions" rendered="#{loginBean.boiteManageAllowed}">
                             <p:commandButton type="button"
-                                             value="Ajouter"
-                                             styleClass="boite-btn boite-add-btn"
+                                             value="+"
+                                             styleClass="boite-btn boite-add-btn boite-add-trigger"
                                              onclick="PF('addBoiteDialog').show()"/>
                         </h:panelGroup>
                     </div>
@@ -308,7 +340,27 @@
                                  paginatorPosition="bottom"
                                  styleClass="boite-table"
                                  emptyMessage="Aucune boite trouvee.">
-                        <p:column headerText="Etage" sortBy="#{emp.etage}">
+                        <p:column headerText="Num&#176; Bo&#238;te"
+                                  sortBy="#{emp.boite}"
+                                  sortOrder="descending"
+                                  filterBy="#{emp.boite}"
+                                  filterMatchMode="contains">
+                            <h:outputText value="#{emp.boite}"/>
+                        </p:column>
+                        <p:column headerText="Date cr&#233;ation" sortBy="#{emp.dateAjout}">
+                            <ui:fragment rendered="#{not empty emp.dateAjout}">
+                                <h:outputText value="#{emp.dateAjout}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{empty emp.dateAjout}">
+                                <h:outputText value="-"/>
+                            </ui:fragment>
+                        </p:column>
+                        <p:column headerText="Cr&#233;er par" sortBy="#{emp.userCree}">
+                            <h:outputText value="#{empty emp.userCree ? '-' : emp.userCree}"/>
+                        </p:column>
+                        <p:column headerText="&#201;tage" sortBy="#{emp.etage}">
                             <h:outputText value="#{emp.etage}"/>
                         </p:column>
                         <p:column headerText="Salle" sortBy="#{emp.salle}">
@@ -317,55 +369,47 @@
                         <p:column headerText="Rayon" sortBy="#{emp.rayon}">
                             <h:outputText value="#{emp.rayon}"/>
                         </p:column>
-                        <p:column headerText="Rangee" sortBy="#{emp.rangee}">
+                        <p:column headerText="Rang&#233;e" sortBy="#{emp.rangee}">
                             <h:outputText value="#{emp.rangee}"/>
                         </p:column>
-                        <p:column headerText="Boite"
-                                  sortBy="#{emp.boite}"
-                                  sortOrder="descending"
-                                  filterBy="#{emp.boite}"
-                                  filterMatchMode="contains">
-                            <h:outputText value="#{emp.boite}"/>
-                        </p:column>
-                        <p:column headerText="Imprimer" style="width: 90px; text-align: center;">
-                            <p:commandButton type="button"
-                                             icon="pi pi-print"
-                                             title="Imprimer les coordonnees de la boite"
-                                             styleClass="boite-row-print ui-button-icon-only"
-                                             onclick="BTKBoitePrint.printCard(#{emp.boite}, #{emp.etage}, #{emp.salle}, #{emp.rayon}, #{emp.rangee});"/>
-                        </p:column>
-                        <p:column headerText="Visualiser" style="width: 90px; text-align: center;">
-                            <p:commandButton icon="pi pi-eye"
-                                             title="Visualiser les informations de creation et modification"
-                                             process="@this"
-                                             update=":boiteForm:boiteInfoPanel"
-                                             oncomplete="PF('boiteInfoDialog').show();"
-                                             styleClass="boite-row-view ui-button-icon-only">
-                                <f:setPropertyActionListener target="#{boiteBean.selectedEmplacement}" value="#{emp}"/>
-                            </p:commandButton>
-                        </p:column>
-                        <p:column headerText="Modifier" style="width: 90px; text-align: center;" rendered="#{loginBean.boiteManageAllowed}">
-                            <p:commandButton icon="pi pi-pencil"
-                                             title="Modifier l'emplacement de la boite"
-                                             process="@this"
-                                             action="#{boiteBean.prepareEditEmplacement}"
-                                             update=":editBoiteForm :boiteForm:messages"
-                                             oncomplete="if (!args.validationFailed) PF('editBoiteDialog').show();"
-                                             styleClass="boite-row-edit ui-button-icon-only">
-                                <f:setPropertyActionListener target="#{boiteBean.selectedEmplacement}" value="#{emp}"/>
-                            </p:commandButton>
-                        </p:column>
-                        <p:column headerText="Suppression" style="width: 90px; text-align: center;" rendered="#{loginBean.boiteManageAllowed}">
-                            <p:commandButton value="&#128465;"
-                                             styleClass="boite-row-delete"
-                                             process="@this"
-                                             oncomplete="PF('deleteBoiteRowDialog').show()">
-                                <f:setPropertyActionListener target="#{boiteBean.deleteBoite}" value="#{emp.boite}"/>
-                            </p:commandButton>
+                        <p:column headerText="Action" style="width: 180px; text-align: center;">
+                            <div class="boite-row-actions">
+                                <p:commandButton type="button"
+                                                 icon="pi pi-print"
+                                                 title="Imprimer les coordonnees de la boite"
+                                                 styleClass="boite-row-print ui-button-icon-only"
+                                                 onclick="BTKBoitePrint.printCard(#{emp.boite}, #{emp.etage}, #{emp.salle}, #{emp.rayon}, #{emp.rangee});"/>
+                                <p:commandButton icon="pi pi-eye"
+                                                 title="Visualiser les informations de la boite"
+                                                 process="@this"
+                                                 update=":boiteForm:boiteInfoPanel"
+                                                 oncomplete="PF('boiteInfoDialog').show();"
+                                                 styleClass="boite-row-view ui-button-icon-only">
+                                    <f:setPropertyActionListener target="#{boiteBean.selectedEmplacement}" value="#{emp}"/>
+                                </p:commandButton>
+                                <p:commandButton icon="pi pi-pencil"
+                                                 title="Modifier l'emplacement de la boite"
+                                                 process="@this"
+                                                 action="#{boiteBean.prepareEditEmplacement}"
+                                                 update=":editBoiteForm :boiteForm:messages"
+                                                 oncomplete="if (!args.validationFailed) PF('editBoiteDialog').show();"
+                                                 styleClass="boite-row-edit ui-button-icon-only"
+                                                 rendered="#{loginBean.boiteManageAllowed}">
+                                    <f:setPropertyActionListener target="#{boiteBean.selectedEmplacement}" value="#{emp}"/>
+                                </p:commandButton>
+                                <p:commandButton icon="pi pi-trash"
+                                                 styleClass="boite-row-delete ui-button-icon-only"
+                                                 title="Supprimer la boite"
+                                                 process="@this"
+                                                 oncomplete="PF('deleteBoiteRowDialog').show()"
+                                                 rendered="#{loginBean.boiteManageAllowed}">
+                                    <f:setPropertyActionListener target="#{boiteBean.deleteBoite}" value="#{emp.boite}"/>
+                                </p:commandButton>
+                            </div>
                         </p:column>
                     </p:dataTable>
 
-                    <p:dialog header="Informations de tracabilite"
+                    <p:dialog header="Informations de la boite"
                               widgetVar="boiteInfoDialog"
                               modal="true"
                               resizable="false"
@@ -376,7 +420,49 @@
                             <ui:fragment rendered="#{not empty boiteBean.selectedEmplacement}">
                                 <div class="boite-info-grid">
                                     <div class="boite-info-item">
-                                        <div class="boite-info-label">Date ajout</div>
+                                        <div class="boite-info-label">Num&#233;ro bo&#238;te</div>
+                                        <div class="boite-info-value">
+                                            <h:outputText value="#{empty boiteBean.selectedEmplacement.boite ? '-' : boiteBean.selectedEmplacement.boite}"/>
+                                        </div>
+                                    </div>
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">ID emplacement</div>
+                                        <div class="boite-info-value">
+                                            <h:outputText value="#{empty boiteBean.selectedEmplacement.idEmplacement ? '-' : boiteBean.selectedEmplacement.idEmplacement}"/>
+                                        </div>
+                                    </div>
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">Filiale</div>
+                                        <div class="boite-info-value">
+                                            <h:outputText value="#{empty boiteBean.selectedEmplacement.filiale ? '-' : boiteBean.selectedEmplacement.filiale}"/>
+                                        </div>
+                                    </div>
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">&#201;tage</div>
+                                        <div class="boite-info-value">
+                                            <h:outputText value="#{empty boiteBean.selectedEmplacement.etage ? '-' : boiteBean.selectedEmplacement.etage}"/>
+                                        </div>
+                                    </div>
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">Salle</div>
+                                        <div class="boite-info-value">
+                                            <h:outputText value="#{empty boiteBean.selectedEmplacement.salle ? '-' : boiteBean.selectedEmplacement.salle}"/>
+                                        </div>
+                                    </div>
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">Rayon</div>
+                                        <div class="boite-info-value">
+                                            <h:outputText value="#{empty boiteBean.selectedEmplacement.rayon ? '-' : boiteBean.selectedEmplacement.rayon}"/>
+                                        </div>
+                                    </div>
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">Rang&#233;e</div>
+                                        <div class="boite-info-value">
+                                            <h:outputText value="#{empty boiteBean.selectedEmplacement.rangee ? '-' : boiteBean.selectedEmplacement.rangee}"/>
+                                        </div>
+                                    </div>
+                                    <div class="boite-info-item">
+                                        <div class="boite-info-label">Date cr&#233;ation</div>
                                         <div class="boite-info-value">
                                             <ui:fragment rendered="#{not empty boiteBean.selectedEmplacement.dateAjout}">
                                                 <h:outputText value="#{boiteBean.selectedEmplacement.dateAjout}">
@@ -402,13 +488,13 @@
                                         </div>
                                     </div>
                                     <div class="boite-info-item">
-                                        <div class="boite-info-label">User cree</div>
+                                        <div class="boite-info-label">Cr&#233;&#233; par</div>
                                         <div class="boite-info-value">
                                             <h:outputText value="#{empty boiteBean.selectedEmplacement.userCree ? '-' : boiteBean.selectedEmplacement.userCree}"/>
                                         </div>
                                     </div>
                                     <div class="boite-info-item">
-                                        <div class="boite-info-label">User modifie</div>
+                                        <div class="boite-info-label">Modifi&#233; par</div>
                                         <div class="boite-info-value">
                                             <h:outputText value="#{empty boiteBean.selectedEmplacement.userModifie ? '-' : boiteBean.selectedEmplacement.userModifie}"/>
                                         </div>
@@ -457,14 +543,14 @@
                 <h:form id="editBoiteForm">
                     <div class="form-row-grid">
                         <div class="form-row">
-                            <h:outputLabel for="editBoiteNo" value="Numero boite"/>
+                            <h:outputLabel for="editBoiteNo" value="Numéro boîte"/>
                             <h:inputText id="editBoiteNo"
                                          value="#{boiteBean.selectedEmplacement.boite}"
                                          disabled="true"/>
                         </div>
 
                         <div class="form-row">
-                            <h:outputLabel for="editEtage" value="Etage"/>
+                            <h:outputLabel for="editEtage" value="Étage"/>
                             <h:inputText id="editEtage" value="#{boiteBean.editEtage}"/>
                         </div>
 
@@ -479,7 +565,7 @@
                         </div>
 
                         <div class="form-row">
-                            <h:outputLabel for="editRangee" value="Rangee"/>
+                            <h:outputLabel for="editRangee" value="Rangée"/>
                             <h:inputText id="editRangee" value="#{boiteBean.editRangee}"/>
                         </div>
                     </div>
@@ -499,7 +585,7 @@
                 </h:form>
             </p:dialog>
 
-            <p:dialog header="Ajouter une boite"
+            <p:dialog header="Ajouter une boîte"
                       widgetVar="addBoiteDialog"
                       modal="true"
                       resizable="false"
@@ -508,8 +594,19 @@
                 <h:form id="addBoiteForm">
                     <div class="form-row-grid">
                         <div class="form-row">
-                            <h:outputLabel for="etage" value="Etage"/>
-                            <h:inputText id="etage" value="#{boiteBean.etage}"/>
+                            <h:outputLabel for="etage" value="Étage"/>
+                            <h:selectOneMenu id="etage" value="#{boiteBean.etage}">
+                                <f:selectItem itemLabel="0" itemValue="0"/>
+                                <f:selectItem itemLabel="1" itemValue="1"/>
+                                <f:selectItem itemLabel="2" itemValue="2"/>
+                                <f:selectItem itemLabel="3" itemValue="3"/>
+                                <f:selectItem itemLabel="4" itemValue="4"/>
+                                <f:selectItem itemLabel="5" itemValue="5"/>
+                                <f:selectItem itemLabel="6" itemValue="6"/>
+                                <f:selectItem itemLabel="7" itemValue="7"/>
+                                <f:selectItem itemLabel="8" itemValue="8"/>
+                                <f:selectItem itemLabel="9" itemValue="9"/>
+                            </h:selectOneMenu>
                         </div>
 
                         <div class="form-row">
@@ -523,12 +620,12 @@
                         </div>
 
                         <div class="form-row">
-                            <h:outputLabel for="rangee" value="Rangee"/>
+                            <h:outputLabel for="rangee" value="Rangée"/>
                             <h:inputText id="rangee" value="#{boiteBean.rangee}"/>
                         </div>
 
                         <div class="form-row">
-                            <h:outputLabel for="newBoite" value="Numero boite"/>
+                            <h:outputLabel for="newBoite" value="Numéro boite"/>
                             <h:inputText id="newBoite" value="#{boiteBean.newBoite}"/>
                         </div>
                     </div>
@@ -610,10 +707,10 @@
                             + '<div class="section-block">'
                             + '<div class="section-title">Emplacement</div>'
                             + '<div class="fields-grid">'
-                            + '<div class="field-card"><span class="field-label">Etage</span><span class="field-value">' + esc(etage) + '</span></div>'
+                            + '<div class="field-card"><span class="field-label">Étage</span><span class="field-value">' + esc(etage) + '</span></div>'
                             + '<div class="field-card"><span class="field-label">Salle</span><span class="field-value">' + esc(salle) + '</span></div>'
                             + '<div class="field-card"><span class="field-label">Rayon</span><span class="field-value">' + esc(rayon) + '</span></div>'
-                            + '<div class="field-card"><span class="field-label">Rangee</span><span class="field-value">' + esc(rangee) + '</span></div>'
+                            + '<div class="field-card"><span class="field-label">Rangée</span><span class="field-value">' + esc(rangee) + '</span></div>'
                             + '</div>'
                             + '</div>'
                             + '</div>'

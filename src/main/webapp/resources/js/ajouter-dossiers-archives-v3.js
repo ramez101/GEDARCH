@@ -47,6 +47,39 @@
         return dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + min;
     }
 
+    function btkDocsLayout() {
+        var body = btkGetEl('docsBody');
+        if (!body) {
+            return 'legacy';
+        }
+        return body.getAttribute('data-layout') || 'legacy';
+    }
+
+    function btkResolveCreator() {
+        var body = btkGetEl('docsBody');
+        if (body) {
+            var createdBy = body.getAttribute('data-created-by');
+            if (createdBy) {
+                return createdBy;
+            }
+        }
+        if (window.BTKCurrentDocumentCreator) {
+            return String(window.BTKCurrentDocumentCreator);
+        }
+        return 'unknown';
+    }
+
+    function btkGetDocFileInput(doc) {
+        if (!doc || !doc.fileKey) {
+            return null;
+        }
+        var filesContainer = btkGetEl('docsFilesContainer');
+        if (!filesContainer) {
+            return null;
+        }
+        return filesContainer.querySelector('[name="' + doc.fileKey + '"]');
+    }
+
     function btkOpenUploadDialog(btn) {
         if (!btn) {
             return false;
@@ -72,16 +105,16 @@
             copyInput.selectedIndex = 0;
         }
         if (nombreInput) {
-            nombreInput.value = "";
+            nombreInput.value = '';
         }
         if (descInput) {
-            descInput.value = "";
+            descInput.value = '';
         }
         if (fileInput) {
-            fileInput.value = "";
+            fileInput.value = '';
         }
         if (fileNameInput) {
-            fileNameInput.value = "";
+            fileNameInput.value = '';
         }
 
         btkShowUploadDialog();
@@ -226,6 +259,8 @@
         btkDocs().push({
             label: docLabel,
             dateAjout: btkCurrentDateTime(),
+            dateCreation: btkCurrentDateTime(),
+            createdBy: btkResolveCreator(),
             copie: copie,
             nombre: nombre,
             desc: desc,
@@ -272,26 +307,120 @@
             return;
         }
 
-        var payload = btkGetEl('docsPayload');
+        var layout = btkDocsLayout();
         if (!docs.length) {
-            body.innerHTML = '<tr id="docsEmptyRow"><td colspan="7" class="doc-empty">Aucun document ajoute.</td></tr>';
+            var colspan = layout === 'actions' ? 4 : 7;
+            body.innerHTML = '<tr id="docsEmptyRow"><td colspan="' + colspan + '" class="doc-empty">Aucun document ajouté.</td></tr>';
             btkSyncDocsPayload();
             return;
         }
 
-        body.innerHTML = docs.map(function (doc, i) {
-            return '<tr>' +
-                '<td>' + btkEscapeHtml(doc.label || '-') + '</td>' +
-                '<td>' + btkEscapeHtml(doc.dateAjout || '-') + '</td>' +
-                '<td>' + btkEscapeHtml(doc.copie || '-') + '</td>' +
-                '<td>' + btkEscapeHtml(doc.nombre || '-') + '</td>' +
-                '<td>' + btkEscapeHtml(doc.desc || '-') + '</td>' +
-                '<td>' + btkEscapeHtml(doc.file || '-') + '</td>' +
-                '<td><button type="button" class="doc-delete" title="Supprimer" onclick="btkRemoveDoc(' + i + ')">🗑</button></td>' +
-                '</tr>';
-        }).join('');
+        if (layout === 'actions') {
+            body.innerHTML = docs.map(function (doc, i) {
+                return '<tr>' +
+                    '<td>' + btkEscapeHtml(doc.file || doc.label || '-') + '</td>' +
+                    '<td>' + btkEscapeHtml(doc.dateCreation || doc.dateAjout || '-') + '</td>' +
+                    '<td>' + btkEscapeHtml(doc.createdBy || '-') + '</td>' +
+                    '<td><div class="doc-action-buttons">' +
+                    '<button type="button" class="doc-action-btn" title="Télécharger" onclick="return btkDownloadDoc(' + i + ')">&#128229;</button>' +
+                    '<button type="button" class="doc-action-btn" title="Visualiser" onclick="return btkShowDocInfo(' + i + ')">&#128065;</button>' +
+                    '</div></td>' +
+                    '</tr>';
+            }).join('');
+        } else {
+            body.innerHTML = docs.map(function (doc, i) {
+                return '<tr>' +
+                    '<td>' + btkEscapeHtml(doc.label || '-') + '</td>' +
+                    '<td>' + btkEscapeHtml(doc.dateAjout || '-') + '</td>' +
+                    '<td>' + btkEscapeHtml(doc.copie || '-') + '</td>' +
+                    '<td>' + btkEscapeHtml(doc.nombre || '-') + '</td>' +
+                    '<td>' + btkEscapeHtml(doc.desc || '-') + '</td>' +
+                    '<td>' + btkEscapeHtml(doc.file || '-') + '</td>' +
+                    '<td><button type="button" class="doc-delete" title="Supprimer" onclick="btkRemoveDoc(' + i + ')">&#128465;</button></td>' +
+                    '</tr>';
+            }).join('');
+        }
 
         btkSyncDocsPayload();
+    }
+
+    function btkDownloadDoc(index) {
+        var docs = btkDocs();
+        if (index < 0 || index >= docs.length) {
+            return false;
+        }
+
+        var doc = docs[index];
+        var input = btkGetDocFileInput(doc);
+        if (!input || !input.files || !input.files.length) {
+            window.alert('Fichier introuvable pour ce document.');
+            return false;
+        }
+
+        var file = input.files[0];
+        var url = URL.createObjectURL(file);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = doc.file || file.name || 'document';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () {
+            URL.revokeObjectURL(url);
+        }, 1000);
+        return false;
+    }
+
+    function btkSetInfoValue(id, value) {
+        var node = btkGetEl(id);
+        if (node) {
+            node.textContent = value == null || value === '' ? '-' : String(value);
+        }
+    }
+
+    function btkShowDocInfo(index) {
+        var docs = btkDocs();
+        if (index < 0 || index >= docs.length) {
+            return false;
+        }
+
+        var doc = docs[index];
+        btkSetInfoValue('docInfoNomDocument', doc.label || doc.file || '-');
+        btkSetInfoValue('docInfoCopie', doc.copie || '-');
+        btkSetInfoValue('docInfoNombreCopies', doc.nombre || '-');
+        btkSetInfoValue('docInfoDescription', doc.desc || '-');
+
+        var overlay = btkGetEl('docInfoOverlay');
+        if (overlay) {
+            overlay.classList.add('is-open');
+            return false;
+        }
+
+        window.alert(
+            'Nom du document : ' + (doc.label || doc.file || '-') + '\n' +
+            'Copie: ' + (doc.copie || '-') + '\n' +
+            'Nombre de copies: ' + (doc.nombre || '-') + '\n' +
+            'Description: ' + (doc.desc || '-')
+        );
+        return false;
+    }
+
+    function btkCloseDocInfoDialog() {
+        var overlay = btkGetEl('docInfoOverlay');
+        if (overlay) {
+            overlay.classList.remove('is-open');
+        }
+        return false;
+    }
+
+    function btkDocInfoOverlayClick(event) {
+        if (!event) {
+            return false;
+        }
+        if (event.target === btkGetEl('docInfoOverlay')) {
+            return btkCloseDocInfoDialog();
+        }
+        return false;
     }
 
     function btkRemoveDoc(index) {
@@ -326,6 +455,10 @@
     window.btkSyncDocsPayload = btkSyncDocsPayload;
     window.btkConfirmDialog = btkConfirmDialog;
     window.btkHandleFormSubmit = btkHandleFormSubmit;
+    window.btkDownloadDoc = btkDownloadDoc;
+    window.btkShowDocInfo = btkShowDocInfo;
+    window.btkCloseDocInfoDialog = btkCloseDocInfoDialog;
+    window.btkDocInfoOverlayClick = btkDocInfoOverlayClick;
     window.btkRemoveDoc = btkRemoveDoc;
 
     document.addEventListener('keydown', btkHandleDialogKeydown, true);

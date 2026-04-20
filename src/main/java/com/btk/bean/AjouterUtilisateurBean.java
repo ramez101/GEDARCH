@@ -62,20 +62,20 @@ public class AjouterUtilisateurBean implements Serializable {
         }
 
         if (!isAllowedPuti(cleanPuti)) {
-            addError("PUTI doit etre Bank ou Finance.");
+            addError("PUTI doit être Bank ou Finance.");
             markValidationFailed();
             return;
         }
 
         if (!isAllowedRole(cleanRole)) {
-            addError("ROLE doit etre admin, Super_admin ou Consultation.");
+            addError("ROLE doit être admin, Super_admin ou Consultation.");
             markValidationFailed();
             return;
         }
 
         if (cleanCuti.length() > 24 || cleanUnix.length() > 20 || cleanLib.length() > 20
                 || cleanPuti.length() > 20 || cleanAge.length() > 8 || cleanRole.length() > 30) {
-            addError("Verifier les longueurs des champs (CUTI 24, UNIX 20, LIB 20, PUTI 20, AGE 8, ROLE 30).");
+            addError("Vérifier les longueurs des champs (CUTI 24, UNIX 20, LIB 20, PUTI 20, AGE 8, ROLE 30).");
             markValidationFailed();
             return;
         }
@@ -88,7 +88,7 @@ public class AjouterUtilisateurBean implements Serializable {
                     .setParameter(1, cleanCuti)
                     .getSingleResult();
             if (count != null && count.longValue() > 0) {
-                addError("Ce CUTI existe deja.");
+                addError("Ce CUTI existe déjà.");
                 markValidationFailed();
                 return;
             }
@@ -111,7 +111,7 @@ public class AjouterUtilisateurBean implements Serializable {
             utx.commit();
             txStarted = false;
 
-            addInfo("Utilisateur ajoute avec succes.");
+            addInfo("Utilisateur ajouté avec succès.");
             clear();
         } catch (NotSupportedException | SystemException | RollbackException
                  | HeuristicMixedException | HeuristicRollbackException e) {
@@ -169,7 +169,7 @@ public class AjouterUtilisateurBean implements Serializable {
                 modAge = null;
                 modRole = null;
                 modResultLoaded = false;
-                addError("Aucun utilisateur trouve.");
+                addError("Aucun utilisateur trouvé.");
                 markValidationFailed();
                 return;
             }
@@ -196,7 +196,7 @@ public class AjouterUtilisateurBean implements Serializable {
             modRole = found.getRole();
             modResultLoaded = true;
 
-            addInfo("Utilisateur charge. Vous pouvez modifier puis valider.");
+            addInfo("Utilisateur chargé. Vous pouvez modifier puis valider.");
         } catch (RuntimeException e) {
             modCuti = null;
             modUnix = null;
@@ -234,20 +234,20 @@ public class AjouterUtilisateurBean implements Serializable {
         }
 
         if (!isAllowedPuti(cleanPuti)) {
-            addError("PUTI doit etre Bank ou Finance.");
+            addError("PUTI doit être Bank ou Finance.");
             markValidationFailed();
             return;
         }
 
         if (!isAllowedRole(cleanRole)) {
-            addError("ROLE doit etre admin, Super_admin ou Consultation.");
+            addError("ROLE doit être admin, Super_admin ou Consultation.");
             markValidationFailed();
             return;
         }
 
         if (cleanCuti.length() > 24 || cleanUnix.length() > 20 || cleanLib.length() > 20
                 || cleanPuti.length() > 20 || cleanAge.length() > 8 || cleanRole.length() > 30) {
-            addError("Verifier les longueurs des champs (CUTI 24, UNIX 20, LIB 20, PUTI 20, AGE 8, ROLE 30).");
+            addError("Vérifier les longueurs des champs (CUTI 24, UNIX 20, LIB 20, PUTI 20, AGE 8, ROLE 30).");
             markValidationFailed();
             return;
         }
@@ -260,7 +260,7 @@ public class AjouterUtilisateurBean implements Serializable {
                     .setParameter(1, cleanCuti)
                     .getSingleResult();
             if (count == null || count.longValue() == 0) {
-                addError("Aucun utilisateur trouve avec ce CUTI.");
+                addError("Aucun utilisateur trouvé avec ce CUTI.");
                 markValidationFailed();
                 return;
             }
@@ -275,7 +275,7 @@ public class AjouterUtilisateurBean implements Serializable {
                     try { utx.rollback(); } catch (Exception ignored) {}
                     txStarted = false;
                 }
-                addError("Aucun utilisateur trouve avec ce CUTI.");
+                addError("Aucun utilisateur trouvé avec ce CUTI.");
                 markValidationFailed();
                 return;
             }
@@ -292,7 +292,7 @@ public class AjouterUtilisateurBean implements Serializable {
             utx.commit();
             txStarted = false;
 
-            addInfo("Utilisateur modifie avec succes.");
+            addInfo("Utilisateur modifié avec succès.");
             clearModification();
         } catch (NotSupportedException | SystemException | RollbackException
                  | HeuristicMixedException | HeuristicRollbackException e) {

@@ -132,11 +132,11 @@ public class SuiviDossiersBean implements Serializable {
         );
 
         if (sent == null) {
-            addWarn("Impossible d'envoyer le rappel: emetteur introuvable.");
+            addWarn("Impossible d'envoyer le rappel : émetteur introuvable.");
             return;
         }
 
-        addInfo("Rappel envoye a l'utilisateur " + row.getEmetteur() + " pour le dossier PIN " + row.getPin() + ".");
+        addInfo("Rappel envoyé à l'utilisateur " + row.getEmetteur() + " pour le dossier PIN " + row.getPin() + ".");
     }
 
     public long getTotalCount() {

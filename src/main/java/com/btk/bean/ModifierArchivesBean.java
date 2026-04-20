@@ -34,6 +34,7 @@ import org.primefaces.PrimeFaces;
 public class ModifierArchivesBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final String RELATION_SUGGESTION_SEPARATOR = " | ";
 
     private static EntityManagerFactory emf;
 
@@ -69,14 +70,15 @@ public class ModifierArchivesBean implements Serializable {
     public void search() {
         clearResult();
 
-        if (searchValue == null || searchValue.isBlank()) {
+        boolean searchByRelation = "relation".equalsIgnoreCase(searchType);
+        String effectiveSearchValue = searchByRelation ? extractRelationSearchTerm(searchValue) : searchValue;
+        if (effectiveSearchValue == null || effectiveSearchValue.isBlank()) {
             addWarn("Veuillez saisir un pin ou une relation.");
             return;
         }
 
         EntityManager em = getEMF().createEntityManager();
         try {
-            boolean searchByRelation = "relation".equalsIgnoreCase(searchType);
             String searchedField = searchByRelation ? "relation" : "pin";
 
             List<ArchDossier> rows = em.createQuery(
@@ -86,7 +88,7 @@ public class ModifierArchivesBean implements Serializable {
                                     "or (d.filiale is null and lower(trim(d.idFiliale)) = :legacyFiliale)) " +
                                     "order by d.idDossier",
                             ArchDossier.class)
-                    .setParameter("value", normalizeSearchValue(searchValue))
+                    .setParameter("value", normalizeSearchValue(effectiveSearchValue))
                     .setParameter("filiale", resolveSessionFiliale())
                     .setParameter("legacyFiliale", resolveSessionLegacyFiliale())
                     .setMaxResults(1)
@@ -150,7 +152,7 @@ public class ModifierArchivesBean implements Serializable {
                         .setParameter("legacyFiliale", sessionLegacyFiliale)
                         .getSingleResult();
                 if (existing != null && existing > 0) {
-                    addWarn("Pin deja utilise dans cette filiale.");
+                    addWarn("PIN déjà utilisé dans cette filiale.");
                     markValidationFailed();
                     return;
                 }
@@ -189,7 +191,7 @@ public class ModifierArchivesBean implements Serializable {
             utx.commit();
             txStarted = false;
 
-            addInfo("Modification enregistree.");
+            addInfo("Modification enregistrée.");
             clear();
         } catch (NotSupportedException | SystemException | RollbackException
                  | HeuristicMixedException | HeuristicRollbackException e) {
@@ -234,6 +236,31 @@ public class ModifierArchivesBean implements Serializable {
         return value == null ? null : value.trim().toUpperCase(Locale.ROOT);
     }
 
+    private String extractRelationSearchTerm(String value) {
+        if (value == null) {
+            return null;
+        }
+        String clean = value.trim();
+        if (clean.isBlank()) {
+            return clean;
+        }
+        int separatorIndex = clean.indexOf(RELATION_SUGGESTION_SEPARATOR);
+        if (separatorIndex < 0) {
+            return clean;
+        }
+        String extracted = clean.substring(separatorIndex + RELATION_SUGGESTION_SEPARATOR.length()).trim();
+        return extracted.isBlank() ? clean : extracted;
+    }
+
+    private String formatRelationSuggestion(String pinValue, String relationValue) {
+        String cleanPin = pinValue == null ? "" : pinValue.trim();
+        String cleanRelation = relationValue == null ? "" : relationValue.trim();
+        if (cleanPin.isBlank()) {
+            return cleanRelation;
+        }
+        return cleanPin + RELATION_SUGGESTION_SEPARATOR + cleanRelation;
+    }
+
     public List<Integer> completeBoite(String query) {
         if (boites == null || boites.isEmpty()) {
             return Collections.emptyList();
@@ -256,9 +283,47 @@ public class ModifierArchivesBean implements Serializable {
         return result;
     }
 
+    public List<String> completeRelation(String query) {
+        if (!"relation".equalsIgnoreCase(searchType) || query == null || query.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        EntityManager em = getEMF().createEntityManager();
+        try {
+            List<Object[]> rows = em.createQuery(
+                            "select distinct d.pin, d.relation from " + ArchDossier.class.getSimpleName() + " d " +
+                                    "where (upper(d.relation) like :query or upper(d.pin) like :query) " +
+                                    "and (lower(trim(d.filiale)) = :filiale " +
+                                    "or (d.filiale is null and lower(trim(d.idFiliale)) = :legacyFiliale)) " +
+                                    "order by d.pin, d.relation",
+                            Object[].class)
+                    .setParameter("query", "%" + query.trim().toUpperCase(Locale.ROOT) + "%")
+                    .setParameter("filiale", resolveSessionFiliale())
+                    .setParameter("legacyFiliale", resolveSessionLegacyFiliale())
+                    .setMaxResults(20)
+                    .getResultList();
+
+            List<String> suggestions = new ArrayList<>();
+            for (Object[] row : rows) {
+                if (row == null || row.length < 2) {
+                    continue;
+                }
+                String pinValue = row[0] == null ? "" : String.valueOf(row[0]).trim();
+                String relationValue = row[1] == null ? "" : String.valueOf(row[1]).trim();
+                if (relationValue.isBlank()) {
+                    continue;
+                }
+                suggestions.add(formatRelationSuggestion(pinValue, relationValue));
+            }
+            return suggestions;
+        } finally {
+            em.close();
+        }
+    }
+
     public void addBoiteSelection() {
         if (boite == null) {
-            addWarn("Saisir un numero de boite avant d'ajouter.");
+            addWarn("Saisir un numéro de boite avant d'ajouter.");
             markValidationFailed();
             return;
         }
@@ -270,7 +335,7 @@ public class ModifierArchivesBean implements Serializable {
         }
 
         if (selectedBoites.contains(boite)) {
-            addWarn("La boite " + boite + " est deja associee.");
+            addWarn("La boite " + boite + " est déjà associée.");
             boite = null;
             markValidationFailed();
             return;
@@ -278,7 +343,7 @@ public class ModifierArchivesBean implements Serializable {
 
         selectedBoites.add(boite);
         selectedBoites = new ArrayList<>(DossierEmpUtil.normalizeBoites(selectedBoites));
-        addInfo("Boite " + boite + " ajoutee.");
+        addInfo("Boite " + boite + " ajoutée.");
         boite = null;
     }
 
@@ -288,7 +353,7 @@ public class ModifierArchivesBean implements Serializable {
         }
 
         selectedBoites.remove(boiteToRemove);
-        addInfo("Boite " + boiteToRemove + " retiree.");
+        addInfo("Boite " + boiteToRemove + " retirée.");
         boiteToRemove = null;
     }
 

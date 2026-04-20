@@ -46,6 +46,7 @@ public class AjoutArchivesBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final Path DOCUMENTS_ROOT = Paths.get("C:\\Documents_Archives");
+    private static final String RELATION_SUGGESTION_SEPARATOR = " | ";
 
     private static EntityManagerFactory emf;
 
@@ -134,7 +135,7 @@ public class AjoutArchivesBean implements Serializable {
 
             if (!hasAdds && !hasDeletes) {
                 FacesContext.getCurrentInstance().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_WARN, "Aucune modification a confirmer.", null));
+                        new FacesMessage(FacesMessage.SEVERITY_WARN, "Aucune modification à confirmer.", null));
                 return;
             }
 
@@ -144,7 +145,7 @@ public class AjoutArchivesBean implements Serializable {
             }
             if (hasAdds && parts.isEmpty()) {
                 FacesContext.getCurrentInstance().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_WARN, "Aucun fichier recu.", null));
+                        new FacesMessage(FacesMessage.SEVERITY_WARN, "Aucun fichier reçu.", null));
                 return;
             }
 
@@ -224,7 +225,7 @@ public class AjoutArchivesBean implements Serializable {
 
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO,
-                            "Mise a jour terminee. Ajoutes: " + savedCount + " | Supprimes: " + deletedCount + ".", null));
+                            "Mise à jour terminée. Ajoutés : " + savedCount + " | Supprimés : " + deletedCount + ".", null));
         } catch (Exception e) {
             try {
                 if (utx != null) {
@@ -234,7 +235,7 @@ public class AjoutArchivesBean implements Serializable {
 
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                            "Erreur mise a jour documents : " + e.getMessage(), null));
+                            "Erreur de mise à jour des documents : " + e.getMessage(), null));
         } finally {
             em.close();
         }
@@ -253,7 +254,7 @@ public class AjoutArchivesBean implements Serializable {
         }
         PrimeFaces.current().executeScript("window.BTKUploadState = {docs: [], counter: 0}; if (window.btkRenderDocs) { window.btkRenderDocs(); }");
         FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO, "Modifications annulees.", null));
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Modifications annulées.", null));
     }
 
     public void clear() {
@@ -289,7 +290,7 @@ public class AjoutArchivesBean implements Serializable {
 
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO,
-                        "Document marque pour suppression. Cliquez Confirmer pour valider.", null));
+                        "Document marqué pour suppression. Cliquez sur Confirmer pour valider.", null));
     }
 
     private void cleanupDeletedFile(PendingDelete pendingDelete) {
@@ -319,18 +320,32 @@ public class AjoutArchivesBean implements Serializable {
         }
         EntityManager em = getEMF().createEntityManager();
         try {
-            return em.createQuery(
-                            "select distinct d.relation from " + ArchDossier.class.getSimpleName() + " d " +
-                                    "where upper(d.relation) like :q " +
+            List<Object[]> rows = em.createQuery(
+                            "select distinct d.pin, d.relation from " + ArchDossier.class.getSimpleName() + " d " +
+                                    "where (upper(d.relation) like :q or upper(d.pin) like :q) " +
                                     "and (lower(trim(d.filiale)) = :filiale " +
                                     "or (d.filiale is null and lower(trim(d.idFiliale)) = :legacyFiliale)) " +
-                                    "order by d.relation",
-                            String.class)
+                                    "order by d.pin, d.relation",
+                            Object[].class)
                     .setParameter("q", "%" + query.trim().toUpperCase(Locale.ROOT) + "%")
                     .setParameter("filiale", resolveSessionFiliale())
                     .setParameter("legacyFiliale", resolveSessionLegacyFiliale())
                     .setMaxResults(20)
                     .getResultList();
+
+            List<String> suggestions = new ArrayList<>();
+            for (Object[] row : rows) {
+                if (row == null || row.length < 2) {
+                    continue;
+                }
+                String pinValue = row[0] == null ? "" : String.valueOf(row[0]).trim();
+                String relationValue = row[1] == null ? "" : String.valueOf(row[1]).trim();
+                if (relationValue.isBlank()) {
+                    continue;
+                }
+                suggestions.add(formatRelationSuggestion(pinValue, relationValue));
+            }
+            return suggestions;
         } finally {
             em.close();
         }
@@ -549,11 +564,39 @@ public class AjoutArchivesBean implements Serializable {
     }
 
     private String resolveSearchValue() {
-        return "relation".equalsIgnoreCase(searchType) ? searchRelationValue : searchPinValue;
+        if ("relation".equalsIgnoreCase(searchType)) {
+            return extractRelationSearchTerm(searchRelationValue);
+        }
+        return searchPinValue;
     }
 
     private String normalize(String value) {
         return value == null ? null : value.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private String extractRelationSearchTerm(String value) {
+        if (value == null) {
+            return null;
+        }
+        String clean = value.trim();
+        if (clean.isBlank()) {
+            return clean;
+        }
+        int separatorIndex = clean.indexOf(RELATION_SUGGESTION_SEPARATOR);
+        if (separatorIndex < 0) {
+            return clean;
+        }
+        String extracted = clean.substring(separatorIndex + RELATION_SUGGESTION_SEPARATOR.length()).trim();
+        return extracted.isBlank() ? clean : extracted;
+    }
+
+    private String formatRelationSuggestion(String pinValue, String relationValue) {
+        String cleanPin = pinValue == null ? "" : pinValue.trim();
+        String cleanRelation = relationValue == null ? "" : relationValue.trim();
+        if (cleanPin.isBlank()) {
+            return cleanRelation;
+        }
+        return cleanPin + RELATION_SUGGESTION_SEPARATOR + cleanRelation;
     }
 
     private String buildDossierName() {

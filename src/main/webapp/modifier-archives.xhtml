@@ -215,16 +215,31 @@
                                                  value="#{modifierArchivesBean.searchType}">
                                     <f:selectItem itemLabel="Pin Client" itemValue="pin"/>
                                     <f:selectItem itemLabel="Relation" itemValue="relation"/>
+                                    <p:ajax process="@this searchValueWrapper" update="searchValueWrapper"/>
                                 </h:selectOneMenu>
                             </div>
-                            <div style="flex: 1 1 320px;">
-                                <h:outputLabel for="searchValue" value="Valeur"/>
-                                <p:inputText id="searchValue"
-                                             value="#{modifierArchivesBean.searchValue}"
-                                             placeholder="Saisir valeur"
-                                             autocomplete="off"
-                                             style="width: 100%"/>
-                            </div>
+                            <h:panelGroup id="searchValueWrapper" layout="block" style="flex: 1 1 320px;">
+                                <h:outputLabel value="Valeur"/>
+                                <ui:fragment rendered="#{modifierArchivesBean.searchType ne 'relation'}">
+                                    <p:inputText id="searchValuePin"
+                                                 value="#{modifierArchivesBean.searchValue}"
+                                                 placeholder="Saisir valeur"
+                                                 autocomplete="off"
+                                                 style="width: 100%"/>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{modifierArchivesBean.searchType eq 'relation'}">
+                                    <p:autoComplete id="searchValueRelation"
+                                                    value="#{modifierArchivesBean.searchValue}"
+                                                    completeMethod="#{modifierArchivesBean.completeRelation}"
+                                                    placeholder="Saisir relation"
+                                                    minQueryLength="1"
+                                                    queryDelay="200"
+                                                    dropdown="false"
+                                                    forceSelection="false"
+                                                    scrollHeight="220"
+                                                    style="width: 100%"/>
+                                </ui:fragment>
+                            </h:panelGroup>
                             <div class="modifier-actions" style="margin-top: 0;">
                                 <p:commandButton value="Rechercher"
                                                  styleClass="modifier-btn"
@@ -284,7 +299,7 @@
                                                  disabled="#{not modifierArchivesBean.resultLoaded}">
                                     <f:selectItem itemLabel="Choisir" itemValue="#{null}" noSelectionOption="true"/>
                                     <f:selectItem itemLabel="Courant" itemValue="courant"/>
-                                    <f:selectItem itemLabel="Intermediaire" itemValue="intermediaire"/>
+                                    <f:selectItem itemLabel="Intermédiaire" itemValue="intermediaire"/>
                                     <f:selectItem itemLabel="Finale" itemValue="finale"/>
                                 </h:selectOneMenu>
                             </div>
@@ -298,7 +313,7 @@
                             </div>
 
                             <div class="form-row full">
-                                <h:outputLabel for="boite" value="Boite"/>
+                                <h:outputLabel for="boite" value="Boîte"/>
                                 <h:panelGroup id="boitesPanel" layout="block">
                                     <div class="modifier-boite-picker">
                                         <div class="modifier-boite-picker-field">
@@ -311,21 +326,19 @@
                                                             scrollHeight="220"
                                                             converterMessage="Boite invalide."
                                                             disabled="#{not modifierArchivesBean.resultLoaded}"
-                                                            placeholder="Saisir num boite">
+                                                            placeholder="Saisir n° boîte"
+                                                            onkeydown="if (event.key === 'Enter') { event.preventDefault(); var addBtn = document.getElementById('addBoiteModifierBtn'); if (addBtn) { addBtn.click(); } return false; }">
                                                 <f:converter converterId="jakarta.faces.Integer"/>
                                             </p:autoComplete>
                                         </div>
                                         <p:commandButton id="addBoiteModifierBtn"
                                                          icon="pi pi-plus"
-                                                         title="Ajouter boite"
+                                                         title="Ajouter une boîte"
                                                          action="#{modifierArchivesBean.addBoiteSelection}"
                                                          process="@this boite"
                                                          update="boitesPanel boite messages"
                                                          disabled="#{not modifierArchivesBean.resultLoaded}"
                                                          styleClass="modifier-boite-add-btn modifier-btn"/>
-                                        <ui:fragment rendered="#{not empty modifierArchivesBean.boitesSummary}">
-                                            <div class="modifier-boite-help modifier-boite-inline-summary">Boites associees : #{modifierArchivesBean.boitesSummary}</div>
-                                        </ui:fragment>
                                     </div>
                                     <ui:fragment rendered="#{not empty modifierArchivesBean.selectedBoites}">
                                         <div class="modifier-boite-chip-list">
@@ -333,7 +346,7 @@
                                                 <div class="modifier-boite-chip">
                                                     <span>Boite #{item}</span>
                                                     <p:commandButton icon="pi pi-times"
-                                                                     title="Retirer cette boite"
+                                                                     title="Retirer cette boîte"
                                                                      action="#{modifierArchivesBean.removeBoiteSelection}"
                                                                      process="@this"
                                                                      update="boitesPanel boite messages"
@@ -391,7 +404,7 @@
                               resizable="false"
                               closable="true"
                               appendTo="@(body)">
-                        <h:outputText value="Aucun dossier trouve."/>
+                        <h:outputText value="Aucun dossier trouvé."/>
                     </p:dialog>
                 </h:form>
             </div>

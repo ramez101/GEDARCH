@@ -74,7 +74,7 @@ public class ListeUtilisateursBean implements Serializable {
             utilisateurs = loaded;
 
             if (!activeColumnAvailable) {
-                addWarn("La colonne ACTIVE est absente de ARCH_UTILISATEURS. Les comptes sont consideres actifs.");
+                addWarn("La colonne ACTIVE est absente de ARCH_UTILISATEURS. Les comptes sont considérés actifs.");
             }
         } catch (RuntimeException e) {
             addError("Erreur chargement utilisateurs : " + e.getMessage());
@@ -89,7 +89,7 @@ public class ListeUtilisateursBean implements Serializable {
         }
 
         if (!activeColumnAvailable) {
-            addError("Impossible de modifier l'etat: colonne ACTIVE absente.");
+            addError("Impossible de modifier l'état : colonne ACTIVE absente.");
             return;
         }
 
@@ -115,7 +115,7 @@ public class ListeUtilisateursBean implements Serializable {
                     try { utx.rollback(); } catch (Exception ignored) {}
                     txStarted = false;
                 }
-                addError("Utilisateur introuvable pour mise a jour.");
+                addError("Utilisateur introuvable pour mise à jour.");
                 return;
             }
 
@@ -132,12 +132,12 @@ public class ListeUtilisateursBean implements Serializable {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur mise a jour active : " + e.getMessage());
+            addError("Erreur de mise à jour de l'état actif : " + e.getMessage());
         } catch (RuntimeException e) {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur mise a jour active : " + e.getMessage());
+            addError("Erreur de mise à jour de l'état actif : " + e.getMessage());
         } finally {
             em.close();
         }

@@ -8,7 +8,7 @@
                 xmlns:p="http://primefaces.org/ui"
                 template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
 
-    <ui:define name="title">BTK - Consultation boites</ui:define>
+    <ui:define name="title">BTK - Consultation boîtes</ui:define>
 
     <ui:define name="content">
         <style type="text/css">
@@ -191,7 +191,7 @@
 
         <div class="container">
             <div class="card">
-                <div class="card-title">Consultation boites</div>
+                <div class="card-title">Consultation boîtes</div>
                 <h:form id="consultationBoitesForm" prependId="false">
                     <p:defaultCommand target="searchBoiteBtn" />
                     <p:messages id="messages" showSummary="false" showDetail="true" closable="true" />
@@ -199,10 +199,10 @@
                     <div class="form-grid two-cols">
                         <div class="form-row full" style="display: flex; gap: 12px; align-items: end; flex-wrap: wrap;">
                             <div style="flex: 1 1 320px;">
-                                <h:outputLabel for="searchBoite" value="Num boite"/>
+                                <h:outputLabel for="searchBoite" value="N° boîte"/>
                                 <p:inputText id="searchBoite"
                                              value="#{consultationBoitesBean.searchBoite}"
-                                             placeholder="Saisir num boite"
+                                             placeholder="Saisir n° boîte"
                                              style="width:100%"/>                            </div>
                             <div class="boites-search-actions" style="margin-top: 0;">
                                 <p:commandButton id="searchBoiteBtn"
@@ -230,7 +230,7 @@
                                 <p:dataTable value="#{consultationBoitesBean.dossiers}"
                                              var="dossier"
                                              styleClass="boites-results-table"
-                                             emptyMessage="Aucun dossier trouve.">
+                                             emptyMessage="Aucun dossier trouvé.">
                                     <p:column headerText="Pin Client">
                                         <h:outputText value="#{dossier.pin}" />
                                     </p:column>
@@ -256,7 +256,7 @@
                             </ui:fragment>
 
                             <ui:fragment rendered="#{consultationBoitesBean.boiteVide}">
-                                <div class="boites-empty">Boite vide.</div>
+                                <div class="boites-empty">Boîte vide.</div>
                             </ui:fragment>
                         </div>
                     </h:panelGroup>
@@ -296,7 +296,7 @@
                                         <div class="value">#{consultationBoitesBean.selectedDossierFilialeLabel}</div>
                                     </div>
                                     <div class="info-item">
-                                        <div class="label">Boites associees</div>
+                                        <div class="label">Boîtes associées</div>
                                         <div class="value">#{consultationBoitesBean.selectedDossierBoites}</div>
                                     </div>
                                 </div>

@@ -1,6 +1,8 @@
 package com.btk.bean;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,6 +33,7 @@ import jakarta.transaction.UserTransaction;
 public class DemandeDossierBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final String RELATION_SUGGESTION_SEPARATOR = " | ";
 
     private static EntityManagerFactory emf;
 
@@ -50,7 +53,9 @@ public class DemandeDossierBean implements Serializable {
     private boolean dossierLoaded;
 
     public void search() {
-        String cleanSearchValue = normalize(searchValue);
+        boolean byRelation = "relation".equalsIgnoreCase(normalize(searchType));
+        String effectiveSearchValue = byRelation ? extractRelationSearchTerm(searchValue) : searchValue;
+        String cleanSearchValue = normalize(effectiveSearchValue);
         if (cleanSearchValue.isBlank()) {
             addError("Saisir PIN ou RELATION.");
             return;
@@ -58,7 +63,6 @@ public class DemandeDossierBean implements Serializable {
 
         EntityManager em = getEMF().createEntityManager();
         try {
-            boolean byRelation = "relation".equalsIgnoreCase(normalize(searchType));
             String normalizedSearchValue = cleanSearchValue.toUpperCase(Locale.ROOT);
             String primaryField = byRelation ? "relation" : "pin";
             String fallbackField = byRelation ? "pin" : "relation";
@@ -70,7 +74,7 @@ public class DemandeDossierBean implements Serializable {
 
             if (row == null) {
                 clearDossierFields();
-                addError("Aucun dossier trouve.");
+                addError("Aucun dossier trouvé.");
                 return;
             }
 
@@ -79,7 +83,7 @@ public class DemandeDossierBean implements Serializable {
             boite = DossierEmpUtil.findBoitesSummary(em, row.getIdDossier());
             dossierLoaded = true;
 
-            addInfo("Dossier charge. Completer les informations puis submit.");
+            addInfo("Dossier chargé. Compléter les informations puis soumettre.");
         } finally {
             em.close();
         }
@@ -100,6 +104,44 @@ public class DemandeDossierBean implements Serializable {
 
         List<ArchDossier> rows = query.getResultList();
         return rows.isEmpty() ? null : rows.get(0);
+    }
+
+    public List<String> completeRelation(String query) {
+        if (!"relation".equalsIgnoreCase(normalize(searchType)) || query == null || query.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        EntityManager em = getEMF().createEntityManager();
+        try {
+            List<Object[]> rows = em.createQuery(
+                            "select distinct d.pin, d.relation from " + ArchDossier.class.getSimpleName() + " d " +
+                                    "where (upper(d.relation) like :query or upper(d.pin) like :query) " +
+                                    "and (lower(trim(d.filiale)) = :filiale " +
+                                    "or (d.filiale is null and lower(trim(d.idFiliale)) = :legacyFiliale)) " +
+                                    "order by d.pin, d.relation",
+                            Object[].class)
+                    .setParameter("query", "%" + query.trim().toUpperCase(Locale.ROOT) + "%")
+                    .setParameter("filiale", resolveSessionFiliale())
+                    .setParameter("legacyFiliale", resolveSessionLegacyFiliale())
+                    .setMaxResults(20)
+                    .getResultList();
+
+            List<String> suggestions = new ArrayList<>();
+            for (Object[] row : rows) {
+                if (row == null || row.length < 2) {
+                    continue;
+                }
+                String pinValue = row[0] == null ? "" : String.valueOf(row[0]).trim();
+                String relationValue = row[1] == null ? "" : String.valueOf(row[1]).trim();
+                if (relationValue.isBlank()) {
+                    continue;
+                }
+                suggestions.add(formatRelationSuggestion(pinValue, relationValue));
+            }
+            return suggestions;
+        } finally {
+            em.close();
+        }
     }
 
     public void submit() {
@@ -168,7 +210,7 @@ public class DemandeDossierBean implements Serializable {
 
             utx.commit();
             txStarted = false;
-            addInfo("Demande envoyee avec succes.");
+            addInfo("Demande envoyée avec succès.");
             clear();
         } catch (NotSupportedException | SystemException | RollbackException
                  | HeuristicMixedException | HeuristicRollbackException e) {
@@ -265,6 +307,28 @@ public class DemandeDossierBean implements Serializable {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private String extractRelationSearchTerm(String value) {
+        String clean = normalize(value);
+        if (clean.isBlank()) {
+            return clean;
+        }
+        int separatorIndex = clean.indexOf(RELATION_SUGGESTION_SEPARATOR);
+        if (separatorIndex < 0) {
+            return clean;
+        }
+        String extracted = clean.substring(separatorIndex + RELATION_SUGGESTION_SEPARATOR.length()).trim();
+        return extracted.isBlank() ? clean : extracted;
+    }
+
+    private String formatRelationSuggestion(String pinValue, String relationValue) {
+        String cleanPin = normalize(pinValue);
+        String cleanRelation = normalize(relationValue);
+        if (cleanPin.isBlank()) {
+            return cleanRelation;
+        }
+        return cleanPin + RELATION_SUGGESTION_SEPARATOR + cleanRelation;
     }
 
     private String toStringValue(Object value) {

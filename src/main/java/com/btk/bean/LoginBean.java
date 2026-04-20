@@ -370,7 +370,7 @@ public class LoginBean implements Serializable {
 
         String viewId = getCurrentViewId();
         if (!hasAccessToView(viewId)) {
-            addError("Acces refuse pour ce role.");
+            addError("Accès refusé pour ce rôle.");
             fc.getExternalContext().redirect(
                 fc.getExternalContext().getRequestContextPath() + getDefaultLandingPage()
             );
@@ -585,8 +585,8 @@ public class LoginBean implements Serializable {
             String summaryKey = "consult.refused.summary";
             loaded.add(new NotificationItem(
                     summaryKey,
-                    "Demandes refusees",
-                    refusedCount + " demande(s) refusee(s).",
+                    "Demandes refusées",
+                    refusedCount + " demande(s) refusée(s).",
                     null,
                     "refused",
                     "/suivi-demandes",
@@ -612,7 +612,7 @@ public class LoginBean implements Serializable {
                 String itemKey = "consult.refused." + safeKeyPart(id);
                 loaded.add(new NotificationItem(
                         itemKey,
-                        "Demande #" + id + " refusee",
+                        "Demande #" + id + " refusée",
                         "PIN " + pin + " refuse par " + recepteur + ".",
                         date,
                         "refused",

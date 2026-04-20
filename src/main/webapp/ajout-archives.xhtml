@@ -203,7 +203,7 @@
                                                     value="#{ajoutArchivesBean.searchRelationValue}"
                                                     completeMethod="#{ajoutArchivesBean.completeRelation}"
                                                     placeholder="Saisir relation"
-                                                    minQueryLength="2"
+                                                    minQueryLength="1"
                                                     queryDelay="250"
                                                     dropdown="false"
                                                     forceSelection="false"
@@ -238,7 +238,7 @@
                                 <h:inputText id="relation" value="#{ajoutArchivesBean.relation}" readonly="true"/>
                             </div>
                             <div class="form-row small">
-                                <h:outputLabel for="boite" value="Boites"/>
+                                <h:outputLabel for="boite" value="Boîtes"/>
                                 <h:inputText id="boite" value="#{ajoutArchivesBean.boite}" readonly="true"/>
                             </div>
                         </div>
@@ -250,113 +250,113 @@
                     <div class="form-section-row">
                         <div class="form-section half upload-side">
                             <details open="open">
-                                <summary>Upload joints</summary>
+                                <summary>Liste des documents</summary>
                                 <div class="upload-scroll" style="margin-top: 12px;">
                                     <div class="upload-list">
                                         <div class="upload-group-title">Dossier juridique :</div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Convention d'ouverture compte</span>
-                                            <button type="button" class="upload-btn" data-doc="Convention d&apos;ouverture compte" data-target="conventionCompteName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Convention d&apos;ouverture compte" data-target="conventionCompteName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Spécimen de signature</span>
-                                            <button type="button" class="upload-btn" data-doc="Spécimen de signature" data-target="specimenSignatureName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Spécimen de signature" data-target="specimenSignatureName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">CIN</span>
-                                            <button type="button" class="upload-btn" data-doc="CIN" data-target="cinName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="CIN" data-target="cinName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Statuts</span>
-                                            <button type="button" class="upload-btn" data-doc="Statuts" data-target="statutsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Statuts" data-target="statutsName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">RNE</span>
-                                            <button type="button" class="upload-btn" data-doc="RNE" data-target="rneName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="RNE" data-target="rneName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Pouvoirs</span>
-                                            <button type="button" class="upload-btn" data-doc="Pouvoirs" data-target="pouvoirsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Pouvoirs" data-target="pouvoirsName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Patente</span>
-                                            <button type="button" class="upload-btn" data-doc="Patente" data-target="patenteName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Patente" data-target="patenteName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
 
                                         <div class="upload-group-title">Escomptes :</div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Traites</span>
-                                            <button type="button" class="upload-btn" data-doc="Traites" data-target="traitesName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Traites" data-target="traitesName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Avis de rejets</span>
-                                            <button type="button" class="upload-btn" data-doc="Avis de rejets" data-target="avisRejetsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Avis de rejets" data-target="avisRejetsName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Protets</span>
-                                            <button type="button" class="upload-btn" data-doc="Protets" data-target="protetsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Protets" data-target="protetsName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
 
                                         <div class="upload-group-title">Engagement par signature :</div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Cautions bancaires</span>
-                                            <button type="button" class="upload-btn" data-doc="Cautions bancaires" data-target="cautionsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Cautions bancaires" data-target="cautionsName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Marchés</span>
-                                            <button type="button" class="upload-btn" data-doc="Marchés" data-target="marchesName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Marchés" data-target="marchesName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
 
                                         <div class="upload-group-title">Contrats :</div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Contrat de prets</span>
-                                            <button type="button" class="upload-btn" data-doc="Contrat de prets" data-target="contratPretsName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Contrat de prets" data-target="contratPretsName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
-                                            <span class="upload-doc-label">Contrat d'hypothéque</span>
-                                            <button type="button" class="upload-btn" data-doc="Contrat d&apos;hypothéque" data-target="contratHypothequeName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <span class="upload-doc-label">Contrat d'hypothèque</span>
+                                            <button type="button" class="upload-btn" data-doc="Contrat d&apos;hypothèque" data-target="contratHypothequeName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Titre de credit</span>
-                                            <button type="button" class="upload-btn" data-doc="Titre de credit" data-target="titreCreditName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Titre de credit" data-target="titreCreditName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
 
                                         <div class="upload-group-title">Avance sur factures :</div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Note ponctuelle</span>
-                                            <button type="button" class="upload-btn" data-doc="Note ponctuelle" data-target="notePonctuelleName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Note ponctuelle" data-target="notePonctuelleName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
 
                                         <div class="upload-group-title">Dossier contentieux :</div>
                                         <div class="upload-item">
-                                            <span class="upload-doc-label">Jugement 1ére instance</span>
-                                            <button type="button" class="upload-btn" data-doc="Jugement 1ére instance" data-target="jugement1Name" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <span class="upload-doc-label">Jugement 1ère instance</span>
+                                            <button type="button" class="upload-btn" data-doc="Jugement 1ère instance" data-target="jugement1Name" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Jugement appel</span>
-                                            <button type="button" class="upload-btn" data-doc="Jugement appel" data-target="jugementAppelName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Jugement appel" data-target="jugementAppelName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Jugement cassation</span>
-                                            <button type="button" class="upload-btn" data-doc="Jugement cassation" data-target="jugementCassationName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Jugement cassation" data-target="jugementCassationName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">PV</span>
-                                            <button type="button" class="upload-btn" data-doc="PV" data-target="pvName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="PV" data-target="pvName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
-                                            <span class="upload-doc-label">Ordonnance sur requete</span>
-                                            <button type="button" class="upload-btn" data-doc="Ordonnance sur requete" data-target="ordonnanceName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <span class="upload-doc-label">Ordonnance sur requête</span>
+                                            <button type="button" class="upload-btn" data-doc="Ordonnance sur requête" data-target="ordonnanceName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Expertises</span>
-                                            <button type="button" class="upload-btn" data-doc="Expertises" data-target="expertisesName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Expertises" data-target="expertisesName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
 
                                         <div class="upload-group-title">Dossier divers :</div>
                                         <div class="upload-item">
                                             <span class="upload-doc-label">Divers</span>
-                                            <button type="button" class="upload-btn" data-doc="Divers" data-target="diversName" onclick="return btkOpenUploadDialog(this);">Selectionner</button>
+                                            <button type="button" class="upload-btn" data-doc="Divers" data-target="diversName" onclick="return btkOpenUploadDialog(this);">Sélectionner</button>
                                         </div>
                                     </div>
                                 </div>

@@ -95,7 +95,7 @@ public class BoiteBean implements Serializable {
 
     public void prepareEditEmplacement() {
         if (selectedEmplacement == null) {
-            addError("Aucune boite selectionnee pour la modification.");
+            addError("Aucune boite sélectionnée pour la modification.");
             markValidationFailed();
             return;
         }
@@ -108,14 +108,14 @@ public class BoiteBean implements Serializable {
 
     public void addBoite() {
         if (etage == null || salle == null || rayon == null || rangee == null) {
-            addError("Veuillez choisir etage, salle, rayon et rangee.");
+            addError("Veuillez choisir étage, salle, rayon et rangée.");
             markValidationFailed();
             return;
         }
 
         Integer boiteValue = parseBoiteValue(newBoite);
         if (boiteValue == null) {
-            addError("Le numero de boite doit etre numerique.");
+            addError("Le numéro de boite doit être numérique.");
             markValidationFailed();
             return;
         }
@@ -135,7 +135,7 @@ public class BoiteBean implements Serializable {
             boolean existsInBoiteTable = archBoiteExists(em, boiteValue);
 
             if ((existing != null && existing > 0) || existsInBoiteTable) {
-                addError("Boite deja existante.");
+                addError("Boite déjà existante.");
                 markValidationFailed();
                 return;
             }
@@ -173,7 +173,7 @@ public class BoiteBean implements Serializable {
             utx.commit();
             txStarted = false;
 
-            addInfo("Ajout reussi.");
+            addInfo("La boîte n° " + boiteValue + " a été ajoutée avec succès.");
             resetAddForm();
             loadEmplacements();
         } catch (NotSupportedException | SystemException | RollbackException
@@ -181,13 +181,13 @@ public class BoiteBean implements Serializable {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur ajout boite : " + e.getMessage());
+            addError("Erreur d'ajout de boite : " + e.getMessage());
             markValidationFailed();
         } catch (RuntimeException e) {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur ajout boite : " + e.getMessage());
+            addError("Erreur d'ajout de boite : " + e.getMessage());
             markValidationFailed();
         } finally {
             em.close();
@@ -196,13 +196,13 @@ public class BoiteBean implements Serializable {
 
     public void updateEmplacement() {
         if (selectedEmplacement == null || selectedEmplacement.getIdEmplacement() == null) {
-            addError("Aucune boite selectionnee pour la modification.");
+            addError("Aucune boite sélectionnée pour la modification.");
             markValidationFailed();
             return;
         }
 
         if (editEtage == null || editSalle == null || editRayon == null || editRangee == null) {
-            addError("Veuillez renseigner etage, salle, rayon et rangee.");
+            addError("Veuillez renseigner étage, salle, rayon et rangée.");
             markValidationFailed();
             return;
         }
@@ -239,7 +239,7 @@ public class BoiteBean implements Serializable {
             utx.commit();
             txStarted = false;
 
-            addInfo("Emplacement modifie avec succes.");
+            addInfo("Emplacement modifié avec succès.");
             loadEmplacements();
             resetEditForm();
             refreshSelectedEmplacement(emplacement.getIdEmplacement());
@@ -248,13 +248,13 @@ public class BoiteBean implements Serializable {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur modification emplacement : " + e.getMessage());
+            addError("Erreur de modification de l'emplacement : " + e.getMessage());
             markValidationFailed();
         } catch (RuntimeException e) {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur modification emplacement : " + e.getMessage());
+            addError("Erreur de modification de l'emplacement : " + e.getMessage());
             markValidationFailed();
         } finally {
             em.close();
@@ -264,7 +264,7 @@ public class BoiteBean implements Serializable {
     public void deleteBoite() {
         Integer boiteValue = parseBoiteValue(deleteBoite);
         if (boiteValue == null) {
-            addError("Le numero de boite doit etre numerique.");
+            addError("Le numéro de boite doit être numérique.");
             markValidationFailed();
             return;
         }
@@ -302,7 +302,7 @@ public class BoiteBean implements Serializable {
                     .getSingleResult();
 
             if (dossiersCount != null && dossiersCount > 0) {
-                addError("Tu ne peux pas supprimer cette boite, veuillez deplacer l'emplacement des dossiers d'abord.");
+                addError("Tu ne peux pas supprimer cette boite, veuillez déplacer l'emplacement des dossiers d'abord.");
                 markValidationFailed();
                 return;
             }
@@ -323,7 +323,7 @@ public class BoiteBean implements Serializable {
             utx.commit();
             txStarted = false;
 
-            addWarn("Suppression reussie.");
+            addWarn("Suppression réussie.");
             resetDeleteForm();
             resetAddForm();
             loadEmplacements();
@@ -332,13 +332,13 @@ public class BoiteBean implements Serializable {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur suppression boite : " + e.getMessage());
+            addError("Erreur de suppression de boite : " + e.getMessage());
             markValidationFailed();
         } catch (RuntimeException e) {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur suppression boite : " + e.getMessage());
+            addError("Erreur de suppression de boite : " + e.getMessage());
             markValidationFailed();
         } finally {
             em.close();

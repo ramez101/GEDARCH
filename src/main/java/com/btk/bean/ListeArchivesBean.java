@@ -216,7 +216,7 @@ public class ListeArchivesBean implements Serializable {
         addHeaderCell(table, "Docs", tableHeaderFont, deepBlue);
 
         if (archives == null || archives.isEmpty()) {
-            PdfPCell emptyCell = new PdfPCell(new Phrase("Aucun dossier archive trouve.", emptyFont));
+            PdfPCell emptyCell = new PdfPCell(new Phrase("Aucun dossier archivé trouvé.", emptyFont));
             emptyCell.setColspan(9);
             emptyCell.setHorizontalAlignment(Element.ALIGN_CENTER);
             emptyCell.setPadding(9);
@@ -294,7 +294,7 @@ public class ListeArchivesBean implements Serializable {
             return "Courant";
         }
         if ("intermediaire".equalsIgnoreCase(value)) {
-            return "Intermediaire";
+            return "Intermédiaire";
         }
         if ("finale".equalsIgnoreCase(value)) {
             return "Finale";

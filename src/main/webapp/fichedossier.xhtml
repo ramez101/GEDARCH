@@ -118,7 +118,7 @@
                                                     value="#{ficheDossierBean.searchRelationValue}"
                                                     completeMethod="#{ficheDossierBean.completeRelation}"
                                                     placeholder="Saisir relation"
-                                                    minQueryLength="2"
+                                                    minQueryLength="1"
                                                     queryDelay="250"
                                                     dropdown="false"
                                                     forceSelection="false"
@@ -169,7 +169,7 @@
                               width="980"
                               appendTo="@(form)">
                         <div class="fiche-dialog-actions">
-                            <p:commandButton value="Telecharger PDF"
+                            <p:commandButton value="Télécharger PDF"
                                              action="#{ficheDossierBean.downloadPdf}"
                                              ajax="false"
                                              process="@this"

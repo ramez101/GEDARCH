@@ -44,7 +44,7 @@ public class ConsultationBoitesBean implements Serializable {
         resetSearchResult();
 
         if (searchBoite == null || searchBoite.isBlank()) {
-            addWarning("Veuillez choisir un numero de boite.");
+            addWarning("Veuillez choisir un numéro de boîte.");
             return;
         }
 
@@ -52,7 +52,7 @@ public class ConsultationBoitesBean implements Serializable {
         try {
             boite = Integer.valueOf(searchBoite.trim());
         } catch (NumberFormatException e) {
-            addWarning("Le numero de boite doit etre numerique.");
+            addWarning("Le numéro de boite doit être numérique.");
             return;
         }
 

@@ -263,7 +263,7 @@
 
         var payload = btkGetEl('docsPayload');
         if (!docs.length) {
-            body.innerHTML = '<tr id="docsEmptyRow"><td colspan="6" class="doc-empty">Aucun document ajoute.</td></tr>';
+            body.innerHTML = '<tr id="docsEmptyRow"><td colspan="6" class="doc-empty">Aucun document ajouté.</td></tr>';
             btkSyncDocsPayload();
             return;
         }

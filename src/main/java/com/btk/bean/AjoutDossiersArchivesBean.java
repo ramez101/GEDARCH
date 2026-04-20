@@ -98,7 +98,7 @@ public class AjoutDossiersArchivesBean implements Serializable {
                         .setParameter("legacyFiliale", sessionLegacyFiliale)
                         .getSingleResult();
                 if (existing != null && existing > 0) {
-                    addWarn("Pin deja utilise.");
+                    addWarn("PIN déjà utilisé.");
                     markValidationFailed();
                     return;
                 }
@@ -137,9 +137,9 @@ public class AjoutDossiersArchivesBean implements Serializable {
             utx.commit();
             txStarted = false;
             resetForm();
-            addInfo("Dossier enregistre avec succes. Boites associees: "
+            addInfo("Dossier enregistré avec succès. Boites associées : "
                     + formatBoites(boitesToSave)
-                    + ". Documents sauvegardes: " + docsSaved + ".");
+                    + ". Documents sauvegardés : " + docsSaved + ".");
         } catch (Exception e) {
             try {
                 if (txStarted && utx != null) {
@@ -214,7 +214,7 @@ public class AjoutDossiersArchivesBean implements Serializable {
 
     public void addBoiteSelection() {
         if (boite == null) {
-            addWarn("Saisir un numero de boite avant d'ajouter.");
+            addWarn("Saisir un numéro de boite avant d'ajouter.");
             markValidationFailed();
             return;
         }
@@ -226,14 +226,14 @@ public class AjoutDossiersArchivesBean implements Serializable {
         }
 
         if (selectedBoites.contains(boite)) {
-            addWarn("La boite " + boite + " est deja associee.");
+            addWarn("La boite " + boite + " est déjà associée.");
             boite = null;
             markValidationFailed();
             return;
         }
 
         selectedBoites.add(boite);
-        addInfo("Boite " + boite + " ajoutee.");
+        addInfo("Boite " + boite + " ajoutée.");
         boite = null;
     }
 
@@ -243,7 +243,7 @@ public class AjoutDossiersArchivesBean implements Serializable {
         }
 
         selectedBoites.remove(boiteToRemove);
-        addInfo("Boite " + boiteToRemove + " retiree.");
+        addInfo("Boite " + boiteToRemove + " retirée.");
         boiteToRemove = null;
     }
 
@@ -591,6 +591,7 @@ public class AjoutDossiersArchivesBean implements Serializable {
     public void setFilialeId(String filialeId) { this.filialeId = filialeId; }
 
     public String getFilialeLabel() { return FilialeUtil.toLabel(resolveSessionFiliale()); }
+    public String getCurrentUserLabel() { return resolveUtilisateur(); }
 
     private String resolveSessionFiliale() {
         if (loginBean != null) {

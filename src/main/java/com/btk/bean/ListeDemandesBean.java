@@ -114,7 +114,7 @@ public class ListeDemandesBean implements Serializable {
             return;
         }
         if (!row.isPending()) {
-            addWarn("Cette demande est deja traitee.");
+            addWarn("Cette demande est déjà traitée.");
             return;
         }
 
@@ -153,14 +153,14 @@ public class ListeDemandesBean implements Serializable {
                 if (txStarted) {
                     try { utx.rollback(); } catch (Exception ignored) {}
                 }
-                addWarn("Demande deja traitee ou introuvable.");
+                addWarn("Demande déjà traitée ou introuvable.");
                 reload();
                 return;
             }
 
             utx.commit();
             txStarted = false;
-            addInfo(approve ? "Demande acceptee." : "Demande refusee.");
+            addInfo(approve ? "Demande acceptée." : "Demande refusée.");
             reload();
         } catch (NotSupportedException | SystemException | RollbackException
                  | HeuristicMixedException | HeuristicRollbackException e) {

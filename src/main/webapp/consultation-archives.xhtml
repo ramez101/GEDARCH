@@ -215,7 +215,7 @@
                                                     value="#{consultationArchivesBean.searchRelationValue}"
                                                     completeMethod="#{consultationArchivesBean.completeRelation}"
                                                     placeholder="Saisir relation"
-                                                    minQueryLength="2"
+                                                    minQueryLength="1"
                                                     queryDelay="250"
                                                     dropdown="false"
                                                     forceSelection="false"
@@ -274,7 +274,7 @@
                             </div>
 
                             <div class="form-row">
-                                <h:outputLabel for="boite" value="Boite"/>
+                                <h:outputLabel for="boite" value="Boîte"/>
                                 <h:inputText id="boite" value="#{consultationArchivesBean.boite}" readonly="true"/>
                             </div>
                         </div>
@@ -316,7 +316,7 @@
                         <h:panelGroup id="scannedDocsContent" layout="block">
                             <p:dataTable value="#{consultationArchivesBean.scannedDocuments}"
                                          var="doc"
-                                         emptyMessage="Aucun document scanne pour ce client."
+                                         emptyMessage="Aucun document scanné pour ce client."
                                          style="margin-top: 8px;">
                                 <p:column headerText="Nom document" style="width: 20%;">
                                     <h:outputText value="#{doc.nomDocument}"/>
@@ -344,7 +344,7 @@
                                                          onclick="var f=this.form; f.target='_blank'; setTimeout(function(){f.target='';}, 300);"
                                                          styleClass="doc-action-icon"/>
                                         <p:commandButton value=""
-                                                         title="Telecharger"
+                                                         title="Télécharger"
                                                          icon="pi pi-download"
                                                          action="#{consultationArchivesBean.downloadDocument(doc)}"
                                                          ajax="false"

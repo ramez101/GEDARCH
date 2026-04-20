@@ -26,16 +26,30 @@
                                 <p:selectOneMenu id="searchType" value="#{demandeDossierBean.searchType}">
                                     <f:selectItem itemLabel="PIN Client" itemValue="pin"/>
                                     <f:selectItem itemLabel="Relation" itemValue="relation"/>
+                                    <p:ajax process="@this searchValueWrapper" update="searchValueWrapper"/>
                                 </p:selectOneMenu>
                             </div>
 
-                            <div class="form-row">
-                                <h:outputLabel for="searchValue" value="PIN Client / Relation"/>
-                                <p:inputText id="searchValue"
-                                             value="#{demandeDossierBean.searchValue}"
-                                             maxlength="40"
-                                             placeholder="Saisir PIN ou RELATION"/>
-                            </div>
+                            <h:panelGroup id="searchValueWrapper" layout="block" styleClass="form-row">
+                                <h:outputLabel value="PIN Client / Relation"/>
+                                <ui:fragment rendered="#{demandeDossierBean.searchType ne 'relation'}">
+                                    <p:inputText id="searchValuePin"
+                                                 value="#{demandeDossierBean.searchValue}"
+                                                 maxlength="40"
+                                                 placeholder="Saisir PIN ou RELATION"/>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{demandeDossierBean.searchType eq 'relation'}">
+                                    <p:autoComplete id="searchValueRelation"
+                                                    value="#{demandeDossierBean.searchValue}"
+                                                    completeMethod="#{demandeDossierBean.completeRelation}"
+                                                    placeholder="Saisir relation"
+                                                    minQueryLength="1"
+                                                    queryDelay="200"
+                                                    dropdown="false"
+                                                    forceSelection="false"
+                                                    scrollHeight="220"/>
+                                </ui:fragment>
+                            </h:panelGroup>
 
                             <div class="demande-search-buttons">
                                 <p:commandButton id="searchDemandeBtn"

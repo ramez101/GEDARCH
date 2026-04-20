@@ -117,7 +117,7 @@ public class SuiviDemandesBean implements Serializable {
             return;
         }
         if (!row.isRestituable()) {
-            addWarn("Cette demande n'est pas eligible a la restitution.");
+            addWarn("Cette demande n'est pas éligible à la restitution.");
             return;
         }
 
@@ -160,14 +160,14 @@ public class SuiviDemandesBean implements Serializable {
                 if (txStarted) {
                     try { utx.rollback(); } catch (Exception ignored) {}
                 }
-                addWarn("Demande deja restituee, non approuvee, ou introuvable.");
+                addWarn("Demande déjà restituée, non approuvée, ou introuvable.");
                 reload();
                 return;
             }
 
             utx.commit();
             txStarted = false;
-            addInfo("Restitution enregistree avec succes.");
+            addInfo("Restitution enregistrée avec succès.");
             reload();
         } catch (NotSupportedException | SystemException | RollbackException
                  | HeuristicMixedException | HeuristicRollbackException e) {
