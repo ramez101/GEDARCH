@@ -1338,6 +1338,31 @@
                 }
             }
 
+            function hideChooseNoSelectionOptions(root) {
+                var scope = (root &amp;&amp; root.querySelectorAll) ? root : document;
+                var selects = scope.querySelectorAll('select');
+                if (!selects || selects.length === 0) {
+                    return;
+                }
+
+                Array.prototype.forEach.call(selects, function (select) {
+                    if (!select || !select.options || select.options.length === 0) {
+                        return;
+                    }
+                    Array.prototype.forEach.call(select.options, function (option) {
+                        if (!option) {
+                            return;
+                        }
+                        var value = String(option.value || '').trim();
+                        var label = String(option.text || '').trim().toLowerCase();
+                        if (value === '' &amp;&amp; label.indexOf('choisir') === 0) {
+                            option.disabled = true;
+                            option.hidden = true;
+                        }
+                    });
+                });
+            }
+
             window.BTKSecrets = {
                 toggle: function (btn) {
                     if (!btn) return;
@@ -1539,6 +1564,22 @@
             }, 350);
 
             applyActiveMenuState();
+            hideChooseNoSelectionOptions();
+
+            document.addEventListener('focusin', function (event) {
+                var target = event ? event.target : null;
+                if (target &amp;&amp; target.tagName &amp;&amp; target.tagName.toLowerCase() === 'select') {
+                    hideChooseNoSelectionOptions(target.parentNode);
+                }
+            });
+
+            if (window.jsf &amp;&amp; window.jsf.ajax &amp;&amp; window.jsf.ajax.addOnEvent) {
+                window.jsf.ajax.addOnEvent(function (data) {
+                    if (data &amp;&amp; data.status === 'success') {
+                        hideChooseNoSelectionOptions();
+                    }
+                });
+            }
 
             var sidebar = sidebarEl();
             var scrim = scrimEl();
