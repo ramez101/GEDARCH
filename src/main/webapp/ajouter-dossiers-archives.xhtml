@@ -259,7 +259,16 @@
 
                         <div class="form-row">
                             <h:outputLabel for="charge" value="Chargé Dossier"/>
-                            <h:inputText id="charge" value="#{ajoutDossiersArchivesBean.charge}" required="true" requiredMessage="Charge obligatoire."/>
+                            <h:selectOneMenu id="charge"
+                                             value="#{ajoutDossiersArchivesBean.charge}"
+                                             required="true"
+                                             requiredMessage="Charge obligatoire.">
+                                <f:selectItem itemLabel="Choisir" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{ajoutDossiersArchivesBean.consultationOptions}"
+                                               var="chargeOption"
+                                               itemLabel="#{chargeOption.label}"
+                                               itemValue="#{chargeOption.value}"/>
+                            </h:selectOneMenu>
                         </div>
 
                         <div class="form-row">

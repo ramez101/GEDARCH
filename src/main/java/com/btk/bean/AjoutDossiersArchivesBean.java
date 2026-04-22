@@ -66,11 +66,13 @@ public class AjoutDossiersArchivesBean implements Serializable {
     private String charge;
     private String typeArchive;
     private String filialeId;
+    private List<ChargeOption> consultationOptions = Collections.emptyList();
 
     @PostConstruct
     public void init() {
         refreshNextDossierId();
         boites = fetchBoites();
+        consultationOptions = fetchConsultationOptions();
     }
 
     public void save() {
@@ -165,6 +167,7 @@ public class AjoutDossiersArchivesBean implements Serializable {
         boiteToRemove = null;
         refreshNextDossierId();
         boites = fetchBoites();
+        consultationOptions = fetchConsultationOptions();
         docsPayload = null;
     }
 
@@ -188,6 +191,57 @@ public class AjoutDossiersArchivesBean implements Serializable {
         } finally {
             em.close();
         }
+    }
+
+    private List<ChargeOption> fetchConsultationOptions() {
+        EntityManager em = getEMF().createEntityManager();
+        try {
+            String sessionFiliale = resolveSessionFiliale();
+            String sessionLegacyFiliale = resolveSessionLegacyFiliale();
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = em.createNativeQuery(
+                            "SELECT CUTI, UNIX, LIB " +
+                                    "FROM ARCH_UTILISATEURS " +
+                                    "WHERE UPPER(TRIM(ROLE)) = 'CONSULTATION' " +
+                                    "AND (LOWER(TRIM(PUTI)) = :sessionFiliale OR LOWER(TRIM(PUTI)) = :sessionLegacyFiliale) " +
+                                    "ORDER BY UPPER(TRIM(NVL(LIB, UNIX))), UPPER(TRIM(CUTI))")
+                    .setParameter("sessionFiliale", sessionFiliale)
+                    .setParameter("sessionLegacyFiliale", sessionLegacyFiliale)
+                    .getResultList();
+
+            List<ChargeOption> options = new ArrayList<>();
+            for (Object[] row : rows) {
+                String cuti = normalize(toStringValue(row[0]));
+                String unix = normalize(toStringValue(row[1]));
+                String lib = normalize(toStringValue(row[2]));
+                String value = !cuti.isBlank() ? cuti : unix;
+                if (value.isBlank()) {
+                    continue;
+                }
+                options.add(new ChargeOption(value, buildChargeLabel(lib, unix, cuti)));
+            }
+            return options;
+        } finally {
+            em.close();
+        }
+    }
+
+    private String buildChargeLabel(String lib, String unix, String cuti) {
+        String displayName = !lib.isBlank() ? lib : (!unix.isBlank() ? unix : cuti);
+        String account = !unix.isBlank() ? unix : cuti;
+        if (account.isBlank() || displayName.equalsIgnoreCase(account)) {
+            return displayName;
+        }
+        return displayName + " (" + account + ")";
+    }
+
+    private String toStringValue(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim();
     }
 
     public List<Integer> completeBoite(String query) {
@@ -590,6 +644,8 @@ public class AjoutDossiersArchivesBean implements Serializable {
     public String getFilialeId() { return filialeId; }
     public void setFilialeId(String filialeId) { this.filialeId = filialeId; }
 
+    public List<ChargeOption> getConsultationOptions() { return consultationOptions; }
+
     public String getFilialeLabel() { return FilialeUtil.toLabel(resolveSessionFiliale()); }
     public String getCurrentUserLabel() { return resolveUtilisateur(); }
 
@@ -602,6 +658,21 @@ public class AjoutDossiersArchivesBean implements Serializable {
 
     private String resolveSessionLegacyFiliale() {
         return FilialeUtil.toLegacyId(resolveSessionFiliale());
+    }
+
+    public static class ChargeOption implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final String value;
+        private final String label;
+
+        ChargeOption(String value, String label) {
+            this.value = value;
+            this.label = label == null ? "" : label;
+        }
+
+        public String getValue() { return value; }
+        public String getLabel() { return label; }
     }
 
 }

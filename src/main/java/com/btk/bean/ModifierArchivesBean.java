@@ -56,6 +56,7 @@ public class ModifierArchivesBean implements Serializable {
     private String charge;
     private String typeArchive;
     private String filialeId;
+    private List<ChargeOption> consultationOptions = Collections.emptyList();
     private Integer boite;
     private Integer boiteToRemove;
     private List<Integer> selectedBoites = new ArrayList<>();
@@ -65,6 +66,7 @@ public class ModifierArchivesBean implements Serializable {
     @PostConstruct
     public void init() {
         boites = fetchBoites();
+        consultationOptions = fetchConsultationOptions();
     }
 
     public void search() {
@@ -105,6 +107,7 @@ public class ModifierArchivesBean implements Serializable {
             pin = dossier.getPin();
             relation = dossier.getRelation();
             charge = dossier.getCharge();
+            consultationOptions = fetchConsultationOptions(charge);
             typeArchive = dossier.getTypeArchive();
             filialeId = dossier.getIdFiliale();
             resultLoaded = true;
@@ -230,6 +233,7 @@ public class ModifierArchivesBean implements Serializable {
         boiteToRemove = null;
         selectedBoites = new ArrayList<>();
         boites = fetchBoites();
+        consultationOptions = fetchConsultationOptions();
     }
 
     private String normalizeSearchValue(String value) {
@@ -393,6 +397,79 @@ public class ModifierArchivesBean implements Serializable {
         }
     }
 
+    private List<ChargeOption> fetchConsultationOptions() {
+        return fetchConsultationOptions(null);
+    }
+
+    private List<ChargeOption> fetchConsultationOptions(String selectedCharge) {
+        EntityManager em = getEMF().createEntityManager();
+        try {
+            String sessionFiliale = resolveSessionFiliale();
+            String sessionLegacyFiliale = resolveSessionLegacyFiliale();
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = em.createNativeQuery(
+                            "SELECT CUTI, UNIX, LIB " +
+                                    "FROM ARCH_UTILISATEURS " +
+                                    "WHERE UPPER(TRIM(ROLE)) = 'CONSULTATION' " +
+                                    "AND (LOWER(TRIM(PUTI)) = :sessionFiliale OR LOWER(TRIM(PUTI)) = :sessionLegacyFiliale) " +
+                                    "ORDER BY UPPER(TRIM(NVL(LIB, UNIX))), UPPER(TRIM(CUTI))")
+                    .setParameter("sessionFiliale", sessionFiliale)
+                    .setParameter("sessionLegacyFiliale", sessionLegacyFiliale)
+                    .getResultList();
+
+            List<ChargeOption> options = new ArrayList<>();
+            for (Object[] row : rows) {
+                String cuti = normalize(toStringValue(row[0]));
+                String unix = normalize(toStringValue(row[1]));
+                String lib = normalize(toStringValue(row[2]));
+                String value = !cuti.isBlank() ? cuti : unix;
+                if (value.isBlank()) {
+                    continue;
+                }
+                options.add(new ChargeOption(value, buildChargeLabel(lib, unix, cuti)));
+            }
+
+            String currentCharge = normalize(selectedCharge);
+            if (!currentCharge.isBlank() && !containsChargeOption(options, currentCharge)) {
+                options.add(0, new ChargeOption(currentCharge, currentCharge));
+            }
+
+            return options;
+        } finally {
+            em.close();
+        }
+    }
+
+    private boolean containsChargeOption(List<ChargeOption> options, String chargeValue) {
+        if (options == null || options.isEmpty() || chargeValue == null || chargeValue.isBlank()) {
+            return false;
+        }
+        for (ChargeOption option : options) {
+            if (option != null && chargeValue.equalsIgnoreCase(normalize(option.getValue()))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String buildChargeLabel(String lib, String unix, String cuti) {
+        String displayName = !lib.isBlank() ? lib : (!unix.isBlank() ? unix : cuti);
+        String account = !unix.isBlank() ? unix : cuti;
+        if (account.isBlank() || displayName.equalsIgnoreCase(account)) {
+            return displayName;
+        }
+        return displayName + " (" + account + ")";
+    }
+
+    private String toStringValue(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim();
+    }
+
     private static synchronized EntityManagerFactory getEMF() {
         if (emf == null || !emf.isOpen()) {
             emf = Persistence.createEntityManagerFactory("btk");
@@ -426,6 +503,8 @@ public class ModifierArchivesBean implements Serializable {
     public String getFilialeId() { return filialeId; }
     public void setFilialeId(String filialeId) { this.filialeId = filialeId; }
 
+    public List<ChargeOption> getConsultationOptions() { return consultationOptions; }
+
     public String getFilialeLabel() {
         String current = filialeId;
         if (current == null || current.isBlank()) {
@@ -449,5 +528,20 @@ public class ModifierArchivesBean implements Serializable {
 
     private String resolveSessionLegacyFiliale() {
         return loginBean == null ? "" : loginBean.getCurrentFilialeId();
+    }
+
+    public static class ChargeOption implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final String value;
+        private final String label;
+
+        ChargeOption(String value, String label) {
+            this.value = value;
+            this.label = label == null ? "" : label;
+        }
+
+        public String getValue() { return value; }
+        public String getLabel() { return label; }
     }
 }

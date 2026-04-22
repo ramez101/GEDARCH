@@ -203,7 +203,7 @@
 
         <div class="container">
             <div class="card">
-                <div class="card-title">Modifier archives</div>
+                <div class="card-title">Modifier dossier</div>
                 <h:form id="modifierForm" prependId="false">
                     <p:messages id="messages" closable="true" />
 
@@ -286,10 +286,16 @@
                             </div>
 
                             <div class="form-row">
-                                <h:outputLabel for="charge" value="Charge"/>
-                                <h:inputText id="charge"
-                                             value="#{modifierArchivesBean.charge}"
-                                             disabled="#{not modifierArchivesBean.resultLoaded}"/>
+                                <h:outputLabel for="charge" value="Chargé"/>
+                                <h:selectOneMenu id="charge"
+                                                 value="#{modifierArchivesBean.charge}"
+                                                 disabled="#{not modifierArchivesBean.resultLoaded}">
+                                    <f:selectItem itemLabel="Choisir" itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItems value="#{modifierArchivesBean.consultationOptions}"
+                                                   var="chargeOption"
+                                                   itemLabel="#{chargeOption.label}"
+                                                   itemValue="#{chargeOption.value}"/>
+                                </h:selectOneMenu>
                             </div>
 
                             <div class="form-row">
