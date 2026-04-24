@@ -122,7 +122,7 @@ public class AjoutDossiersArchivesBean implements Serializable {
             dossier.setPortefeuille(portefeuille);
             dossier.setPin(pin);
             dossier.setRelation(relation);
-            dossier.setCharge(charge);
+            dossier.setCharge(resolveSelectedCharge(charge));
             dossier.setTypeArchive(typeArchive);
             dossier.setIdFiliale(sessionLegacyFiliale);
             dossier.setFiliale(sessionFiliale);
@@ -215,7 +215,7 @@ public class AjoutDossiersArchivesBean implements Serializable {
                 String cuti = normalize(toStringValue(row[0]));
                 String unix = normalize(toStringValue(row[1]));
                 String lib = normalize(toStringValue(row[2]));
-                String value = !cuti.isBlank() ? cuti : unix;
+                String value = resolveChargeValue(cuti, unix, lib);
                 if (value.isBlank()) {
                     continue;
                 }
@@ -234,6 +234,55 @@ public class AjoutDossiersArchivesBean implements Serializable {
             return displayName;
         }
         return displayName + " (" + account + ")";
+    }
+
+    private String resolveChargeValue(String cuti, String unix, String lib) {
+        String normalizedLib = normalize(lib);
+        if (!normalizedLib.isBlank()) {
+            return normalizedLib;
+        }
+        String normalizedUnix = normalize(unix);
+        if (!normalizedUnix.isBlank()) {
+            return normalizedUnix;
+        }
+        return normalize(cuti);
+    }
+
+    private String resolveSelectedCharge(String selectedCharge) {
+        String normalizedSelectedCharge = normalize(selectedCharge);
+        if (normalizedSelectedCharge.isBlank()) {
+            return normalizedSelectedCharge;
+        }
+
+        EntityManager em = getEMF().createEntityManager();
+        try {
+            String sessionFiliale = resolveSessionFiliale();
+            String sessionLegacyFiliale = resolveSessionLegacyFiliale();
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = em.createNativeQuery(
+                            "SELECT CUTI, UNIX, LIB " +
+                                    "FROM ARCH_UTILISATEURS " +
+                                    "WHERE UPPER(TRIM(ROLE)) = 'CONSULTATION' " +
+                                    "AND (LOWER(TRIM(PUTI)) = :sessionFiliale OR LOWER(TRIM(PUTI)) = :sessionLegacyFiliale)")
+                    .setParameter("sessionFiliale", sessionFiliale)
+                    .setParameter("sessionLegacyFiliale", sessionLegacyFiliale)
+                    .getResultList();
+
+            for (Object[] row : rows) {
+                String cuti = normalize(toStringValue(row[0]));
+                String unix = normalize(toStringValue(row[1]));
+                String lib = normalize(toStringValue(row[2]));
+                if (normalizedSelectedCharge.equalsIgnoreCase(cuti)
+                        || normalizedSelectedCharge.equalsIgnoreCase(unix)
+                        || normalizedSelectedCharge.equalsIgnoreCase(lib)) {
+                    return resolveChargeValue(cuti, unix, lib);
+                }
+            }
+            return normalizedSelectedCharge;
+        } finally {
+            em.close();
+        }
     }
 
     private String toStringValue(Object value) {

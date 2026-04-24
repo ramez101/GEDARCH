@@ -32,6 +32,14 @@
                 font-size: .82rem;
             }
 
+            .archives-index-col {
+                width: 42px;
+                min-width: 42px;
+                max-width: 42px;
+                text-align: center;
+                white-space: nowrap;
+            }
+
             .doc-yes,
             .doc-no {
                 display: inline-block;
@@ -96,7 +104,7 @@
                                  paginatorPosition="bottom"
                                  emptyMessage="Aucun dossier archivé trouvé."
                                  rowIndexVar="idx">
-                        <p:column headerText="#">
+                        <p:column headerText="#" styleClass="archives-index-col">
                             <h:outputText value="#{idx + 1}"/>
                         </p:column>
                         <p:column headerText="Portefeuille" sortBy="#{item.portefeuille}">

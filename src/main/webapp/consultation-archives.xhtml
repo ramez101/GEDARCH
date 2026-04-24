@@ -82,7 +82,7 @@
                 display: flex;
                 justify-content: center;
                 gap: 12px;
-                flex-wrap: nowrap;
+                flex-wrap: wrap;
             }
 
             .consultation-action-btn.ui-button.ui-widget {
@@ -228,14 +228,15 @@
                                                  value="Rechercher"
                                                  action="#{consultationArchivesBean.search}"
                                                  process="@form"
-                                                 update="@form"/>
+                                                 update="@form"
+                                                 styleClass="docs-btn docs-btn-primary"/>
                                 <p:commandButton value=""
                                  action="#{consultationArchivesBean.clear}"
                                                  process="@this"
                                                  update="@form"
                                                  icon="pi pi-times"
                                                  title="Clean"
-                                                 styleClass="danger-icon-btn"/>
+                                                 styleClass="doc-action-btn doc-delete"/>
                             </div>
                         </div>
                     </div>
@@ -287,14 +288,14 @@
                                          update="messages scannedDocsContent"
                                          oncomplete="PF('scannedDocsDialog').show();"
                                          disabled="#{not consultationArchivesBean.resultLoaded}"
-                                         styleClass="consultation-action-btn"/>
+                                         styleClass="docs-btn docs-btn-primary"/>
                         <p:commandButton value="Historique transmission dossier"
                                          actionListener="#{consultationArchivesBean.loadTransmissionHistory}"
                                          process="@this"
                                          update="messages transmissionHistoryContent"
                                          oncomplete="PF('transmissionHistoryDialog').show();"
                                          disabled="#{not consultationArchivesBean.resultLoaded}"
-                                         styleClass="consultation-action-btn"/>
+                                         styleClass="docs-btn docs-btn-primary"/>
                     </div>
 
                     <p:dialog header="Archive introuvable"
@@ -314,10 +315,10 @@
                               width="980"
                               appendTo="@(form)">
                         <h:panelGroup id="scannedDocsContent" layout="block">
-                            <p:dataTable value="#{consultationArchivesBean.scannedDocuments}"
-                                         var="doc"
-                                         emptyMessage="Aucun document scanné pour ce client."
-                                         style="margin-top: 8px;">
+                                <p:dataTable value="#{consultationArchivesBean.scannedDocuments}"
+                                             var="doc"
+                                             emptyMessage="Aucun document scanné pour ce client."
+                                             style="margin-top: 8px;">
                                 <p:column headerText="Nom document" style="width: 20%;">
                                     <h:outputText value="#{doc.nomDocument}"/>
                                 </p:column>
@@ -334,7 +335,7 @@
                                     <h:outputText value="#{doc.document}"/>
                                 </p:column>
                                 <p:column headerText="Actions" style="width: 16%; text-align: center;">
-                                    <div class="doc-actions">
+                                    <div class="doc-action-buttons">
                                         <p:commandButton value=""
                                                          title="Visualiser"
                                                          icon="pi pi-eye"
@@ -342,7 +343,7 @@
                                                          ajax="false"
                                                          process="@this"
                                                          onclick="var f=this.form; f.target='_blank'; setTimeout(function(){f.target='';}, 300);"
-                                                         styleClass="doc-action-icon"/>
+                                                         styleClass="doc-action-btn"/>
                                         <p:commandButton value=""
                                                          title="Télécharger"
                                                          icon="pi pi-download"
@@ -350,7 +351,7 @@
                                                          ajax="false"
                                                          process="@this"
                                                          onclick="this.form.target='';"
-                                                         styleClass="doc-action-icon"/>
+                                                         styleClass="doc-action-btn"/>
                                     </div>
                                 </p:column>
                             </p:dataTable>

@@ -32,20 +32,52 @@
             .modifier-actions {
                 margin-top: 16px;
                 display: flex;
-                justify-content: center;
+                justify-content: flex-end;
                 gap: 10px;
+                flex-wrap: wrap;
             }
 
-            .modifier-btn.ui-button.ui-widget {
+            .modifier-btn.ui-button.ui-widget,
+            .modifier-btn.ui-button.ui-widget.ui-state-default {
                 min-height: 34px;
-                border-radius: 8px;
-                padding: 0;
+                min-width: 92px;
+                padding: 0 !important;
+                border-radius: 8px !important;
                 font-weight: 700;
+                font-size: .82rem;
+                letter-spacing: .2px;
+                cursor: pointer;
+                box-shadow: none !important;
+                border: none !important;
+                background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2)) !important;
+                color: #fff !important;
             }
 
-            .modifier-btn.ui-button.ui-widget .ui-button-text {
-                padding: 7px 16px;
+            .modifier-btn.ui-button.ui-widget .ui-button-text,
+            .modifier-btn.ui-button.ui-widget.ui-state-default .ui-button-text {
+                padding: 7px 16px !important;
                 font-size: .82rem;
+                line-height: 1 !important;
+            }
+
+            .modifier-btn.ui-button.ui-widget:hover,
+            .modifier-btn.ui-button.ui-widget.ui-state-default:hover {
+                filter: brightness(1.03);
+                transform: translateY(-1px);
+            }
+
+            .modifier-cancel.ui-button.ui-widget,
+            .modifier-cancel.ui-button.ui-widget.ui-state-default {
+                border: 1px solid #d46a6a !important;
+                background: #fff5f5 !important;
+                color: #b21e1e !important;
+                box-shadow: none !important;
+            }
+
+            .modifier-cancel.ui-button.ui-widget:hover,
+            .modifier-cancel.ui-button.ui-widget.ui-state-default:hover {
+                background: #ffe9e9;
+                filter: brightness(0.99);
             }
 
             .modifier-boite-picker {
@@ -67,17 +99,37 @@
             }
 
             .modifier-boite-add-btn.ui-button.ui-widget {
-                min-width: 42px;
-                width: 42px;
-                height: 42px;
-                border-radius: 10px;
+                min-width: 43px;
+                width: 43px;
+                height: 43px;
+                padding: 0 !important;
+                border-radius: 8px;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
+                border: none !important;
+                background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2)) !important;
+                color: #fff !important;
+                box-shadow: 0 4px 12px rgba(0, 123, 174, .16) !important;
+                flex: 0 0 43px;
             }
 
             .modifier-boite-add-btn.ui-button.ui-widget .ui-button-text {
-                padding: 0;
+                display: none;
+            }
+
+            .modifier-boite-add-btn.ui-button.ui-widget .ui-icon,
+            .modifier-boite-add-btn.ui-button.ui-widget .pi {
+                position: static;
+                margin: 0;
+                font-size: 1.5rem;
+                line-height: 1;
+            }
+
+            .modifier-boite-add-btn.ui-button.ui-widget:hover,
+            .modifier-boite-add-btn.ui-button.ui-widget.ui-state-default:hover {
+                filter: brightness(1.03);
+                transform: translateY(-1px);
             }
 
             .modifier-boite-help {
@@ -112,12 +164,13 @@
             }
 
             .modifier-boite-chip-remove.ui-button.ui-widget {
-                width: 24px;
-                height: 24px;
-                min-width: 24px;
-                border-radius: 999px;
-                background: #d94b4b;
-                border-color: #d94b4b;
+                width: 28px;
+                height: 28px;
+                min-width: 28px;
+                border-radius: 8px;
+                background: #fff5f5;
+                border: 1px solid #f0b1b1;
+                color: #b21e1e;
             }
 
             .modifier-boite-chip-remove.ui-button.ui-widget .ui-button-text {
@@ -126,8 +179,13 @@
 
             .modifier-boite-chip-remove.ui-button.ui-widget .ui-icon,
             .modifier-boite-chip-remove.ui-button.ui-widget .pi {
-                color: #ffffff;
+                color: #b21e1e;
                 font-size: 1rem;
+            }
+
+            .modifier-boite-chip-remove.ui-button.ui-widget:hover,
+            .modifier-boite-chip-remove.ui-button.ui-widget.ui-state-default:hover {
+                background: #ffe9e9;
             }
 
             .modifier-boite-chip-empty {
@@ -165,7 +223,7 @@
             }
 
             .modifier-confirm .ui-dialog-titlebar .ui-dialog-title:before {
-                content: "⚠";
+                content: "\26A0";
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -178,26 +236,103 @@
             .modifier-confirm .ui-button.ui-widget {
                 border-radius: 8px;
                 font-weight: 700;
-                min-width: 120px;
+                min-width: 92px;
             }
 
-            .modifier-confirm .confirm-yes.ui-button.ui-widget {
-                background: #ffffff;
-                border: 1px solid #5bb6b3;
-                color: #4aa6a3;
-                box-shadow: none;
-            }
-
-            .modifier-confirm .confirm-no.ui-button.ui-widget {
-                background: #ffffff;
-                border: 1px solid #eb0a0a;
-                color: #eb0a0a;
-                box-shadow: none;
+            .modifier-confirm .confirm-yes.ui-button.ui-widget,
+            .modifier-confirm .confirm-yes.ui-button.ui-widget.ui-state-default {
+                border: none !important;
+                background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2)) !important;
+                color: #fff !important;
+                box-shadow: 0 4px 12px rgba(0, 123, 174, .16) !important;
             }
 
             .modifier-confirm .confirm-yes.ui-button.ui-widget:hover,
-            .modifier-confirm .confirm-no.ui-button.ui-widget:hover {
-                filter: brightness(0.98);
+            .modifier-confirm .confirm-yes.ui-button.ui-widget.ui-state-default:hover {
+                filter: brightness(1.03);
+                transform: translateY(-1px);
+            }
+
+            .modifier-confirm .modifier-cancel.ui-button.ui-widget,
+            .modifier-confirm .modifier-cancel.ui-button.ui-widget.ui-state-default {
+                border: 1px solid #d46a6a !important;
+                background: #fff5f5 !important;
+                color: #b21e1e !important;
+                box-shadow: none !important;
+            }
+
+            .modifier-confirm .modifier-cancel.ui-button.ui-widget:hover,
+            .modifier-confirm .modifier-cancel.ui-button.ui-widget.ui-state-default:hover {
+                background: #ffe9e9 !important;
+                filter: brightness(0.99);
+            }
+
+            .modifier-dialog-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(8, 30, 48, .46);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 18px;
+                z-index: 2600;
+            }
+
+            .modifier-dialog-overlay.is-open {
+                display: flex;
+            }
+
+            .modifier-dialog-panel {
+                width: min(520px, 100%);
+                background: #fff;
+                border-radius: 14px;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, .22);
+                overflow: hidden;
+            }
+
+            .modifier-dialog-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 14px 18px;
+                border-bottom: 1px solid #e6edf5;
+                background: linear-gradient(180deg, #ffffff, #f7fbff);
+            }
+
+            .modifier-dialog-title {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                font-weight: 800;
+                color: #1a3f5f;
+            }
+
+            .modifier-dialog-title:before {
+                content: "\26A0";
+                color: #b12b2b;
+            }
+
+            .modifier-dialog-close {
+                border: 0;
+                background: transparent;
+                color: #7a8794;
+                font-size: 1.2rem;
+                cursor: pointer;
+                line-height: 1;
+            }
+
+            .modifier-dialog-body {
+                padding: 18px 20px 20px;
+                color: #35506b;
+            }
+
+            .modifier-dialog-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 16px;
+                flex-wrap: wrap;
             }
         </style>
 
@@ -245,24 +380,36 @@
                                                  styleClass="modifier-btn"
                                                  action="#{modifierArchivesBean.search}"
                                                  process="@form"
-                                                 update="@form"/>
+                                                 update="@form"
+                                                 oncomplete="if (window.btkResetModifierDirty) { window.btkResetModifierDirty(); }"/>
                                 <p:commandButton value="Effacer"
                                                  styleClass="modifier-btn"
                                                  action="#{modifierArchivesBean.clear}"
                                                  process="@this"
-                                                 update="@form"/>
+                                                 update="@form"
+                                                 oncomplete="if (window.btkResetModifierDirty) { window.btkResetModifierDirty(); }"/>
                             </div>
                         </div>
                     </div>
 
-                    <div class="modifier-result #{modifierArchivesBean.resultLoaded ? 'modifier-ready' : 'modifier-empty'}">
+                    <h:panelGroup id="modifierResultPanel"
+                                  layout="block"
+                                  styleClass="modifier-result #{modifierArchivesBean.resultLoaded ? 'modifier-ready' : 'modifier-empty'}">
+                        <input type="hidden" id="modifierDirtyFlag" value="0"/>
+                        <f:passThroughAttribute name="data-original-portefeuille" value="#{modifierArchivesBean.originalPortefeuille}"/>
+                        <f:passThroughAttribute name="data-original-pin" value="#{modifierArchivesBean.originalPin}"/>
+                        <f:passThroughAttribute name="data-original-relation" value="#{modifierArchivesBean.originalRelation}"/>
+                        <f:passThroughAttribute name="data-original-charge" value="#{modifierArchivesBean.originalCharge}"/>
+                        <f:passThroughAttribute name="data-original-type-archive" value="#{modifierArchivesBean.originalTypeArchive}"/>
+                        <f:passThroughAttribute name="data-original-boites" value="#{modifierArchivesBean.originalBoitesCsv}"/>
                         <div class="form-section-title">Informations client</div>
                         <div class="form-grid two-cols">
                             <div class="form-row">
                                 <h:outputLabel for="portefeuille" value="Portefeuille"/>
                                 <h:selectOneMenu id="portefeuille"
                                                  value="#{modifierArchivesBean.portefeuille}"
-                                                 disabled="#{not modifierArchivesBean.resultLoaded}">
+                                                 disabled="#{not modifierArchivesBean.resultLoaded}"
+                                                 onchange="if (window.btkMarkModifierDirty) { window.btkMarkModifierDirty(); }">
                                     <f:selectItem itemLabel="Choisir" itemValue="#{null}" noSelectionOption="true"/>
                                     <f:selectItem itemLabel="BTK - Cédé" itemValue="BTK - Cédé"/>
                                     <f:selectItem itemLabel="BTK - Radié" itemValue="BTK - Radié"/>
@@ -275,21 +422,26 @@
                                 <h:outputLabel for="pin" value="Pin Client"/>
                                 <h:inputText id="pin"
                                              value="#{modifierArchivesBean.pin}"
-                                             disabled="#{not modifierArchivesBean.resultLoaded}"/>
+                                             disabled="#{not modifierArchivesBean.resultLoaded}"
+                                             oninput="if (window.btkMarkModifierDirty) { window.btkMarkModifierDirty(); }"
+                                             onchange="if (window.btkMarkModifierDirty) { window.btkMarkModifierDirty(); }"/>
                             </div>
 
                             <div class="form-row">
                                 <h:outputLabel for="relation" value="Relation"/>
                                 <h:inputText id="relation"
                                              value="#{modifierArchivesBean.relation}"
-                                             disabled="#{not modifierArchivesBean.resultLoaded}"/>
+                                             disabled="#{not modifierArchivesBean.resultLoaded}"
+                                             oninput="if (window.btkMarkModifierDirty) { window.btkMarkModifierDirty(); }"
+                                             onchange="if (window.btkMarkModifierDirty) { window.btkMarkModifierDirty(); }"/>
                             </div>
 
                             <div class="form-row">
                                 <h:outputLabel for="charge" value="Chargé"/>
                                 <h:selectOneMenu id="charge"
                                                  value="#{modifierArchivesBean.charge}"
-                                                 disabled="#{not modifierArchivesBean.resultLoaded}">
+                                                 disabled="#{not modifierArchivesBean.resultLoaded}"
+                                                 onchange="if (window.btkMarkModifierDirty) { window.btkMarkModifierDirty(); }">
                                     <f:selectItem itemLabel="Choisir" itemValue="#{null}" noSelectionOption="true"/>
                                     <f:selectItems value="#{modifierArchivesBean.consultationOptions}"
                                                    var="chargeOption"
@@ -302,7 +454,8 @@
                                 <h:outputLabel for="typeArchive" value="Type archive"/>
                                 <h:selectOneMenu id="typeArchive"
                                                  value="#{modifierArchivesBean.typeArchive}"
-                                                 disabled="#{not modifierArchivesBean.resultLoaded}">
+                                                 disabled="#{not modifierArchivesBean.resultLoaded}"
+                                                 onchange="if (window.btkMarkModifierDirty) { window.btkMarkModifierDirty(); }">
                                     <f:selectItem itemLabel="Choisir" itemValue="#{null}" noSelectionOption="true"/>
                                     <f:selectItem itemLabel="Courant" itemValue="courant"/>
                                     <f:selectItem itemLabel="Intermédiaire" itemValue="intermediaire"/>
@@ -344,7 +497,8 @@
                                                          process="@this boite"
                                                          update="boitesPanel boite messages"
                                                          disabled="#{not modifierArchivesBean.resultLoaded}"
-                                                         styleClass="modifier-boite-add-btn modifier-btn"/>
+                                                         styleClass="modifier-boite-add-btn"
+                                                         onclick="if (window.btkMarkModifierDirty) { window.btkMarkModifierDirty(); }"/>
                                     </div>
                                     <ui:fragment rendered="#{not empty modifierArchivesBean.selectedBoites}">
                                         <div class="modifier-boite-chip-list">
@@ -356,7 +510,8 @@
                                                                      action="#{modifierArchivesBean.removeBoiteSelection}"
                                                                      process="@this"
                                                                      update="boitesPanel boite messages"
-                                                                     styleClass="modifier-boite-chip-remove ui-button-icon-only">
+                                                                     styleClass="modifier-boite-chip-remove ui-button-icon-only"
+                                                                     onclick="if (window.btkMarkModifierDirty) { window.btkMarkModifierDirty(); }">
                                                         <f:setPropertyActionListener target="#{modifierArchivesBean.boiteToRemove}" value="#{item}"/>
                                                     </p:commandButton>
                                                 </div>
@@ -369,40 +524,83 @@
                                 </h:panelGroup>
                             </div>
                         </div>
-                    </div>
+                    </h:panelGroup>
 
                     <div class="modifier-actions">
                         <p:commandButton value="Confirmer"
                                          styleClass="modifier-btn"
-                                         type="button"
                                          disabled="#{not modifierArchivesBean.resultLoaded}"
-                                         onclick="PF('confirmModificationDialog').show()"/>
+                                         actionListener="#{modifierArchivesBean.prepareConfirmModification}"
+                                         process="@form"
+                                         update="messages"
+                                         oncomplete="if (args &amp;&amp; args.openDialog) { var overlay=document.getElementById('modifierConfirmOverlay')||document.querySelector('[id$=\'modifierConfirmOverlay\']'); if (overlay) { overlay.classList.add('is-open'); } }"/>
+                        <p:commandButton value="Annuler"
+                                         styleClass="modifier-btn modifier-cancel"
+                                         disabled="#{not modifierArchivesBean.resultLoaded}"
+                                         actionListener="#{modifierArchivesBean.prepareCancelModification}"
+                                         process="@form"
+                                         update="messages"
+                                         oncomplete="if (args &amp;&amp; args.openDialog) { var overlay=document.getElementById('modifierCancelOverlay')||document.querySelector('[id$=\'modifierCancelOverlay\']'); if (overlay) { overlay.classList.add('is-open'); } }"/>
                     </div>
 
-                    <p:confirmDialog header="Confirmation"
-                                     widgetVar="confirmModificationDialog"
-                                     styleClass="modifier-confirm"
-                                     modal="true"
-                                     resizable="false"
-                                     appendTo="@(body)">
-                        <p:outputPanel style="margin-bottom: 12px;">
-                            Confirmer la modification du dossier ?
-                        </p:outputPanel>
-                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                            <p:commandButton value="Oui"
-                                             styleClass="modifier-btn confirm-yes"
-                                             action="#{modifierArchivesBean.save}"
-                                             process="@form"
-                                             update="@form"
-                                             oncomplete="PF('confirmModificationDialog').hide()"/>
-                            <p:commandButton value="Annuler"
-                                             styleClass="modifier-btn confirm-no"
-                                             action="#{modifierArchivesBean.clear}"
-                                             process="@this"
-                                             update="@form"
-                                             oncomplete="PF('confirmModificationDialog').hide()"/>
+                    <div id="modifierConfirmOverlay" class="modifier-dialog-overlay"
+                         onclick="if (event.target === this) { this.classList.remove('is-open'); }">
+                        <div class="modifier-dialog-panel modifier-confirm" role="dialog" aria-modal="true" aria-labelledby="modifierConfirmTitle"
+                             onclick="event.stopPropagation();">
+                            <div class="modifier-dialog-header">
+                                <span id="modifierConfirmTitle" class="modifier-dialog-title">Confirmation</span>
+                                <button type="button" class="modifier-dialog-close"
+                                        onclick="document.getElementById('modifierConfirmOverlay').classList.remove('is-open'); return false;">x</button>
+                            </div>
+                            <div class="modifier-dialog-body">
+                                <div style="font-weight:600; margin-bottom:6px;">
+                                    Confirmer la modification du dossier ?
+                                </div>
+                                <div class="modifier-dialog-actions">
+                                    <p:commandButton value="Oui"
+                                                     styleClass="modifier-btn confirm-yes"
+                                                     action="#{modifierArchivesBean.save}"
+                                                     process="@this modifierResultPanel"
+                                                     update="@form"
+                                                     oncomplete="window.scrollTo(0,0); if (window.btkResetModifierDirty) { window.btkResetModifierDirty(); } if (window.btkCloseModifierConfirmDialog) { window.btkCloseModifierConfirmDialog(); }"/>
+                                    <p:commandButton value="Annuler"
+                                                     type="button"
+                                                     styleClass="modifier-btn modifier-cancel"
+                                                     onclick="return btkCloseModifierConfirmDialog();"/>
+                                </div>
+                            </div>
                         </div>
-                    </p:confirmDialog>
+                    </div>
+
+                    <div id="modifierCancelOverlay" class="modifier-dialog-overlay"
+                         onclick="if (event.target === this) { this.classList.remove('is-open'); }">
+                        <div class="modifier-dialog-panel modifier-confirm" role="dialog" aria-modal="true" aria-labelledby="modifierCancelTitle"
+                             onclick="event.stopPropagation();">
+                            <div class="modifier-dialog-header">
+                                <span id="modifierCancelTitle" class="modifier-dialog-title">Annulation</span>
+                                <button type="button" class="modifier-dialog-close"
+                                        onclick="document.getElementById('modifierCancelOverlay').classList.remove('is-open'); return false;">x</button>
+                            </div>
+                            <div class="modifier-dialog-body">
+                                <div style="font-weight:600; margin-bottom:6px;">
+                                    Confirmer l'annulation des modifications du dossier ?
+                                </div>
+                                <div class="modifier-dialog-actions">
+                                    <p:commandButton value="Oui"
+                                                     styleClass="modifier-btn confirm-yes"
+                                                     action="#{modifierArchivesBean.clear}"
+                                                     immediate="true"
+                                                     process="@this"
+                                                     update="@form"
+                                                     oncomplete="window.scrollTo(0,0); if (window.btkResetModifierDirty) { window.btkResetModifierDirty(); } if (window.btkCloseModifierCancelDialog) { window.btkCloseModifierCancelDialog(); }"/>
+                                    <p:commandButton value="Annuler"
+                                                     type="button"
+                                                     styleClass="modifier-btn modifier-cancel"
+                                                     onclick="return btkCloseModifierCancelDialog();"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <p:dialog header="Information"
                               widgetVar="modifierNotFoundDialog"
@@ -412,6 +610,153 @@
                               appendTo="@(body)">
                         <h:outputText value="Aucun dossier trouvé."/>
                     </p:dialog>
+
+                    <h:outputScript target="body">
+                        (function () {
+                            function byIdOrSuffix(id) {
+                                var exact = document.getElementById(id);
+                                if (exact) {
+                                    return exact;
+                                }
+                                return document.querySelector('[id$="' + id + '"]');
+                            }
+
+                            function clean(value) {
+                                return String(value == null ? '' : value).trim();
+                            }
+
+                            var modifierDirty = false;
+
+                            function dirtyFlagEl() {
+                                return byIdOrSuffix('modifierDirtyFlag');
+                            }
+
+                            function markModifierDirty() {
+                                modifierDirty = true;
+                                var flag = dirtyFlagEl();
+                                if (flag) {
+                                    flag.value = '1';
+                                }
+                            }
+
+                            function resetModifierDirty() {
+                                modifierDirty = false;
+                                var flag = dirtyFlagEl();
+                                if (flag) {
+                                    flag.value = '0';
+                                }
+                            }
+
+                            function isInsideModifierResult(target) {
+                                var resultPanel = byIdOrSuffix('modifierResultPanel');
+                                return !!(resultPanel &amp;&amp; target &amp;&amp; resultPanel.contains(target));
+                            }
+
+                            document.addEventListener('input', function (event) {
+                                if (isInsideModifierResult(event.target)) {
+                                    markModifierDirty();
+                                }
+                            }, true);
+
+                            document.addEventListener('change', function (event) {
+                                if (isInsideModifierResult(event.target)) {
+                                    markModifierDirty();
+                                }
+                            }, true);
+
+                            function currentValue(id) {
+                                var input = byIdOrSuffix(id);
+                                return input ? clean(input.value) : '';
+                            }
+
+                            function originalValue(attributeName) {
+                                var resultPanel = byIdOrSuffix('modifierResultPanel');
+                                return resultPanel ? clean(resultPanel.getAttribute('data-original-' + attributeName)) : '';
+                            }
+
+                            function currentBoitesCsv() {
+                                var panel = byIdOrSuffix('boitesPanel');
+                                if (!panel) {
+                                    return '';
+                                }
+
+                                var chips = panel.querySelectorAll('.modifier-boite-chip span');
+                                var values = [];
+                                for (var i = 0; i &lt; chips.length; i++) {
+                                    var text = clean(chips[i].textContent);
+                                    if (!text) {
+                                        continue;
+                                    }
+                                    text = text.replace(/^Boite\s*/i, '').trim();
+                                    if (text) {
+                                        values.push(text);
+                                    }
+                                }
+
+                                values.sort(function (a, b) {
+                                    return parseInt(a, 10) - parseInt(b, 10);
+                                });
+                                return values.join(', ');
+                            }
+
+                            function hasModifierChanges() {
+                                var resultPanel = byIdOrSuffix('modifierResultPanel');
+                                if (!resultPanel || resultPanel.classList.contains('modifier-empty')) {
+                                    return false;
+                                }
+                                return currentValue('portefeuille') !== originalValue('portefeuille')
+                                    || currentValue('pin') !== originalValue('pin')
+                                    || currentValue('relation') !== originalValue('relation')
+                                    || currentValue('charge') !== originalValue('charge')
+                                    || currentValue('typeArchive') !== originalValue('type-archive')
+                                    || currentValue('boite') !== ''
+                                    || currentBoitesCsv() !== originalValue('boites');
+                            }
+
+                            window.btkOpenModifierConfirmDialog = function () {
+                                if (!hasModifierChanges()) {
+                                    return false;
+                                }
+                                var overlay = byIdOrSuffix('modifierConfirmOverlay');
+                                if (overlay) {
+                                    overlay.classList.add('is-open');
+                                }
+                                return false;
+                            };
+
+                            window.btkCloseModifierConfirmDialog = function () {
+                                var overlay = byIdOrSuffix('modifierConfirmOverlay');
+                                if (overlay) {
+                                    overlay.classList.remove('is-open');
+                                }
+                                return false;
+                            };
+
+                            window.btkOpenModifierCancelDialog = function () {
+                                if (!hasModifierChanges()) {
+                                    return false;
+                                }
+                                var overlay = byIdOrSuffix('modifierCancelOverlay');
+                                if (overlay) {
+                                    overlay.classList.add('is-open');
+                                }
+                                return false;
+                            };
+
+                            window.btkCloseModifierCancelDialog = function () {
+                                var overlay = byIdOrSuffix('modifierCancelOverlay');
+                                if (overlay) {
+                                    overlay.classList.remove('is-open');
+                                }
+                                return false;
+                            };
+
+                            window.btkMarkModifierDirty = markModifierDirty;
+                            window.btkResetModifierDirty = resetModifierDirty;
+                            window.btkModifierHasChanges = hasModifierChanges;
+                        })();
+                    </h:outputScript>
+
                 </h:form>
             </div>
         </div>

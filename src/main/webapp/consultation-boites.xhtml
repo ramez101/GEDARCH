@@ -210,14 +210,14 @@
                                          action="#{consultationBoitesBean.search}"
                                          process="@form"
                                          update="@form"
-                                         styleClass="boites-search-btn"/>
+                                         styleClass="docs-btn docs-btn-primary"/>
                                 <p:commandButton value=""
                                          action="#{consultationBoitesBean.clear}"
                                          process="@this"
                                          update="@form"
                                          icon="pi pi-times"
                                          title="Clean"
-                                         styleClass="boites-clear-btn"/>
+                                         styleClass="doc-action-btn doc-delete"/>
                             </div>
                         </div>
                     </div>
@@ -243,7 +243,7 @@
                                                          update="dossierInfoPanel"
                                                          oncomplete="PF('boiteDossierDialog').show();"
                                                          title="Visualiser dossier"
-                                                         styleClass="boites-view-btn">
+                                                         styleClass="doc-action-btn">
                                             <f:setPropertyActionListener value="#{dossier}"
                                                                          target="#{consultationBoitesBean.selectedDossier}"/>
                                         </p:commandButton>

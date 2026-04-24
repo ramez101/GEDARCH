@@ -51,17 +51,31 @@
             }
 
             .fiche-preview-btn.ui-button.ui-widget {
-                border: 1px solid #7ea6d3;
-                background: #fff;
-                color: #153b5a;
                 font-weight: 700;
                 min-width: 160px;
-                border-radius: 4px;
+                border-radius: 8px;
             }
 
             .fiche-preview-btn.ui-button.ui-widget .ui-button-text {
                 font-size: .82rem;
-                padding: 8px 12px;
+                padding: 7px 12px;
+            }
+
+            .fiche-preview-btn-active.ui-button.ui-widget {
+                min-width: 160px;
+            }
+
+            .fiche-preview-btn-disabled.ui-button.ui-widget {
+                border: 1px solid #ced8e4;
+                background: #eef2f6;
+                color: #97a3b2;
+                box-shadow: none;
+                opacity: 1;
+                min-width: 160px;
+            }
+
+            .fiche-preview-btn-disabled.ui-button.ui-widget:hover {
+                background: #eef2f6;
             }
 
             .fiche-preview-card {
@@ -132,14 +146,15 @@
                                                  value="Rechercher"
                                                  action="#{ficheDossierBean.search}"
                                                  process="@form"
-                                                 update="@form"/>
+                                                 update="@form"
+                                                 styleClass="docs-btn docs-btn-primary"/>
                                 <p:commandButton value=""
                                                  action="#{ficheDossierBean.clear}"
                                                  process="@this"
                                                  update="@form"
                                                  icon="pi pi-times"
                                                  title="Clean"
-                                                 styleClass="danger-icon-btn"/>
+                                                 styleClass="doc-action-btn doc-delete"/>
                             </div>
                         </div>
                     </div>
@@ -147,7 +162,7 @@
                     <div class="fiche-preview-actions">
                         <p:commandButton value="Apercu fiche"
                                          type="button"
-                                         styleClass="fiche-preview-btn"
+                                         styleClass="#{ficheDossierBean.resultLoaded ? 'docs-btn docs-btn-primary fiche-preview-btn fiche-preview-btn-active' : 'docs-btn fiche-preview-btn fiche-preview-btn-disabled'}"
                                          disabled="#{not ficheDossierBean.resultLoaded}"
                                          onclick="PF('fichePreviewDialog').show();"/>
                     </div>
@@ -173,7 +188,7 @@
                                              action="#{ficheDossierBean.downloadPdf}"
                                              ajax="false"
                                              process="@this"
-                                             styleClass="fiche-preview-btn"/>
+                                             styleClass="docs-btn docs-btn-primary"/>
                         </div>
                         <div class="fiche-preview-card">
                             <div class="fiche-preview-title">Resume dossier</div>

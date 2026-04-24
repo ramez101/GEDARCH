@@ -1,7 +1,10 @@
 package com.btk.bean;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +27,7 @@ import com.btk.util.FilialeUtil;
 
 import jakarta.annotation.Resource;
 import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
@@ -69,6 +73,7 @@ public class AjoutArchivesBean implements Serializable {
 
     private String docsPayload;
     private List<DocumentRow> existingDocuments = Collections.emptyList();
+    private DocumentRow selectedExistingDocument;
     private final Map<Long, PendingDelete> pendingDeletes = new LinkedHashMap<>();
 
     public void search() {
@@ -280,6 +285,10 @@ public class AjoutArchivesBean implements Serializable {
         pendingDeletes.put(doc.getIdDocument(),
                 new PendingDelete(doc.getIdDocument(), doc.getDocument(), doc.getPath()));
 
+        if (selectedExistingDocument != null && doc.getIdDocument().equals(selectedExistingDocument.getIdDocument())) {
+            selectedExistingDocument = null;
+        }
+
         List<DocumentRow> remaining = new ArrayList<>();
         for (DocumentRow row : existingDocuments) {
             if (!doc.getIdDocument().equals(row.getIdDocument())) {
@@ -291,6 +300,71 @@ public class AjoutArchivesBean implements Serializable {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO,
                         "Document marqué pour suppression. Cliquez sur Confirmer pour valider.", null));
+    }
+
+    public void viewExistingDocument(DocumentRow doc) {
+        if (doc == null) {
+            selectedExistingDocument = null;
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Document introuvable.", null));
+            return;
+        }
+        selectedExistingDocument = doc;
+    }
+
+    public void downloadExistingDocument(DocumentRow doc) {
+        streamExistingDocument(doc, true);
+    }
+
+    private void streamExistingDocument(DocumentRow doc, boolean download) {
+        if (doc == null || doc.getPath() == null || doc.getPath().isBlank()
+                || doc.getDocument() == null || doc.getDocument().isBlank()) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Document introuvable.", null));
+            return;
+        }
+
+        Path filePath = Paths.get(doc.getPath()).resolve(doc.getDocument()).normalize();
+        if (!Files.exists(filePath) || !Files.isRegularFile(filePath)) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Fichier non trouvé sur le serveur.", null));
+            return;
+        }
+
+        FacesContext ctx = FacesContext.getCurrentInstance();
+        ExternalContext ext = ctx.getExternalContext();
+
+        try {
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null || contentType.isBlank()) {
+                contentType = "application/octet-stream";
+            }
+
+            String fileName = filePath.getFileName().toString();
+            String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
+            String disposition = (download ? "attachment" : "inline") + "; filename*=UTF-8''" + encodedFileName;
+            long fileSize = Files.size(filePath);
+
+            ext.responseReset();
+            ext.setResponseContentType(contentType);
+            if (fileSize <= Integer.MAX_VALUE) {
+                ext.setResponseContentLength((int) fileSize);
+            } else {
+                ext.setResponseHeader("Content-Length", String.valueOf(fileSize));
+            }
+            ext.setResponseHeader("Content-Disposition", disposition);
+            ext.setResponseHeader("X-Content-Type-Options", "nosniff");
+
+            try (OutputStream out = ext.getResponseOutputStream()) {
+                Files.copy(filePath, out);
+                out.flush();
+            }
+            ctx.responseComplete();
+        } catch (IOException e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Erreur lecture fichier : " + e.getMessage(), null));
+        }
     }
 
     private void cleanupDeletedFile(PendingDelete pendingDelete) {
@@ -362,6 +436,7 @@ public class AjoutArchivesBean implements Serializable {
                 .setParameter("nom", dossierName.toUpperCase(Locale.ROOT))
                 .getResultList();
 
+        selectedExistingDocument = null;
         if (rows.isEmpty()) {
             existingDocuments = Collections.emptyList();
             return;
@@ -656,6 +731,7 @@ public class AjoutArchivesBean implements Serializable {
         boite = null;
         dossierLoaded = false;
         existingDocuments = Collections.emptyList();
+        selectedExistingDocument = null;
         pendingDeletes.clear();
     }
 
@@ -718,8 +794,24 @@ public class AjoutArchivesBean implements Serializable {
         this.docsPayload = docsPayload;
     }
 
+    public String getCurrentUserLabel() {
+        return resolveUtilisateur();
+    }
+
     public List<DocumentRow> getExistingDocuments() {
         return existingDocuments;
+    }
+
+    public DocumentRow getSelectedExistingDocument() {
+        return selectedExistingDocument;
+    }
+
+    public void setSelectedExistingDocument(DocumentRow selectedExistingDocument) {
+        this.selectedExistingDocument = selectedExistingDocument;
+    }
+
+    public int getPendingDeleteCount() {
+        return pendingDeletes.size();
     }
 
     private String resolveSessionFiliale() {

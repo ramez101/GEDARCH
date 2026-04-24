@@ -261,6 +261,13 @@
             white-space: nowrap;
         }
 
+        .brand-helonik {
+            font-family: 'Helonik Extended', 'Helvetica Neue Extended', 'Helvetica Neue', Arial, sans-serif;
+            font-stretch: expanded;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
         .nav-user {
             display: flex;
             align-items: center;
@@ -690,17 +697,232 @@
             height: 1px;
             opacity: 0;
         }
-        .upload-btn {
-            border: none;
-            background: #2f6fb8;
-            color: #fff;
-            padding: 7px 14px;
-            border-radius: 6px;
-            font-weight: 600;
+        .btn-primary,
+        .upload-btn,
+        .ui-button-secondary,
+        .ui-button-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            min-width: 92px;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: .82rem;
+            letter-spacing: .2px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(47, 111, 184, .25);
+            line-height: 1;
+            text-decoration: none;
+            transition: transform .18s ease, filter .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
         }
-        .upload-btn:hover { filter: brightness(1.05); }
+
+        button.btn-primary,
+        input.btn-primary,
+        label.btn-primary,
+        button.upload-btn,
+        label.upload-btn {
+            border: none;
+            background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 123, 174, .16);
+        }
+
+        .btn-primary.ui-button.ui-widget,
+        .btn-primary.ui-button.ui-widget.ui-state-default,
+        .upload-btn.ui-button.ui-widget,
+        .upload-btn.ui-button.ui-widget.ui-state-default {
+            border: none !important;
+            background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2)) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 12px rgba(0, 123, 174, .16) !important;
+        }
+
+        .btn-primary.ui-button.ui-widget .ui-button-text,
+        .btn-primary.ui-button.ui-widget.ui-state-default .ui-button-text,
+        .upload-btn.ui-button.ui-widget .ui-button-text,
+        .upload-btn.ui-button.ui-widget.ui-state-default .ui-button-text,
+        .ui-button-secondary.ui-button.ui-widget .ui-button-text,
+        .ui-button-secondary.ui-button.ui-widget.ui-state-default .ui-button-text,
+        .ui-button-danger.ui-button.ui-widget .ui-button-text,
+        .ui-button-danger.ui-button.ui-widget.ui-state-default .ui-button-text {
+            padding: 7px 16px !important;
+            font-size: .82rem !important;
+            line-height: 1 !important;
+        }
+
+        .btn-primary:hover,
+        .upload-btn:hover {
+            filter: brightness(1.03);
+            transform: translateY(-1px);
+        }
+
+        .ui-button-secondary,
+        .ui-button-danger {
+            border: 1px solid #d46a6a;
+            background: #fff5f5;
+            color: #b21e1e;
+            box-shadow: none;
+        }
+
+        .ui-button-secondary.ui-button.ui-widget,
+        .ui-button-secondary.ui-button.ui-widget.ui-state-default,
+        .ui-button-danger.ui-button.ui-widget,
+        .ui-button-danger.ui-button.ui-widget.ui-state-default {
+            border: 1px solid #d46a6a !important;
+            background: #fff5f5 !important;
+            color: #b21e1e !important;
+            box-shadow: none !important;
+        }
+
+        .ui-button-secondary:hover,
+        .ui-button-danger:hover,
+        .ui-button-secondary.ui-button.ui-widget:hover,
+        .ui-button-secondary.ui-button.ui-widget.ui-state-default:hover,
+        .ui-button-danger.ui-button.ui-widget:hover,
+        .ui-button-danger.ui-button.ui-widget.ui-state-default:hover {
+            background: #ffe9e9 !important;
+        }
+
+        .btn-primary.ui-button-icon-only,
+        .upload-btn.ui-button-icon-only,
+        .ui-button-secondary.ui-button-icon-only,
+        .ui-button-danger.ui-button-icon-only {
+            min-width: 34px !important;
+            width: 34px !important;
+            min-height: 34px !important;
+            height: 34px !important;
+            padding: 0 !important;
+            border-radius: 8px !important;
+        }
+
+        .docs-btn.ui-button.ui-widget,
+        .docs-btn.ui-button.ui-widget.ui-state-default {
+            min-height: 34px;
+            min-width: 92px;
+            padding: 0 !important;
+            border-radius: 8px !important;
+            font-weight: 700;
+            font-size: .82rem;
+            letter-spacing: .2px;
+            cursor: pointer;
+            box-shadow: none !important;
+        }
+
+        .docs-btn.ui-button.ui-widget .ui-button-text,
+        .docs-btn.ui-button.ui-widget.ui-state-default .ui-button-text {
+            padding: 7px 16px !important;
+            font-size: .82rem !important;
+            line-height: 1 !important;
+        }
+
+        .docs-btn-primary.ui-button.ui-widget,
+        .docs-btn-primary.ui-button.ui-widget.ui-state-default {
+            border: none !important;
+            background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2)) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 12px rgba(0, 123, 174, .16) !important;
+        }
+
+        .docs-btn-primary.ui-button.ui-widget:hover,
+        .docs-btn-primary.ui-button.ui-widget.ui-state-default:hover {
+            filter: brightness(1.03);
+            transform: translateY(-1px);
+        }
+
+        .docs-btn-danger.ui-button.ui-widget,
+        .docs-btn-danger.ui-button.ui-widget.ui-state-default {
+            border: 1px solid #d46a6a !important;
+            background: #fff5f5 !important;
+            color: #b21e1e !important;
+        }
+
+        .docs-btn-danger.ui-button.ui-widget:hover,
+        .docs-btn-danger.ui-button.ui-widget.ui-state-default:hover {
+            background: #ffe9e9 !important;
+        }
+
+        .doc-action-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .doc-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            padding: 0;
+            border: 1px solid #c5d9eb;
+            border-radius: 8px;
+            background: #f6fbff;
+            cursor: pointer;
+            line-height: 1;
+            font-size: 1rem;
+        }
+
+        .doc-action-btn:hover {
+            filter: brightness(0.98);
+        }
+
+        .doc-action-btn.ui-button.ui-widget .ui-button-text {
+            display: block;
+            padding: 0;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .doc-action-btn.ui-button.ui-widget,
+        .doc-action-btn.ui-button.ui-widget.ui-state-default {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px !important;
+            min-width: 32px !important;
+            height: 32px !important;
+            padding: 0 !important;
+            margin: 0;
+            border: 1px solid #c5d9eb !important;
+            border-radius: 8px !important;
+            background: #f6fbff !important;
+            color: #0d4f85 !important;
+            box-shadow: none !important;
+            cursor: pointer;
+            line-height: 1;
+            font-size: 1rem;
+        }
+
+        .doc-action-btn.ui-button.ui-widget .ui-button-text,
+        .doc-action-btn.ui-button.ui-widget.ui-state-default .ui-button-text {
+            display: block;
+            padding: 0 !important;
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1;
+            color: inherit;
+        }
+
+        .doc-action-btn.ui-button.ui-widget .ui-button-icon-left,
+        .doc-action-btn.ui-button.ui-widget .ui-icon {
+            position: static;
+            margin: 0;
+        }
+
+        .doc-action-btn.doc-delete.ui-button.ui-widget,
+        .doc-action-btn.doc-delete.ui-button.ui-widget.ui-state-default {
+            color: #b21e1e !important;
+            border-color: #f0b1b1 !important;
+            background: #fff5f5 !important;
+        }
+
+        .doc-action-btn.doc-delete.ui-button.ui-widget:hover,
+        .doc-action-btn.doc-delete.ui-button.ui-widget.ui-state-default:hover {
+            background: #ffe9e9 !important;
+        }
         @media (max-width: 900px) {
             .upload-item { grid-template-columns: 1fr; align-items: stretch; }
             .form-section.half { grid-column: 1 / -1; }
@@ -1100,7 +1322,7 @@
             <div class="navbar">
                 <div class="nav-left">
                     <button type="button" class="hamburger" onclick="BTKNav.toggle()" aria-label="Menu">☰</button>
-                    <span class="brand">BTK Bank - Garanties</span>
+                    <span class="brand brand-helonik">BTK Bank - Garanties</span>
                 </div>
                 <div class="nav-user">
                     <span>Connecté : <strong>#{loginBean.utilisateur.unix}</strong></span>
@@ -1285,6 +1507,70 @@
                 var aNoExt = a.replace(/\.xhtml$/, '');
                 var bNoExt = b.replace(/\.xhtml$/, '');
                 return aNoExt === bNoExt;
+            }
+
+            var sidebarPrefetchCache = {};
+
+            function runAfterFirstPaint(callback) {
+                if (!callback) {
+                    return;
+                }
+                if (window.requestAnimationFrame) {
+                    window.requestAnimationFrame(function () {
+                        window.requestAnimationFrame(callback);
+                    });
+                    return;
+                }
+                window.setTimeout(callback, 0);
+            }
+
+            function prefetchSidebarLink(anchor) {
+                if (!anchor) {
+                    return;
+                }
+
+                var href = String(anchor.getAttribute('href') || '').trim();
+                if (!href || href === '#') {
+                    return;
+                }
+
+                var resolvedHref = href;
+                try {
+                    resolvedHref = new URL(anchor.href, window.location.origin).href;
+                } catch (e) {
+                    resolvedHref = anchor.href || href;
+                }
+
+                if (!resolvedHref || sidebarPrefetchCache[resolvedHref]) {
+                    return;
+                }
+
+                sidebarPrefetchCache[resolvedHref] = true;
+
+                var link = document.createElement('link');
+                link.rel = 'prefetch';
+                link.href = resolvedHref;
+                link.as = 'document';
+                document.head.appendChild(link);
+            }
+
+            function wireSidebarPrefetch() {
+                var nav = document.querySelector('.nav');
+                if (!nav) {
+                    return;
+                }
+
+                var triggerPrefetch = function (event) {
+                    var target = event ? event.target : null;
+                    var anchor = target &amp;&amp; target.closest ? target.closest('a.nav-item') : null;
+                    if (anchor) {
+                        prefetchSidebarLink(anchor);
+                    }
+                };
+
+                nav.addEventListener('mouseover', triggerPrefetch, true);
+                nav.addEventListener('focusin', triggerPrefetch, true);
+                nav.addEventListener('touchstart', triggerPrefetch, { passive: true });
             }
 
             function applyActiveMenuState() {
@@ -1563,8 +1849,11 @@
                 }
             }, 350);
 
-            applyActiveMenuState();
-            hideChooseNoSelectionOptions();
+            runAfterFirstPaint(function () {
+                applyActiveMenuState();
+                hideChooseNoSelectionOptions();
+                wireSidebarPrefetch();
+            });
 
             document.addEventListener('focusin', function (event) {
                 var target = event ? event.target : null;

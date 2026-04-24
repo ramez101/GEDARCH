@@ -60,6 +60,12 @@ public class ModifierArchivesBean implements Serializable {
     private Integer boite;
     private Integer boiteToRemove;
     private List<Integer> selectedBoites = new ArrayList<>();
+    private String originalPortefeuille;
+    private String originalPin;
+    private String originalRelation;
+    private String originalCharge;
+    private String originalTypeArchive;
+    private List<Integer> originalSelectedBoites = new ArrayList<>();
 
     private List<Integer> boites = Collections.emptyList();
 
@@ -106,7 +112,7 @@ public class ModifierArchivesBean implements Serializable {
             portefeuille = dossier.getPortefeuille();
             pin = dossier.getPin();
             relation = dossier.getRelation();
-            charge = dossier.getCharge();
+            charge = resolveSelectedCharge(dossier.getCharge());
             consultationOptions = fetchConsultationOptions(charge);
             typeArchive = dossier.getTypeArchive();
             filialeId = dossier.getIdFiliale();
@@ -116,6 +122,7 @@ public class ModifierArchivesBean implements Serializable {
             boite = null;
             boiteToRemove = null;
             boites = fetchBoites();
+            captureOriginalSnapshot();
 
             PrimeFaces.current().executeScript("PF('modifierNotFoundDialog').hide()");
         } finally {
@@ -183,7 +190,7 @@ public class ModifierArchivesBean implements Serializable {
             dossier.setPortefeuille(portefeuille);
             dossier.setPin(pin);
             dossier.setRelation(relation);
-            dossier.setCharge(charge);
+            dossier.setCharge(resolveSelectedCharge(charge));
             dossier.setTypeArchive(typeArchive);
             dossier.setIdFiliale(sessionLegacyFiliale);
             dossier.setFiliale(sessionFiliale);
@@ -232,8 +239,49 @@ public class ModifierArchivesBean implements Serializable {
         boite = null;
         boiteToRemove = null;
         selectedBoites = new ArrayList<>();
+        originalPortefeuille = null;
+        originalPin = null;
+        originalRelation = null;
+        originalCharge = null;
+        originalTypeArchive = null;
+        originalSelectedBoites = new ArrayList<>();
         boites = fetchBoites();
         consultationOptions = fetchConsultationOptions();
+    }
+
+    private void captureOriginalSnapshot() {
+        originalPortefeuille = portefeuille;
+        originalPin = pin;
+        originalRelation = relation;
+        originalCharge = charge;
+        originalTypeArchive = typeArchive;
+        originalSelectedBoites = new ArrayList<>(DossierEmpUtil.normalizeBoites(selectedBoites));
+    }
+
+    public void prepareConfirmModification() {
+        PrimeFaces.current().ajax().addCallbackParam("openDialog", hasPendingChanges());
+    }
+
+    public void prepareCancelModification() {
+        PrimeFaces.current().ajax().addCallbackParam("openDialog", hasPendingChanges());
+    }
+
+    private boolean hasPendingChanges() {
+        if (!resultLoaded || dossierId == null) {
+            return false;
+        }
+
+        return !equalsNormalized(portefeuille, originalPortefeuille)
+                || !equalsNormalized(pin, originalPin)
+                || !equalsNormalized(relation, originalRelation)
+                || !equalsNormalized(charge, originalCharge)
+                || !equalsNormalized(typeArchive, originalTypeArchive)
+                || !DossierEmpUtil.normalizeBoites(resolveBoitesToSave())
+                .equals(DossierEmpUtil.normalizeBoites(originalSelectedBoites));
+    }
+
+    private boolean equalsNormalized(String left, String right) {
+        return normalize(left).equals(normalize(right));
     }
 
     private String normalizeSearchValue(String value) {
@@ -423,7 +471,7 @@ public class ModifierArchivesBean implements Serializable {
                 String cuti = normalize(toStringValue(row[0]));
                 String unix = normalize(toStringValue(row[1]));
                 String lib = normalize(toStringValue(row[2]));
-                String value = !cuti.isBlank() ? cuti : unix;
+                String value = resolveChargeValue(cuti, unix, lib);
                 if (value.isBlank()) {
                     continue;
                 }
@@ -460,6 +508,55 @@ public class ModifierArchivesBean implements Serializable {
             return displayName;
         }
         return displayName + " (" + account + ")";
+    }
+
+    private String resolveChargeValue(String cuti, String unix, String lib) {
+        String normalizedLib = normalize(lib);
+        if (!normalizedLib.isBlank()) {
+            return normalizedLib;
+        }
+        String normalizedUnix = normalize(unix);
+        if (!normalizedUnix.isBlank()) {
+            return normalizedUnix;
+        }
+        return normalize(cuti);
+    }
+
+    private String resolveSelectedCharge(String selectedCharge) {
+        String normalizedSelectedCharge = normalize(selectedCharge);
+        if (normalizedSelectedCharge.isBlank()) {
+            return normalizedSelectedCharge;
+        }
+
+        EntityManager em = getEMF().createEntityManager();
+        try {
+            String sessionFiliale = resolveSessionFiliale();
+            String sessionLegacyFiliale = resolveSessionLegacyFiliale();
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = em.createNativeQuery(
+                            "SELECT CUTI, UNIX, LIB " +
+                                    "FROM ARCH_UTILISATEURS " +
+                                    "WHERE UPPER(TRIM(ROLE)) = 'CONSULTATION' " +
+                                    "AND (LOWER(TRIM(PUTI)) = :sessionFiliale OR LOWER(TRIM(PUTI)) = :sessionLegacyFiliale)")
+                    .setParameter("sessionFiliale", sessionFiliale)
+                    .setParameter("sessionLegacyFiliale", sessionLegacyFiliale)
+                    .getResultList();
+
+            for (Object[] row : rows) {
+                String cuti = normalize(toStringValue(row[0]));
+                String unix = normalize(toStringValue(row[1]));
+                String lib = normalize(toStringValue(row[2]));
+                if (normalizedSelectedCharge.equalsIgnoreCase(cuti)
+                        || normalizedSelectedCharge.equalsIgnoreCase(unix)
+                        || normalizedSelectedCharge.equalsIgnoreCase(lib)) {
+                    return resolveChargeValue(cuti, unix, lib);
+                }
+            }
+            return normalizedSelectedCharge;
+        } finally {
+            em.close();
+        }
     }
 
     private String toStringValue(Object value) {
@@ -521,6 +618,12 @@ public class ModifierArchivesBean implements Serializable {
     public Integer getBoiteToRemove() { return boiteToRemove; }
     public void setBoiteToRemove(Integer boiteToRemove) { this.boiteToRemove = boiteToRemove; }
     public String getBoitesSummary() { return DossierEmpUtil.formatBoites(resolveBoitesToSave()); }
+    public String getOriginalPortefeuille() { return originalPortefeuille; }
+    public String getOriginalPin() { return originalPin; }
+    public String getOriginalRelation() { return originalRelation; }
+    public String getOriginalCharge() { return originalCharge; }
+    public String getOriginalTypeArchive() { return originalTypeArchive; }
+    public String getOriginalBoitesCsv() { return DossierEmpUtil.formatBoites(originalSelectedBoites); }
 
     private String resolveSessionFiliale() {
         return loginBean == null ? "" : loginBean.getCurrentFilialeCode();

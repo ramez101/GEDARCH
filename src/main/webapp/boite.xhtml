@@ -530,7 +530,7 @@
                                      oncomplete="PF('deleteBoiteRowDialog').hide()"/>
                     <p:commandButton value="Annuler"
                                      type="button"
-                                     styleClass="modifier-btn confirm-no"
+                                     styleClass="docs-btn docs-btn-danger"
                                      onclick="PF('deleteBoiteRowDialog').hide()"/>
                 </div>
             </p:confirmDialog>
@@ -580,7 +580,7 @@
                                          oncomplete="if (!args.validationFailed) PF('editBoiteDialog').hide();"/>
                         <p:commandButton value="Annuler"
                                          type="button"
-                                         styleClass="boite-btn boite-delete-btn"
+                                         styleClass="docs-btn docs-btn-danger"
                                          onclick="PF('editBoiteDialog').hide()"/>
                     </div>
                 </h:form>
@@ -633,14 +633,14 @@
 
                     <div class="boite-dialog-actions">
                         <p:commandButton value="Ajouter"
-                                         styleClass="boite-btn boite-add-btn"
+                                         styleClass="docs-btn docs-btn-primary"
                                          action="#{boiteBean.addBoite}"
                                          process="@form"
                                          update=":boiteForm:boiteTable :boiteForm:messages addBoiteForm"
                                          oncomplete="if (!args.validationFailed) PF('addBoiteDialog').hide();"/>
                         <p:commandButton value="Annuler"
                                          type="button"
-                                         styleClass="boite-btn boite-delete-btn"
+                                         styleClass="docs-btn docs-btn-danger"
                                          onclick="PF('addBoiteDialog').hide()"/>
                     </div>
                 </h:form>

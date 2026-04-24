@@ -324,6 +324,7 @@
                     '<td><div class="doc-action-buttons">' +
                     '<button type="button" class="doc-action-btn" title="Télécharger" onclick="return btkDownloadDoc(' + i + ')">&#128229;</button>' +
                     '<button type="button" class="doc-action-btn" title="Visualiser" onclick="return btkShowDocInfo(' + i + ')">&#128065;</button>' +
+                    '<button type="button" class="doc-action-btn doc-delete" title="Supprimer" onclick="return btkRemoveDoc(' + i + ')">&#128465;</button>' +
                     '</div></td>' +
                     '</tr>';
             }).join('');

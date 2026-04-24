@@ -34,6 +34,33 @@
                 background: #f8fbff;
             }
 
+            .docs-side .doc-table {
+                table-layout: fixed;
+            }
+
+            .docs-side .doc-table th:nth-child(1),
+            .docs-side .doc-table td:nth-child(1) {
+                width: 22%;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
+
+            .docs-side .doc-table th:nth-child(2),
+            .docs-side .doc-table td:nth-child(2) {
+                width: 22%;
+            }
+
+            .docs-side .doc-table th:nth-child(3),
+            .docs-side .doc-table td:nth-child(3) {
+                width: 18%;
+            }
+
+            .docs-side .doc-table th:nth-child(4),
+            .docs-side .doc-table td:nth-child(4) {
+                width: 38%;
+                text-align: center;
+            }
+
             .doc-existing-chip {
                 display: inline-flex;
                 align-items: center;
@@ -48,55 +75,113 @@
                 border: 1px solid #bad6f5;
             }
 
-            .doc-existing-delete {
-                border: none;
-                background: transparent;
-                color: #b22929;
-                font-size: 1rem;
-                line-height: 1;
-                cursor: pointer;
-                padding: 2px 4px;
+            .doc-action-buttons {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
             }
 
-            .doc-existing-delete.ui-button.ui-widget {
-                width: 28px;
-                height: 28px;
-                min-width: 28px;
-                padding: 0;
-                border-radius: 6px;
-                border: 1px solid #e8bdc1;
-                background: #fff5f6;
+            .doc-action-btn {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-            }
-
-            .doc-existing-delete.ui-button.ui-widget .ui-button-text {
-                display: none;
-            }
-
-            .doc-existing-delete.ui-button.ui-widget::before {
-                content: "🗑";
-                font-size: .95rem;
+                width: 32px;
+                height: 32px;
+                border: 1px solid #c5d9eb;
+                border-radius: 8px;
+                background: #f6fbff;
+                cursor: pointer;
                 line-height: 1;
+                font-size: 1rem;
             }
 
-            .doc-existing-delete:hover {
-                filter: brightness(1.1);
+            .doc-action-btn:hover {
+                filter: brightness(0.98);
             }
 
-            .doc-existing-delete.ui-button.ui-widget::before {
-                content: "\1F5D1";
-            }
-
-            .docs-side .doc-delete {
-                font-size: 0;
-            }
-
-            .docs-side .doc-delete::before {
-                content: "\1F5D1";
+            .doc-action-btn.ui-button.ui-widget .ui-button-text {
+                display: block;
+                padding: 0;
                 font-size: 1rem;
                 line-height: 1;
+            }
+
+            .doc-action-btn.ui-button.ui-widget,
+            .doc-action-btn.ui-button.ui-widget.ui-state-default {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 32px !important;
+                min-width: 32px !important;
+                height: 32px !important;
+                padding: 0 !important;
+                margin: 0;
+                border: 1px solid #c5d9eb !important;
+                border-radius: 8px !important;
+                background: #f6fbff !important;
+                color: #0d4f85 !important;
+                box-shadow: none !important;
+                cursor: pointer;
+                line-height: 1;
+                font-size: 1rem;
+            }
+
+            .doc-action-btn.ui-button.ui-widget .ui-button-text,
+            .doc-action-btn.ui-button.ui-widget.ui-state-default .ui-button-text {
+                display: block;
+                padding: 0 !important;
+                margin: 0;
+                font-size: 1rem;
+                line-height: 1;
+                color: inherit;
+            }
+
+            .doc-action-btn.ui-button.ui-widget .ui-button-icon-left,
+            .doc-action-btn.ui-button.ui-widget .ui-icon {
+                position: static;
+                margin: 0;
+            }
+
+            .doc-action-btn.doc-delete.ui-button.ui-widget,
+            .doc-action-btn.doc-delete.ui-button.ui-widget.ui-state-default {
+                color: #b21e1e !important;
+                border-color: #f0b1b1 !important;
+                background: #fff5f5 !important;
+            }
+
+            .doc-action-btn.doc-delete.ui-button.ui-widget:hover,
+            .doc-action-btn.doc-delete.ui-button.ui-widget.ui-state-default:hover {
+                background: #ffe9e9 !important;
+            }
+
+            .doc-info-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .doc-info-item {
+                border: 1px solid #d7e5f3;
+                border-radius: 8px;
+                padding: 10px 12px;
+                background: #f8fbff;
+            }
+
+            .doc-info-label {
+                display: block;
+                font-size: .78rem;
+                font-weight: 700;
+                color: #4f6c84;
+                margin-bottom: 4px;
+                text-transform: uppercase;
+            }
+
+            .doc-info-value {
+                display: block;
+                color: #17344d;
+                font-weight: 600;
+                word-break: break-word;
             }
 
             .upload-dialog-overlay {
@@ -105,9 +190,9 @@
                 display: none;
                 align-items: center;
                 justify-content: center;
-                padding: 24px;
-                background: rgba(11, 47, 69, 0.45);
-                z-index: 2000;
+                padding: 18px;
+                background: rgba(8, 30, 48, .46);
+                z-index: 2600;
             }
 
             .upload-dialog-overlay.is-open {
@@ -115,12 +200,12 @@
             }
 
             .upload-dialog-panel {
-                width: min(560px, 100%);
+                width: min(520px, 100%);
                 max-height: calc(100vh - 48px);
                 overflow-y: auto;
                 background: #fff;
                 border-radius: 14px;
-                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, .22);
                 border: 1px solid #dce8f5;
             }
 
@@ -129,20 +214,24 @@
                 align-items: center;
                 justify-content: space-between;
                 gap: 16px;
-                padding: 18px 20px 12px;
-                border-bottom: 1px solid #e8f0fb;
+                padding: 14px 18px;
+                border-bottom: 1px solid #e6edf5;
+                background: linear-gradient(180deg, #ffffff, #f7fbff);
             }
 
             .upload-dialog-title {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
                 font-size: 1rem;
-                font-weight: 700;
-                color: #132a3a;
+                font-weight: 800;
+                color: #1a3f5f;
             }
 
             .upload-dialog-close {
-                border: none;
+                border: 0;
                 background: transparent;
-                color: #5c7287;
+                color: #7a8794;
                 font-size: 1.2rem;
                 line-height: 1;
                 cursor: pointer;
@@ -152,19 +241,83 @@
                 padding: 18px 20px 20px;
             }
 
-            .btn-secondary {
-                border: 1px solid #9fb5cb;
-                background: #f3f7fc;
-                color: #17476d;
-                padding: 10px 18px;
-                border-radius: 8px;
+            .docs-btn.ui-button.ui-widget,
+            .docs-btn.ui-button.ui-widget.ui-state-default {
+                min-height: 34px;
+                min-width: 92px;
+                padding: 0 !important;
+                border-radius: 8px !important;
                 font-weight: 700;
-                letter-spacing: .3px;
+                font-size: .82rem;
+                letter-spacing: .2px;
                 cursor: pointer;
+                box-shadow: none !important;
             }
 
-            .btn-secondary:hover {
-                background: #e9f1fb;
+            .docs-btn.ui-button.ui-widget .ui-button-text,
+            .docs-btn.ui-button.ui-widget.ui-state-default .ui-button-text {
+                padding: 7px 16px !important;
+                font-size: .82rem !important;
+                line-height: 1 !important;
+            }
+
+            .docs-btn-primary.ui-button.ui-widget,
+            .docs-btn-primary.ui-button.ui-widget.ui-state-default {
+                border: none !important;
+                background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2)) !important;
+                color: #fff !important;
+                box-shadow: 0 4px 12px rgba(0, 123, 174, .16) !important;
+            }
+
+            .docs-btn-primary.ui-button.ui-widget:hover,
+            .docs-btn-primary.ui-button.ui-widget.ui-state-default:hover {
+                filter: brightness(1.03);
+                transform: translateY(-1px);
+            }
+
+            .docs-btn-danger.ui-button.ui-widget,
+            .docs-btn-danger.ui-button.ui-widget.ui-state-default {
+                border: 1px solid #d46a6a !important;
+                background: #fff5f5 !important;
+                color: #b21e1e !important;
+            }
+
+            .docs-btn-danger.ui-button.ui-widget:hover,
+            .docs-btn-danger.ui-button.ui-widget.ui-state-default:hover {
+                background: #ffe9e9 !important;
+            }
+
+            button.upload-btn,
+            label.upload-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 34px;
+                min-width: 92px;
+                padding: 0 16px;
+                border: none;
+                border-radius: 8px;
+                background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2));
+                color: #fff;
+                font-weight: 700;
+                font-size: .82rem;
+                letter-spacing: .2px;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0, 123, 174, .16);
+            }
+
+            button.upload-btn:hover,
+            label.upload-btn:hover {
+                filter: brightness(1.03);
+                transform: translateY(-1px);
+            }
+
+            .docs-form-actions,
+            .docs-dialog-actions {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+                flex-wrap: wrap;
             }
         </style>
 
@@ -214,14 +367,16 @@
 
                             <div class="ajout-search-actions">
                                 <p:commandButton id="searchAjoutDocsBtn"
-                                                 value="Rechercher"
-                                                 action="#{ajoutArchivesBean.search}"
-                                                 process="@form"
-                                                 update="@form"/>
+                                                  value="Rechercher"
+                                                  styleClass="docs-btn docs-btn-primary"
+                                                  action="#{ajoutArchivesBean.search}"
+                                                  process="@form"
+                                                  update="@form"/>
                                 <p:commandButton value="Clean"
-                                                 action="#{ajoutArchivesBean.clear}"
-                                                 process="@this"
-                                                 update="@form"/>
+                                                  styleClass="docs-btn docs-btn-danger"
+                                                  action="#{ajoutArchivesBean.clear}"
+                                                  process="@this"
+                                                  update="@form"/>
                             </div>
                         </div>
                     </div>
@@ -365,55 +520,67 @@
 
                         <div class="form-section half docs-side">
                             <div class="form-section-title">Documents ajoutés</div>
-                            <h:panelGroup id="existingDocumentsSection" layout="block">
-                                <table class="doc-table">
+                                <h:panelGroup id="existingDocumentsSection" layout="block">
+                                    <f:passThroughAttribute name="data-pending-deletes" value="#{ajoutArchivesBean.pendingDeleteCount}"/>
+                                    <table class="doc-table">
                                 <thead>
                                     <tr>
-                                        <th>Nom document</th>
-                                        <th>Date d'ajout</th>
-                                        <th>Copie</th>
-                                        <th>Nombre</th>
-                                        <th>Description</th>
-                                        <th>Fichier</th>
-                                        <th></th>
+                                        <th>Document</th>
+                                        <th>Date de création</th>
+                                        <th>Créé par</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <ui:fragment rendered="#{not empty ajoutArchivesBean.existingDocuments}">
                                         <ui:repeat value="#{ajoutArchivesBean.existingDocuments}" var="doc">
                                             <tr class="doc-existing-row">
-                                                <td><h:outputText value="#{doc.nomDocument}"/></td>
+                                                <td><h:outputText value="#{empty doc.document ? '-' : doc.document}"/></td>
                                                 <td>
                                                     <h:outputText value="#{doc.dateCreation}">
                                                         <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
                                                     </h:outputText>
                                                 </td>
-                                                <td><h:outputText value="#{empty doc.copie ? '-' : doc.copie}"/></td>
-                                                <td><h:outputText value="#{empty doc.nombre ? '-' : doc.nombre}"/></td>
-                                                <td><h:outputText value="#{empty doc.description ? '-' : doc.description}"/></td>
-                                                <td><h:outputText value="#{doc.document}"/></td>
+                                                <td><h:outputText value="#{empty doc.utilisateur ? '-' : doc.utilisateur}"/></td>
                                                 <td>
-                                                    <p:commandButton value="🗑"
-                                                                     title="Supprimer document"
-                                                                     action="#{ajoutArchivesBean.stageDeleteExistingDocument(doc)}"
-                                                                     process="@this"
-                                                                     update="messages existingDocumentsSection"
-                                                                     onclick="return confirm('Confirmer la suppression de ce document ?');"
-                                                                     oncomplete="if (window.btkRenderDocs) { window.btkRenderDocs(); }"
-                                                                     styleClass="doc-existing-delete"/>
+                                                    <div class="doc-action-buttons">
+                                                        <p:commandButton value="&#128229;"
+                                                                         title="Télécharger"
+                                                                         action="#{ajoutArchivesBean.downloadExistingDocument(doc)}"
+                                                                         ajax="false"
+                                                                         immediate="true"
+                                                                         styleClass="doc-action-btn"/>
+                                                        <p:commandButton value="&#128065;"
+                                                                         title="Visualiser"
+                                                                         action="#{ajoutArchivesBean.viewExistingDocument(doc)}"
+                                                                         process="@this"
+                                                                         update="messages existingDocumentInfoPanel"
+                                                                         oncomplete="var overlay = document.getElementById('existingDocInfoOverlay'); if (overlay) { overlay.classList.add('is-open'); }"
+                                                                         styleClass="doc-action-btn"/>
+                                                        <p:commandButton value="&#128465;"
+                                                                         title="Supprimer"
+                                                                         action="#{ajoutArchivesBean.stageDeleteExistingDocument(doc)}"
+                                                                         process="@this"
+                                                                         update="messages existingDocumentsSection"
+                                                                         onclick="return confirm('Confirmer la suppression de ce document ?');"
+                                                                         oncomplete="if (window.btkRenderDocs) { window.btkRenderDocs(); }"
+                                                                         styleClass="doc-action-btn doc-delete"/>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         </ui:repeat>
                                     </ui:fragment>
                                     <ui:fragment rendered="#{empty ajoutArchivesBean.existingDocuments}">
                                         <tr>
-                                            <td colspan="7" class="doc-empty">Aucun document déjà ajouté pour ce dossier.</td>
+                                            <td colspan="4" class="doc-empty">Aucun document déjà ajouté pour ce dossier.</td>
                                         </tr>
                                     </ui:fragment>
                                 </tbody>
-                                <tbody id="docsBody">
+                                <tbody id="docsBody"
+                                       data-layout="actions"
+                                       data-created-by="#{ajoutArchivesBean.currentUserLabel}">
                                     <tr id="docsEmptyRow">
-                                        <td colspan="7" class="doc-empty">Aucun nouveau document ajouté.</td>
+                                        <td colspan="4" class="doc-empty">Aucun nouveau document ajouté.</td>
                                     </tr>
                                 </tbody>
                                 </table>
@@ -433,14 +600,109 @@
                         </div>
                     </div>
 
-                    <div class="form-actions" style="display: flex;margin-top: 15px; gap: 10px; justify-content: flex-end;">
-                        <h:commandButton value="Confirmer"
-                                         styleClass="btn-primary"
-                                         action="#{ajoutArchivesBean.confirm}"/>
-                        <h:commandButton value="Annuler"
-                                         styleClass="btn-secondary"
-                                         immediate="true"
-                                         action="#{ajoutArchivesBean.cancel}"/>
+                    <div id="existingDocInfoOverlay" class="upload-dialog-overlay"
+                         onclick="if (event.target === this) { this.classList.remove('is-open'); }">
+                        <div class="upload-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="existingDocInfoTitle" onclick="event.stopPropagation();">
+                            <div class="upload-dialog-header">
+                                <span id="existingDocInfoTitle" class="upload-dialog-title">Informations document</span>
+                                <button type="button" class="upload-dialog-close"
+                                        onclick="document.getElementById('existingDocInfoOverlay').classList.remove('is-open'); return false;">x</button>
+                            </div>
+                            <div class="upload-dialog-body">
+                                <h:panelGroup id="existingDocumentInfoPanel" layout="block">
+                                    <ui:fragment rendered="#{not empty ajoutArchivesBean.selectedExistingDocument}">
+                                        <div class="doc-info-grid">
+                                            <div class="doc-info-item">
+                                                <span class="doc-info-label">Nom document</span>
+                                                <span class="doc-info-value">#{empty ajoutArchivesBean.selectedExistingDocument.nomDocument ? '-' : ajoutArchivesBean.selectedExistingDocument.nomDocument}</span>
+                                            </div>
+                                            <div class="doc-info-item">
+                                                <span class="doc-info-label">Copie</span>
+                                                <span class="doc-info-value">#{empty ajoutArchivesBean.selectedExistingDocument.copie ? '-' : ajoutArchivesBean.selectedExistingDocument.copie}</span>
+                                            </div>
+                                            <div class="doc-info-item">
+                                                <span class="doc-info-label">Nombre de copies</span>
+                                                <span class="doc-info-value">#{empty ajoutArchivesBean.selectedExistingDocument.nombre ? '-' : ajoutArchivesBean.selectedExistingDocument.nombre}</span>
+                                            </div>
+                                            <div class="doc-info-item">
+                                                <span class="doc-info-label">Description</span>
+                                                <span class="doc-info-value">#{empty ajoutArchivesBean.selectedExistingDocument.description ? '-' : ajoutArchivesBean.selectedExistingDocument.description}</span>
+                                            </div>
+                                        </div>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{empty ajoutArchivesBean.selectedExistingDocument}">
+                                        <div class="doc-empty">Aucun document sélectionné.</div>
+                                    </ui:fragment>
+                                </h:panelGroup>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="docsConfirmOverlay" class="upload-dialog-overlay"
+                         onclick="if (event.target === this) { this.classList.remove('is-open'); }">
+                        <div class="upload-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="docsConfirmTitle" onclick="event.stopPropagation();">
+                            <div class="upload-dialog-header">
+                                <span id="docsConfirmTitle" class="upload-dialog-title">Confirmation</span>
+                                <button type="button" class="upload-dialog-close"
+                                        onclick="document.getElementById('docsConfirmOverlay').classList.remove('is-open'); return false;">x</button>
+                            </div>
+                            <div class="upload-dialog-body">
+                                <div style="color:#17344d; font-weight:600; margin-bottom:16px;">
+                                    Confirmer la mise à jour des documents ?
+                                </div>
+                                <div class="docs-dialog-actions">
+                                    <p:commandButton value="Oui"
+                                                     styleClass="docs-btn docs-btn-primary"
+                                                     action="#{ajoutArchivesBean.confirm}"
+                                                     process="@form"
+                                                     update="messages existingDocumentsSection"
+                                                     oncomplete="window.scrollTo(0,0); if (window.btkCloseDocsConfirmDialog) { window.btkCloseDocsConfirmDialog(); }"/>
+                                    <p:commandButton value="Annuler"
+                                                     type="button"
+                                                     styleClass="docs-btn docs-btn-danger"
+                                                     onclick="return btkCloseDocsConfirmDialog();"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="docsCancelOverlay" class="upload-dialog-overlay"
+                         onclick="if (event.target === this) { this.classList.remove('is-open'); }">
+                        <div class="upload-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="docsCancelTitle" onclick="event.stopPropagation();">
+                            <div class="upload-dialog-header">
+                                <span id="docsCancelTitle" class="upload-dialog-title">Annulation</span>
+                                <button type="button" class="upload-dialog-close"
+                                        onclick="document.getElementById('docsCancelOverlay').classList.remove('is-open'); return false;">x</button>
+                            </div>
+                            <div class="upload-dialog-body">
+                                <div style="color:#17344d; font-weight:600; margin-bottom:16px;">
+                                    Confirmer l'annulation des modifications en cours ?
+                                </div>
+                                <div class="docs-dialog-actions">
+                                    <p:commandButton value="Oui"
+                                                     styleClass="docs-btn docs-btn-primary"
+                                                     action="#{ajoutArchivesBean.cancel}"
+                                                     process="@form"
+                                                     update="messages existingDocumentsSection"
+                                                     oncomplete="window.scrollTo(0,0); if (window.btkCloseDocsCancelDialog) { window.btkCloseDocsCancelDialog(); }"/>
+                                    <p:commandButton value="Annuler"
+                                                     type="button"
+                                                     styleClass="docs-btn docs-btn-danger"
+                                                     onclick="return btkCloseDocsCancelDialog();"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions docs-form-actions" style="display: flex;margin-top: 15px; gap: 10px; justify-content: flex-end;">
+                        <p:commandButton value="Confirmer"
+                                         styleClass="docs-btn docs-btn-primary"
+                                         type="button"
+                                         onclick="return btkOpenDocsConfirmDialog();"/>
+                        <p:commandButton value="Annuler"
+                                         styleClass="docs-btn docs-btn-danger"
+                                         type="button"
+                                         onclick="return btkOpenDocsCancelDialog();"/>
                     </div>
                 </h:form>
             </div>
@@ -486,6 +748,63 @@
                     }
                     return false;
                 }
+
+                function docsPendingDeleteCount() {
+                    var section = byIdOrSuffix('existingDocumentsSection');
+                    if (!section) {
+                        return 0;
+                    }
+                    var raw = section.getAttribute('data-pending-deletes') || '0';
+                    var count = parseInt(raw, 10);
+                    return isNaN(count) ? 0 : count;
+                }
+
+                function hasPendingDocsChanges() {
+                    var payload = byIdOrSuffix('docsPayload');
+                    if (payload) {
+                        var value = (payload.value || '').trim();
+                        if (value &amp;&amp; value !== '[]' &amp;&amp; value !== 'null') {
+                            return true;
+                        }
+                    }
+                    if (docsPendingDeleteCount() > 0) {
+                        return true;
+                    }
+                    return false;
+                }
+
+                function openDocsDialog(overlayId) {
+                    if (!hasPendingDocsChanges()) {
+                        return false;
+                    }
+                    var overlay = byIdOrSuffix(overlayId);
+                    if (overlay) {
+                        overlay.classList.add('is-open');
+                    }
+                    return false;
+                }
+
+                function closeDocsDialog(overlayId) {
+                    var overlay = byIdOrSuffix(overlayId);
+                    if (overlay) {
+                        overlay.classList.remove('is-open');
+                    }
+                    return false;
+                }
+
+                window.btkHasPendingDocsChanges = hasPendingDocsChanges;
+                window.btkOpenDocsConfirmDialog = function () {
+                    return openDocsDialog('docsConfirmOverlay');
+                };
+                window.btkCloseDocsConfirmDialog = function () {
+                    return closeDocsDialog('docsConfirmOverlay');
+                };
+                window.btkOpenDocsCancelDialog = function () {
+                    return openDocsDialog('docsCancelOverlay');
+                };
+                window.btkCloseDocsCancelDialog = function () {
+                    return closeDocsDialog('docsCancelOverlay');
+                };
 
                 var originalShow = window.btkShowUploadDialog;
                 window.btkShowUploadDialog = function () {
