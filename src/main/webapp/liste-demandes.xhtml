@@ -53,10 +53,10 @@
                         <p:column headerText="Boîte" style="width: 6%; text-align:center;">
                             <h:outputText value="#{demande.boite}"/>
                         </p:column>
-                        <p:column headerText="Emetteur" style="width: 10%;">
+                        <p:column headerText="Demandeur" style="width: 10%;">
                             <h:outputText value="#{demande.emetteur}"/>
                         </p:column>
-                        <p:column headerText="Recepteur" style="width: 10%;">
+                        <p:column headerText="Responsable du traitement" style="width: 10%;">
                             <h:outputText value="#{demande.recepteur}" rendered="#{not empty demande.recepteur}"/>
                             <h:outputText value="-" rendered="#{empty demande.recepteur}" styleClass="cell-empty"/>
                         </p:column>
