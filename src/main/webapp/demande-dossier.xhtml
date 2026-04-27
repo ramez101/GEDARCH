@@ -27,6 +27,10 @@
                                   style="margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; border: 1px solid #f0a4a4; background: #fff1f1; color: #b42318; font-weight: 700; line-height: 1.45;">
                         <h:outputText value="#{demandeDossierBean.blockedRequestMessage}"/>
                     </h:panelGroup>
+                    <h:panelGroup rendered="#{demandeDossierBean.blockExceptionActive and not demandeDossierBean.requestBlocked}" layout="block"
+                                  style="margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; border: 1px solid #9dc7eb; background: #eff8ff; color: #124f8c; font-weight: 700; line-height: 1.45;">
+                        <h:outputText value="#{demandeDossierBean.blockExceptionMessage}"/>
+                    </h:panelGroup>
 
                     <div class="demande-shell">
                         <div class="demande-search-line">
@@ -94,7 +98,7 @@
                                 </div>
                                 <div class="info-item">
                                     <div class="label">Statut</div>
-                                    <div class="value">#{demandeDossierBean.requestBlocked ? 'Bloqué' : 'Pret pour envoi'}</div>
+                                    <div class="value">#{demandeDossierBean.requestBlocked ? 'Bloque' : (demandeDossierBean.blockExceptionActive ? 'Exception admin active' : 'Pret pour envoi')}</div>
                                 </div>
                             </div>
 

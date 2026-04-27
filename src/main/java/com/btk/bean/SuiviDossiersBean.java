@@ -35,6 +35,8 @@ import jakarta.transaction.UserTransaction;
 public class SuiviDossiersBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final int REQUEST_BLOCK_DELAY_DAYS = 15;
+    private static final String USER_UNBLOCKED_STATUS = "0";
 
     private static EntityManagerFactory emf;
 
@@ -203,6 +205,10 @@ public class SuiviDossiersBean implements Serializable {
                 return;
             }
 
+            if (hasStatutColumn(em) && !hasApprovedNonRestitutedDossierForUser(em, row.getEmetteur())) {
+                updateUserBlockStatus(em, row.getEmetteur(), USER_UNBLOCKED_STATUS);
+            }
+
             utx.commit();
             txStarted = false;
             addInfo("Restitution enregistree avec succes.");
@@ -229,6 +235,96 @@ public class SuiviDossiersBean implements Serializable {
         }
         CurrentUserIdentity identity = resolveCurrentUserIdentity();
         return identity.hasIdentity() && identity.matchesReceiver(row.getRecepteur());
+    }
+
+    public void accorderExceptionBlocage(SuiviDossierRow row) {
+        if (row == null || row.getIdDemande() == null) {
+            return;
+        }
+        if (loginBean == null || !loginBean.isAdminRole()) {
+            addWarn("Seul un admin peut accorder un deblocage exceptionnel.");
+            return;
+        }
+        if (!isExceptionGrantable(row)) {
+            addWarn("Deblocage exceptionnel indisponible pour ce dossier.");
+            return;
+        }
+
+        String emetteur = normalize(row.getEmetteur());
+        if (emetteur.isBlank()) {
+            addWarn("Demandeur introuvable pour ce dossier.");
+            return;
+        }
+
+        EntityManager em = getEMF().createEntityManager();
+        boolean txStarted = false;
+        try {
+            if (!hasStatutColumn(em)) {
+                addWarn("Colonne STATUT absente dans ARCH_UTILISATEURS.");
+                return;
+            }
+
+            utx.begin();
+            txStarted = true;
+            em.joinTransaction();
+
+            int updated = updateUserBlockStatus(em, emetteur, USER_UNBLOCKED_STATUS);
+            if (updated <= 0) {
+                if (txStarted) {
+                    try { utx.rollback(); } catch (Exception ignored) {}
+                }
+                addWarn("Impossible de mettre STATUT=0 pour cet utilisateur.");
+                return;
+            }
+
+            RequestBlockExceptionStore.BlockExceptionGrant grant = RequestBlockExceptionStore.grantOneShot(
+                    resolveSessionFiliale(),
+                    emetteur,
+                    resolveCurrentAdminIdentity(),
+                    row.getIdDemande(),
+                    row.getPin(),
+                    row.getBoite()
+            );
+            if (grant == null) {
+                if (txStarted) {
+                    try { utx.rollback(); } catch (Exception ignored) {}
+                }
+                addWarn("Impossible d'accorder l'exception de deblocage.");
+                return;
+            }
+
+            utx.commit();
+            txStarted = false;
+            addInfo("Deblocage exceptionnel accorde a " + emetteur + " pour une seule nouvelle demande.");
+        } catch (NotSupportedException | SystemException | RollbackException
+                 | HeuristicMixedException | HeuristicRollbackException e) {
+            if (txStarted) {
+                try { utx.rollback(); } catch (Exception ignored) {}
+            }
+            addError("Erreur deblocage exceptionnel : " + e.getMessage());
+        } catch (RuntimeException e) {
+            if (txStarted) {
+                try { utx.rollback(); } catch (Exception ignored) {}
+            }
+            addError("Erreur deblocage exceptionnel : " + e.getMessage());
+        } finally {
+            em.close();
+        }
+    }
+
+    public boolean isExceptionGrantable(SuiviDossierRow row) {
+        if (row == null || !row.isRestituable()) {
+            return false;
+        }
+        Long duree = row.getDureeJours();
+        return duree != null && duree >= REQUEST_BLOCK_DELAY_DAYS;
+    }
+
+    public boolean hasActiveException(SuiviDossierRow row) {
+        if (row == null) {
+            return false;
+        }
+        return RequestBlockExceptionStore.hasActiveGrant(resolveSessionFiliale(), row.getEmetteur());
     }
 
     public long getTotalCount() {
@@ -347,12 +443,85 @@ public class SuiviDossiersBean implements Serializable {
         return value == null ? "" : value.trim();
     }
 
+    private boolean hasStatutColumn(EntityManager em) {
+        Number count = (Number) em.createNativeQuery(
+                        "SELECT COUNT(*) FROM USER_TAB_COLUMNS " +
+                                "WHERE TABLE_NAME = 'ARCH_UTILISATEURS' " +
+                                "AND COLUMN_NAME = 'STATUT'")
+                .getSingleResult();
+        return count != null && count.longValue() > 0L;
+    }
+
+    private int updateUserBlockStatus(EntityManager em, String userIdentifier, String statusValue) {
+        String cleanUser = normalize(userIdentifier);
+        if (cleanUser.isBlank()) {
+            return 0;
+        }
+
+        String filiale = resolveSessionFiliale();
+        String legacyFiliale = resolveSessionLegacyFiliale();
+        return em.createNativeQuery(
+                        "UPDATE ARCH_UTILISATEURS " +
+                                "SET STATUT = :status " +
+                                "WHERE (UPPER(TRIM(CUTI)) = UPPER(TRIM(:userId)) " +
+                                "OR UPPER(TRIM(UNIX)) = UPPER(TRIM(:userId))) " +
+                                "AND (LOWER(TRIM(PUTI)) = :sessionFiliale OR LOWER(TRIM(PUTI)) = :sessionLegacyFiliale)")
+                .setParameter("status", statusValue)
+                .setParameter("userId", cleanUser)
+                .setParameter("sessionFiliale", filiale)
+                .setParameter("sessionLegacyFiliale", legacyFiliale)
+                .executeUpdate();
+    }
+
+    private boolean hasApprovedNonRestitutedDossierForUser(EntityManager em, String userIdentifier) {
+        String cleanUser = normalize(userIdentifier);
+        if (cleanUser.isBlank()) {
+            return false;
+        }
+
+        String filiale = resolveSessionFiliale();
+        String legacyFiliale = resolveSessionLegacyFiliale();
+        String filialePredicate = DemandeFilialeUtil.buildPredicate(em, "dd", filiale, legacyFiliale);
+
+        Query countQuery = em.createNativeQuery(
+                        "SELECT COUNT(*) " +
+                                "FROM DEMANDE_DOSSIER dd " +
+                                "WHERE " + filialePredicate + " " +
+                                "AND UPPER(TRIM(dd.EMETTEUR)) IN (UPPER(TRIM(:userIdUnix)), UPPER(TRIM(:userIdCuti))) " +
+                                "AND dd.DATE_APPROUVE IS NOT NULL " +
+                                "AND dd.DATE_RESTITUTION IS NULL")
+                .setParameter("userIdUnix", cleanUser)
+                .setParameter("userIdCuti", cleanUser);
+        DemandeFilialeUtil.bindParameters(countQuery, filiale, legacyFiliale);
+
+        Number count = (Number) countQuery.getSingleResult();
+        return count != null && count.longValue() > 0L;
+    }
+
     private String resolveSessionFiliale() {
         return loginBean == null ? "" : loginBean.getCurrentFilialeCode();
     }
 
     private String resolveSessionLegacyFiliale() {
         return loginBean == null ? "" : loginBean.getCurrentFilialeId();
+    }
+
+    private String resolveCurrentAdminIdentity() {
+        if (loginBean != null && loginBean.getUtilisateur() != null) {
+            String unix = normalize(loginBean.getUtilisateur().getUnix());
+            if (!unix.isBlank()) {
+                return unix;
+            }
+            String cuti = normalize(loginBean.getUtilisateur().getCuti());
+            if (!cuti.isBlank()) {
+                return cuti;
+            }
+            String lib = normalize(loginBean.getUtilisateur().getLib());
+            if (!lib.isBlank()) {
+                return lib;
+            }
+        }
+        return "admin";
     }
 
     private CurrentUserIdentity resolveCurrentUserIdentity() {

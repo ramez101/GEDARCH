@@ -31,6 +31,7 @@ import jakarta.transaction.UserTransaction;
 public class SuiviDemandesBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final String USER_UNBLOCKED_STATUS = "0";
 
     private static EntityManagerFactory emf;
 
@@ -165,6 +166,10 @@ public class SuiviDemandesBean implements Serializable {
                 return;
             }
 
+            if (hasStatutColumn(em) && !hasApprovedNonRestitutedDossierForCurrentUser(em, unix, cuti)) {
+                updateCurrentUserBlockStatus(em, unix, cuti, USER_UNBLOCKED_STATUS);
+            }
+
             utx.commit();
             txStarted = false;
             addInfo("Restitution enregistrée avec succès.");
@@ -218,6 +223,64 @@ public class SuiviDemandesBean implements Serializable {
 
     private String resolveSessionLegacyFiliale() {
         return loginBean == null ? "" : loginBean.getCurrentFilialeId();
+    }
+
+    private boolean hasStatutColumn(EntityManager em) {
+        Number count = (Number) em.createNativeQuery(
+                        "SELECT COUNT(*) FROM USER_TAB_COLUMNS " +
+                                "WHERE TABLE_NAME = 'ARCH_UTILISATEURS' " +
+                                "AND COLUMN_NAME = 'STATUT'")
+                .getSingleResult();
+        return count != null && count.longValue() > 0L;
+    }
+
+    private int updateCurrentUserBlockStatus(EntityManager em, String unix, String cuti, String statusValue) {
+        String cleanUnix = normalize(unix);
+        String cleanCuti = normalize(cuti);
+        if (cleanUnix.isBlank() && cleanCuti.isBlank()) {
+            return 0;
+        }
+
+        String filiale = resolveSessionFiliale();
+        String legacyFiliale = resolveSessionLegacyFiliale();
+        return em.createNativeQuery(
+                        "UPDATE ARCH_UTILISATEURS " +
+                                "SET STATUT = :status " +
+                                "WHERE (UPPER(TRIM(CUTI)) IN (UPPER(TRIM(:unix)), UPPER(TRIM(:cuti))) " +
+                                "OR UPPER(TRIM(UNIX)) IN (UPPER(TRIM(:unix)), UPPER(TRIM(:cuti)))) " +
+                                "AND (LOWER(TRIM(PUTI)) = :sessionFiliale OR LOWER(TRIM(PUTI)) = :sessionLegacyFiliale)")
+                .setParameter("status", statusValue)
+                .setParameter("unix", cleanUnix)
+                .setParameter("cuti", cleanCuti)
+                .setParameter("sessionFiliale", filiale)
+                .setParameter("sessionLegacyFiliale", legacyFiliale)
+                .executeUpdate();
+    }
+
+    private boolean hasApprovedNonRestitutedDossierForCurrentUser(EntityManager em, String unix, String cuti) {
+        String cleanUnix = normalize(unix);
+        String cleanCuti = normalize(cuti);
+        if (cleanUnix.isBlank() && cleanCuti.isBlank()) {
+            return false;
+        }
+
+        String filiale = resolveSessionFiliale();
+        String legacyFiliale = resolveSessionLegacyFiliale();
+        String filialePredicate = DemandeFilialeUtil.buildPredicate(em, "dd", filiale, legacyFiliale);
+
+        Query countQuery = em.createNativeQuery(
+                        "SELECT COUNT(*) " +
+                                "FROM DEMANDE_DOSSIER dd " +
+                                "WHERE " + filialePredicate + " " +
+                                "AND UPPER(TRIM(dd.EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti))) " +
+                                "AND dd.DATE_APPROUVE IS NOT NULL " +
+                                "AND dd.DATE_RESTITUTION IS NULL")
+                .setParameter("emetteurUnix", cleanUnix)
+                .setParameter("emetteurCuti", cleanCuti);
+        DemandeFilialeUtil.bindParameters(countQuery, filiale, legacyFiliale);
+
+        Number count = (Number) countQuery.getSingleResult();
+        return count != null && count.longValue() > 0L;
     }
 
     private String toStringValue(Object value) {

@@ -37,6 +37,8 @@ public class DemandeDossierBean implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String RELATION_SUGGESTION_SEPARATOR = " | ";
     private static final int REQUEST_BLOCK_DELAY_DAYS = 15;
+    private static final String USER_BLOCKED_STATUS = "1";
+    private static final String USER_UNBLOCKED_STATUS = "0";
 
     private static EntityManagerFactory emf;
 
@@ -56,6 +58,8 @@ public class DemandeDossierBean implements Serializable {
     private boolean dossierLoaded;
     private boolean requestBlocked;
     private String blockedRequestMessage;
+    private boolean blockExceptionActive;
+    private String blockExceptionMessage;
 
     @PostConstruct
     public void init() {
@@ -166,6 +170,8 @@ public class DemandeDossierBean implements Serializable {
         String cleanTypeDemande = normalize(typeDemande);
         String cleanCommentaire = normalize(commentaire);
         String emetteur = resolveEmitter();
+        String emitterUnix = resolveCurrentUserUnix();
+        String emitterCuti = resolveCurrentUserCuti();
         String sessionFiliale = resolveSessionFiliale();
 
 
@@ -176,6 +182,7 @@ public class DemandeDossierBean implements Serializable {
 
         EntityManager em = getEMF().createEntityManager();
         boolean txStarted = false;
+        boolean bypassUsed = false;
         try {
             if (refreshRequestBlockStatus(em)) {
                 addError(blockedRequestMessage);
@@ -201,6 +208,15 @@ public class DemandeDossierBean implements Serializable {
                 addError("Aucun administrateur actif disponible pour la filiale " + resolveTargetFilialeLabel() + ".");
                 return;
             }
+
+            if (blockExceptionActive) {
+                bypassUsed = RequestBlockExceptionStore.consumeGrant(sessionFiliale, emitterUnix, emitterCuti) != null;
+                if (!bypassUsed && refreshRequestBlockStatus(em)) {
+                    addError(blockedRequestMessage);
+                    return;
+                }
+            }
+
             utx.begin();
             txStarted = true;
             em.joinTransaction();
@@ -224,8 +240,16 @@ public class DemandeDossierBean implements Serializable {
                     .setParameter("filiale", sessionFiliale);
             insertQuery.executeUpdate();
 
+            if (bypassUsed) {
+                boolean shouldReblock = hasApprovedNonRestitutedDossier(em, emitterUnix, emitterCuti);
+                updateCurrentUserBlockStatus(em, shouldReblock);
+            }
+
             utx.commit();
             txStarted = false;
+            if (bypassUsed) {
+                addInfo("Deblocage exceptionnel utilise pour cette demande.");
+            }
             addInfo("Demande envoyée avec succès.");
             clear();
         } catch (NotSupportedException | SystemException | RollbackException
@@ -275,16 +299,54 @@ public class DemandeDossierBean implements Serializable {
 
     private boolean refreshRequestBlockStatus(EntityManager em) {
         BlockedRequestInfo blockedRequest = findBlockedRequest(em);
-        requestBlocked = blockedRequest != null;
-        blockedRequestMessage = requestBlocked ? buildBlockedRequestMessage(blockedRequest) : null;
-        return requestBlocked;
+        boolean exceptionGranted = hasBlockExceptionForCurrentUser();
+        boolean statutColumnAvailable = hasStatutColumn(em);
+        boolean blockedByStatus = statutColumnAvailable && isCurrentUserMarkedBlocked(em);
+
+        if (exceptionGranted) {
+            if (statutColumnAvailable) {
+                updateCurrentUserBlockStatus(em, false);
+            }
+            requestBlocked = false;
+            blockedRequestMessage = null;
+            blockExceptionActive = true;
+            blockExceptionMessage = buildBlockExceptionMessage(blockedRequest);
+            return false;
+        }
+
+        if (blockedRequest != null) {
+            if (statutColumnAvailable && !blockedByStatus) {
+                updateCurrentUserBlockStatus(em, true);
+            }
+            requestBlocked = true;
+            blockedRequestMessage = buildBlockedRequestMessage(blockedRequest);
+            blockExceptionActive = false;
+            blockExceptionMessage = null;
+            return true;
+        }
+
+        if (blockedByStatus) {
+            requestBlocked = true;
+            blockedRequestMessage = buildStatusBlockedMessage();
+            blockExceptionActive = false;
+            blockExceptionMessage = null;
+            return true;
+        }
+
+        if (statutColumnAvailable) {
+            updateCurrentUserBlockStatus(em, false);
+        }
+
+        requestBlocked = false;
+        blockedRequestMessage = null;
+        blockExceptionActive = false;
+        blockExceptionMessage = null;
+        return false;
     }
 
     private BlockedRequestInfo findBlockedRequest(EntityManager em) {
-        String emitterUnix = normalize(loginBean == null || loginBean.getUtilisateur() == null
-                ? null : loginBean.getUtilisateur().getUnix());
-        String emitterCuti = normalize(loginBean == null || loginBean.getUtilisateur() == null
-                ? null : loginBean.getUtilisateur().getCuti());
+        String emitterUnix = resolveCurrentUserUnix();
+        String emitterCuti = resolveCurrentUserCuti();
         if (emitterUnix.isBlank() && emitterCuti.isBlank()) {
             return null;
         }
@@ -334,6 +396,27 @@ public class DemandeDossierBean implements Serializable {
         return message.toString();
     }
 
+    private String buildStatusBlockedMessage() {
+        return "Attention : votre acces est bloque (STATUT = 1). Merci de contacter un administrateur pour le deblocage.";
+    }
+
+    private String buildBlockExceptionMessage(BlockedRequestInfo blockedRequest) {
+        if (blockedRequest == null) {
+            return "Deblocage exceptionnel. Vous pouvez envoyer une seule nouvelle demande.";
+        }
+        StringBuilder message = new StringBuilder();
+        message.append("Deblocage exceptionnel. ");
+        message.append("Vous pouvez envoyer une seule nouvelle demande meme si le dossier PIN ");
+        String pinValue = blockedRequest == null ? "" : normalize(blockedRequest.pin);
+        String boiteValue = blockedRequest == null ? "" : normalize(blockedRequest.boite);
+        message.append(pinValue.isBlank() ? "?" : pinValue);
+        if (!boiteValue.isBlank()) {
+            message.append(" (boite ").append(boiteValue).append(")");
+        }
+        message.append(" est toujours non restitue.");
+        return message.toString();
+    }
+
     private String resolveEmitter() {
         if (loginBean != null && loginBean.getUtilisateur() != null) {
             String unix = normalize(loginBean.getUtilisateur().getUnix());
@@ -346,6 +429,24 @@ public class DemandeDossierBean implements Serializable {
             }
         }
         return "unknown";
+    }
+
+    private String resolveCurrentUserUnix() {
+        return normalize(loginBean == null || loginBean.getUtilisateur() == null
+                ? null : loginBean.getUtilisateur().getUnix());
+    }
+
+    private String resolveCurrentUserCuti() {
+        return normalize(loginBean == null || loginBean.getUtilisateur() == null
+                ? null : loginBean.getUtilisateur().getCuti());
+    }
+
+    private boolean hasBlockExceptionForCurrentUser() {
+        return RequestBlockExceptionStore.hasActiveGrant(
+                resolveSessionFiliale(),
+                resolveCurrentUserUnix(),
+                resolveCurrentUserCuti()
+        );
     }
 
     private boolean hasEligibleAdminReceiver(EntityManager em, String filialeCode) {
@@ -365,6 +466,92 @@ public class DemandeDossierBean implements Serializable {
         return count != null && count.longValue() > 0L;
     }
 
+    private boolean isCurrentUserMarkedBlocked(EntityManager em) {
+        if (!hasStatutColumn(em)) {
+            return false;
+        }
+
+        String accountKey = resolveCurrentUserAccountKey();
+        if (accountKey.isBlank()) {
+            return false;
+        }
+
+        String filiale = resolveSessionFiliale();
+        String legacyFiliale = resolveSessionLegacyFiliale();
+        @SuppressWarnings("unchecked")
+        List<Object> rows = em.createNativeQuery(
+                        "SELECT NVL(TO_CHAR(STATUT), '0') " +
+                                "FROM ARCH_UTILISATEURS " +
+                                "WHERE (UPPER(TRIM(CUTI)) = UPPER(TRIM(:accountKey)) " +
+                                "OR UPPER(TRIM(UNIX)) = UPPER(TRIM(:accountKey))) " +
+                                "AND (LOWER(TRIM(PUTI)) = :sessionFiliale OR LOWER(TRIM(PUTI)) = :sessionLegacyFiliale)")
+                .setParameter("accountKey", accountKey)
+                .setParameter("sessionFiliale", filiale)
+                .setParameter("sessionLegacyFiliale", legacyFiliale)
+                .setMaxResults(1)
+                .getResultList();
+        if (rows.isEmpty()) {
+            return false;
+        }
+        String status = normalize(String.valueOf(rows.get(0)));
+        return USER_BLOCKED_STATUS.equals(status);
+    }
+
+    private void updateCurrentUserBlockStatus(EntityManager em, boolean blocked) {
+        if (!hasStatutColumn(em)) {
+            return;
+        }
+
+        String accountKey = resolveCurrentUserAccountKey();
+        if (accountKey.isBlank()) {
+            return;
+        }
+
+        String filiale = resolveSessionFiliale();
+        String legacyFiliale = resolveSessionLegacyFiliale();
+        String newStatus = blocked ? USER_BLOCKED_STATUS : USER_UNBLOCKED_STATUS;
+        try {
+            em.createNativeQuery(
+                            "UPDATE ARCH_UTILISATEURS " +
+                                    "SET STATUT = :status " +
+                                    "WHERE (UPPER(TRIM(CUTI)) = UPPER(TRIM(:accountKey)) " +
+                                    "OR UPPER(TRIM(UNIX)) = UPPER(TRIM(:accountKey))) " +
+                                    "AND (LOWER(TRIM(PUTI)) = :sessionFiliale OR LOWER(TRIM(PUTI)) = :sessionLegacyFiliale)")
+                    .setParameter("status", newStatus)
+                    .setParameter("accountKey", accountKey)
+                    .setParameter("sessionFiliale", filiale)
+                    .setParameter("sessionLegacyFiliale", legacyFiliale)
+                    .executeUpdate();
+        } catch (RuntimeException ignored) {
+            // Ignore transient write errors in read-only flows; blocking still enforced in-memory.
+        }
+    }
+
+    private boolean hasApprovedNonRestitutedDossier(EntityManager em, String emitterUnix, String emitterCuti) {
+        String cleanUnix = normalize(emitterUnix);
+        String cleanCuti = normalize(emitterCuti);
+        if (cleanUnix.isBlank() && cleanCuti.isBlank()) {
+            return false;
+        }
+
+        String filiale = resolveSessionFiliale();
+        String legacyFiliale = resolveSessionLegacyFiliale();
+        String filialePredicate = DemandeFilialeUtil.buildPredicate(em, "dd", filiale, legacyFiliale);
+        Query query = em.createNativeQuery(
+                        "SELECT COUNT(*) " +
+                                "FROM DEMANDE_DOSSIER dd " +
+                                "WHERE " + filialePredicate + " " +
+                                "AND UPPER(TRIM(dd.EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti))) " +
+                                "AND dd.DATE_APPROUVE IS NOT NULL " +
+                                "AND dd.DATE_RESTITUTION IS NULL")
+                .setParameter("emetteurUnix", cleanUnix)
+                .setParameter("emetteurCuti", cleanCuti);
+        DemandeFilialeUtil.bindParameters(query, filiale, legacyFiliale);
+
+        Number count = (Number) query.getSingleResult();
+        return count != null && count.longValue() > 0L;
+    }
+
     private boolean hasActiveColumn(EntityManager em) {
         Number count = (Number) em.createNativeQuery(
                         "SELECT COUNT(*) FROM USER_TAB_COLUMNS " +
@@ -372,6 +559,23 @@ public class DemandeDossierBean implements Serializable {
                         "AND COLUMN_NAME = 'ACTIVE'")
                 .getSingleResult();
         return count != null && count.longValue() > 0L;
+    }
+
+    private boolean hasStatutColumn(EntityManager em) {
+        Number count = (Number) em.createNativeQuery(
+                        "SELECT COUNT(*) FROM USER_TAB_COLUMNS " +
+                                "WHERE TABLE_NAME = 'ARCH_UTILISATEURS' " +
+                                "AND COLUMN_NAME = 'STATUT'")
+                .getSingleResult();
+        return count != null && count.longValue() > 0L;
+    }
+
+    private String resolveCurrentUserAccountKey() {
+        String cuti = resolveCurrentUserCuti();
+        if (!cuti.isBlank()) {
+            return cuti;
+        }
+        return resolveCurrentUserUnix();
     }
 
     private String resolveTargetReceiverLabel() {
@@ -497,6 +701,14 @@ public class DemandeDossierBean implements Serializable {
 
     public String getBlockedRequestMessage() {
         return blockedRequestMessage;
+    }
+
+    public boolean isBlockExceptionActive() {
+        return blockExceptionActive;
+    }
+
+    public String getBlockExceptionMessage() {
+        return blockExceptionMessage;
     }
 
     private String resolveSessionFiliale() {

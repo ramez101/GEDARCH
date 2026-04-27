@@ -164,12 +164,36 @@
                 font-size: .86rem;
             }
 
-            .restitution-btn.ui-button {
-                min-width: 96px !important;
+            .restitution-btn.ui-button,
+            .exception-btn.ui-button {
+                min-width: 132px !important;
+                width: 132px !important;
                 height: 34px !important;
                 border-radius: 10px !important;
                 font-size: .8rem !important;
                 padding: 0 12px !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                white-space: nowrap;
+            }
+
+            .exception-btn.ui-button {
+                background: #fef7ec !important;
+                border: 1px solid #f2cc91 !important;
+                color: #8a4f00 !important;
+            }
+
+            .exception-btn.ui-button.ui-state-disabled {
+                opacity: .7 !important;
+            }
+
+            .action-stack {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                flex-wrap: wrap;
             }
 
             .duree-badge {
@@ -310,17 +334,26 @@
                                           rendered="#{not dossier.rappelable}"
                                           styleClass="rappel-na"/>
                         </p:column>
-                        <p:column headerText="Action" style="width: 11%; text-align:center;">
-                            <p:commandButton value="Restituer"
-                                             actionListener="#{suiviDossiersBean.restituer(dossier)}"
-                                             process="@this"
-                                             update="@form"
-                                             rendered="#{dossier.restituable}"
-                                             disabled="#{not suiviDossiersBean.canCurrentUserRestituer(dossier)}"
-                                             styleClass="ui-button-secondary restitution-btn"/>
-                            <h:outputText value="-"
-                                          rendered="#{not dossier.restituable}"
-                                          styleClass="rappel-na"/>
+                        <p:column headerText="Action" style="width: 18%; text-align:center;">
+                            <h:panelGroup layout="block" styleClass="action-stack">
+                                <p:commandButton value="Restituer"
+                                                 actionListener="#{suiviDossiersBean.restituer(dossier)}"
+                                                 process="@this"
+                                                 update="@form"
+                                                 rendered="#{dossier.restituable}"
+                                                 disabled="#{not suiviDossiersBean.canCurrentUserRestituer(dossier)}"
+                                                 styleClass="ui-button-secondary restitution-btn"/>
+                                <p:commandButton value="#{suiviDossiersBean.hasActiveException(dossier) ? 'Exception active' : 'Debloquer'}"
+                                                 actionListener="#{suiviDossiersBean.accorderExceptionBlocage(dossier)}"
+                                                 process="@this"
+                                                 update="@form"
+                                                 rendered="#{loginBean.adminRole and suiviDossiersBean.isExceptionGrantable(dossier)}"
+                                                 disabled="#{suiviDossiersBean.hasActiveException(dossier)}"
+                                                 styleClass="exception-btn"/>
+                                <h:outputText value="-"
+                                              rendered="#{not dossier.restituable and not suiviDossiersBean.isExceptionGrantable(dossier)}"
+                                              styleClass="rappel-na"/>
+                            </h:panelGroup>
                         </p:column>
                     </p:dataTable>
                 </h:form>
