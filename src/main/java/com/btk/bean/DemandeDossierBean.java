@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Locale;
 
 import com.btk.model.ArchDossier;
+import com.btk.util.DemandeFilialeUtil;
 import com.btk.util.DossierEmpUtil;
 import com.btk.util.FilialeUtil;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -34,6 +36,7 @@ public class DemandeDossierBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final String RELATION_SUGGESTION_SEPARATOR = " | ";
+    private static final int REQUEST_BLOCK_DELAY_DAYS = 15;
 
     private static EntityManagerFactory emf;
 
@@ -51,6 +54,13 @@ public class DemandeDossierBean implements Serializable {
     private String typeDemande = "demande dossier complet";
     private String commentaire;
     private boolean dossierLoaded;
+    private boolean requestBlocked;
+    private String blockedRequestMessage;
+
+    @PostConstruct
+    public void init() {
+        refreshRequestBlockStatus();
+    }
 
     public void search() {
         boolean byRelation = "relation".equalsIgnoreCase(normalize(searchType));
@@ -63,6 +73,7 @@ public class DemandeDossierBean implements Serializable {
 
         EntityManager em = getEMF().createEntityManager();
         try {
+            refreshRequestBlockStatus(em);
             String normalizedSearchValue = cleanSearchValue.toUpperCase(Locale.ROOT);
             String primaryField = byRelation ? "relation" : "pin";
             String fallbackField = byRelation ? "pin" : "relation";
@@ -157,20 +168,6 @@ public class DemandeDossierBean implements Serializable {
         String emetteur = resolveEmitter();
         String sessionFiliale = resolveSessionFiliale();
 
-        if (cleanPin.isBlank() || cleanBoite.isBlank()) {
-            addError("Informations dossier incomplètes.");
-            return;
-        }
-
-        if (cleanTypeDemande.isBlank()) {
-            addError("Choisir un type de demande.");
-            return;
-        }
-
-        if (cleanCommentaire.isBlank()) {
-            addError("Saisir une justification pour expliquer pourquoi vous allez prendre ce dossier.");
-            return;
-        }
 
         if (sessionFiliale.isBlank()) {
             addError("Profil filiale introuvable pour l'envoi de la demande.");
@@ -180,11 +177,30 @@ public class DemandeDossierBean implements Serializable {
         EntityManager em = getEMF().createEntityManager();
         boolean txStarted = false;
         try {
+            if (refreshRequestBlockStatus(em)) {
+                addError(blockedRequestMessage);
+                return;
+            }
+
+            if (cleanPin.isBlank() || cleanBoite.isBlank()) {
+                addError("Informations dossier incomplètes.");
+                return;
+            }
+
+            if (cleanTypeDemande.isBlank()) {
+                addError("Choisir un type de demande.");
+                return;
+            }
+
+            if (cleanCommentaire.isBlank()) {
+                addError("Saisir une justification pour expliquer pourquoi vous allez prendre ce dossier.");
+                return;
+            }
+
             if (!hasEligibleAdminReceiver(em, sessionFiliale)) {
                 addError("Aucun administrateur actif disponible pour la filiale " + resolveTargetFilialeLabel() + ".");
                 return;
             }
-
             utx.begin();
             txStarted = true;
             em.joinTransaction();
@@ -234,6 +250,11 @@ public class DemandeDossierBean implements Serializable {
         typeDemande = "demande dossier complet";
         commentaire = null;
         clearDossierFields();
+        refreshRequestBlockStatus();
+    }
+
+    public void refreshBlockNotification() {
+        refreshRequestBlockStatus();
     }
 
     private void clearDossierFields() {
@@ -241,6 +262,76 @@ public class DemandeDossierBean implements Serializable {
         relation = null;
         boite = null;
         dossierLoaded = false;
+    }
+
+    private void refreshRequestBlockStatus() {
+        EntityManager em = getEMF().createEntityManager();
+        try {
+            refreshRequestBlockStatus(em);
+        } finally {
+            em.close();
+        }
+    }
+
+    private boolean refreshRequestBlockStatus(EntityManager em) {
+        BlockedRequestInfo blockedRequest = findBlockedRequest(em);
+        requestBlocked = blockedRequest != null;
+        blockedRequestMessage = requestBlocked ? buildBlockedRequestMessage(blockedRequest) : null;
+        return requestBlocked;
+    }
+
+    private BlockedRequestInfo findBlockedRequest(EntityManager em) {
+        String emitterUnix = normalize(loginBean == null || loginBean.getUtilisateur() == null
+                ? null : loginBean.getUtilisateur().getUnix());
+        String emitterCuti = normalize(loginBean == null || loginBean.getUtilisateur() == null
+                ? null : loginBean.getUtilisateur().getCuti());
+        if (emitterUnix.isBlank() && emitterCuti.isBlank()) {
+            return null;
+        }
+
+        String filiale = resolveSessionFiliale();
+        String legacyFiliale = resolveSessionLegacyFiliale();
+        String filialePredicate = DemandeFilialeUtil.buildPredicate(em, "dd", filiale, legacyFiliale);
+
+        Query query = em.createNativeQuery(
+                        "SELECT dd.PIN, dd.BOITE " +
+                                "FROM DEMANDE_DOSSIER dd " +
+                                "WHERE " + filialePredicate + " " +
+                                "AND UPPER(TRIM(dd.EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti))) " +
+                                "AND dd.DATE_APPROUVE IS NOT NULL " +
+                                "AND dd.DATE_RESTITUTION IS NULL " +
+                                "AND TRUNC(SYSDATE) - TRUNC(dd.DATE_APPROUVE) >= :delayDays " +
+                                "ORDER BY dd.DATE_APPROUVE ASC")
+                .setParameter("emetteurUnix", emitterUnix)
+                .setParameter("emetteurCuti", emitterCuti)
+                .setParameter("delayDays", REQUEST_BLOCK_DELAY_DAYS)
+                .setMaxResults(1);
+        DemandeFilialeUtil.bindParameters(query, filiale, legacyFiliale);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = query.getResultList();
+
+        if (rows.isEmpty()) {
+            return null;
+        }
+
+        Object[] row = rows.get(0);
+        return new BlockedRequestInfo(toStringValue(row[0]), toStringValue(row[1]));
+    }
+
+    private String buildBlockedRequestMessage(BlockedRequestInfo blockedRequest) {
+        StringBuilder message = new StringBuilder();
+        message.append("Attention : votre accès est actuellement bloqué car le dossier PIN ");
+        String pinValue = blockedRequest == null ? "" : normalize(blockedRequest.pin);
+        String boiteValue = blockedRequest == null ? "" : normalize(blockedRequest.boite);
+        message.append(pinValue.isBlank() ? "?" : pinValue);
+        if (!boiteValue.isBlank()) {
+            message.append(" (boite ").append(boiteValue).append(")");
+        }
+        message.append(" n'a pas été restitué depuis plus de ")
+                .append(REQUEST_BLOCK_DELAY_DAYS)
+                .append(" jours. Merci de procéder à sa restitution afin de pouvoir effectuer une nouvelle demande de dossier.");
+        return message.toString();
     }
 
     private String resolveEmitter() {
@@ -400,6 +491,14 @@ public class DemandeDossierBean implements Serializable {
         return dossierLoaded;
     }
 
+    public boolean isRequestBlocked() {
+        return requestBlocked;
+    }
+
+    public String getBlockedRequestMessage() {
+        return blockedRequestMessage;
+    }
+
     private String resolveSessionFiliale() {
         return loginBean == null ? "" : loginBean.getCurrentFilialeCode();
     }
@@ -409,5 +508,15 @@ public class DemandeDossierBean implements Serializable {
             return loginBean.getCurrentFilialeId();
         }
         return FilialeUtil.toLegacyId("");
+    }
+
+    private static final class BlockedRequestInfo {
+        private final String pin;
+        private final String boite;
+
+        private BlockedRequestInfo(String pin, String boite) {
+            this.pin = pin == null ? "" : pin;
+            this.boite = boite == null ? "" : boite;
+        }
     }
 }

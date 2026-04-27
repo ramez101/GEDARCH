@@ -13,6 +13,7 @@ import java.util.List;
 import com.btk.util.DemandeFilialeUtil;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
@@ -22,6 +23,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.Query;
+import jakarta.transaction.HeuristicMixedException;
+import jakarta.transaction.HeuristicRollbackException;
+import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.UserTransaction;
 
 @Named("suiviDossiersBean")
 @ViewScoped
@@ -30,6 +37,9 @@ public class SuiviDossiersBean implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static EntityManagerFactory emf;
+
+    @Resource
+    private UserTransaction utx;
 
     @Inject
     private LoginBean loginBean;
@@ -137,6 +147,88 @@ public class SuiviDossiersBean implements Serializable {
         }
 
         addInfo("Rappel envoyé à l'utilisateur " + row.getEmetteur() + " pour le dossier PIN " + row.getPin() + ".");
+    }
+
+    public void restituer(SuiviDossierRow row) {
+        if (row == null || row.getIdDemande() == null) {
+            return;
+        }
+        if (!row.isRestituable()) {
+            addWarn("Cette demande n'est pas eligible a la restitution.");
+            return;
+        }
+
+        CurrentUserIdentity identity = resolveCurrentUserIdentity();
+        if (!identity.hasIdentity()) {
+            addError("Utilisateur recepteur introuvable.");
+            return;
+        }
+        if (!identity.matchesReceiver(row.getRecepteur())) {
+            addWarn("La restitution doit etre effectuee par le recepteur dans Suivi dossiers.");
+            return;
+        }
+
+        EntityManager em = getEMF().createEntityManager();
+        boolean txStarted = false;
+        try {
+            utx.begin();
+            txStarted = true;
+            em.joinTransaction();
+
+            String filiale = resolveSessionFiliale();
+            String legacyFiliale = resolveSessionLegacyFiliale();
+            String filialePredicate = DemandeFilialeUtil.buildPredicate(em, "DEMANDE_DOSSIER", filiale, legacyFiliale);
+
+            Query updateQuery = em.createNativeQuery(
+                            "UPDATE DEMANDE_DOSSIER " +
+                                    "SET DATE_RESTITUTION = SYSDATE " +
+                                    "WHERE ID_DEMANDE = :id " +
+                                    "AND DATE_APPROUVE IS NOT NULL " +
+                                    "AND DATE_RESTITUTION IS NULL " +
+                                    "AND UPPER(TRIM(RECEPTEUR)) IN (UPPER(TRIM(:receiverLib)), UPPER(TRIM(:receiverUnix)), UPPER(TRIM(:receiverCuti))) " +
+                                    "AND " + filialePredicate)
+                    .setParameter("id", row.getIdDemande())
+                    .setParameter("receiverLib", identity.lib())
+                    .setParameter("receiverUnix", identity.unix())
+                    .setParameter("receiverCuti", identity.cuti());
+            DemandeFilialeUtil.bindParameters(updateQuery, filiale, legacyFiliale);
+
+            int updated = updateQuery.executeUpdate();
+            if (updated == 0) {
+                if (txStarted) {
+                    try { utx.rollback(); } catch (Exception ignored) {}
+                }
+                addWarn("Demande deja restituee, non approuvee, ou recepteur invalide.");
+                reload();
+                return;
+            }
+
+            utx.commit();
+            txStarted = false;
+            addInfo("Restitution enregistree avec succes.");
+            reload();
+        } catch (NotSupportedException | SystemException | RollbackException
+                 | HeuristicMixedException | HeuristicRollbackException e) {
+            if (txStarted) {
+                try { utx.rollback(); } catch (Exception ignored) {}
+            }
+            addError("Erreur restitution : " + e.getMessage());
+        } catch (RuntimeException e) {
+            if (txStarted) {
+                try { utx.rollback(); } catch (Exception ignored) {}
+            }
+            addError("Erreur restitution : " + e.getMessage());
+        } finally {
+            em.close();
+        }
+    }
+
+    public boolean canCurrentUserRestituer(SuiviDossierRow row) {
+        if (row == null || !row.isRestituable()) {
+            return false;
+        }
+        CurrentUserIdentity identity = resolveCurrentUserIdentity();
+        return identity.hasIdentity() && identity.matchesReceiver(row.getRecepteur());
     }
 
     public long getTotalCount() {
@@ -261,6 +353,18 @@ public class SuiviDossiersBean implements Serializable {
 
     private String resolveSessionLegacyFiliale() {
         return loginBean == null ? "" : loginBean.getCurrentFilialeId();
+    }
+
+    private CurrentUserIdentity resolveCurrentUserIdentity() {
+        String lib = "";
+        String unix = "";
+        String cuti = "";
+        if (loginBean != null && loginBean.getUtilisateur() != null) {
+            lib = normalize(loginBean.getUtilisateur().getLib());
+            unix = normalize(loginBean.getUtilisateur().getUnix());
+            cuti = normalize(loginBean.getUtilisateur().getCuti());
+        }
+        return new CurrentUserIdentity(lib, unix, cuti);
     }
 
     private void addInfo(String message) {
@@ -400,6 +504,10 @@ public class SuiviDossiersBean implements Serializable {
             return dateApprouve != null && dateRestitution == null;
         }
 
+        public boolean isRestituable() {
+            return dateApprouve != null && dateRestitution == null;
+        }
+
         private LocalDate toLocalDate(Date value) {
             return Instant.ofEpochMilli(value.getTime())
                     .atZone(ZoneId.systemDefault())
@@ -436,6 +544,44 @@ public class SuiviDossiersBean implements Serializable {
 
         public String getLabel() {
             return label;
+        }
+    }
+
+    private static final class CurrentUserIdentity {
+        private final String lib;
+        private final String unix;
+        private final String cuti;
+
+        private CurrentUserIdentity(String lib, String unix, String cuti) {
+            this.lib = lib == null ? "" : lib;
+            this.unix = unix == null ? "" : unix;
+            this.cuti = cuti == null ? "" : cuti;
+        }
+
+        private String lib() {
+            return lib;
+        }
+
+        private String unix() {
+            return unix;
+        }
+
+        private String cuti() {
+            return cuti;
+        }
+
+        private boolean hasIdentity() {
+            return !lib.isBlank() || !unix.isBlank() || !cuti.isBlank();
+        }
+
+        private boolean matchesReceiver(String receiver) {
+            if (receiver == null || receiver.isBlank()) {
+                return false;
+            }
+            String normalizedReceiver = receiver.trim();
+            return normalizedReceiver.equalsIgnoreCase(lib)
+                    || normalizedReceiver.equalsIgnoreCase(unix)
+                    || normalizedReceiver.equalsIgnoreCase(cuti);
         }
     }
 }

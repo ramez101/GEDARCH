@@ -8,6 +8,10 @@
                 xmlns:p="http://primefaces.org/ui"
                 template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
 
+    <f:metadata>
+        <f:viewAction action="#{demandeDossierBean.refreshBlockNotification}"/>
+    </f:metadata>
+
     <ui:define name="title">BTK - Demande dossier</ui:define>
 
     <ui:define name="content">
@@ -18,6 +22,11 @@
                 <h:form id="demandeForm" prependId="false">
                     <p:defaultCommand target="searchDemandeBtn"/>
                     <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
+
+                    <h:panelGroup rendered="#{demandeDossierBean.requestBlocked}" layout="block"
+                                  style="margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; border: 1px solid #f0a4a4; background: #fff1f1; color: #b42318; font-weight: 700; line-height: 1.45;">
+                        <h:outputText value="#{demandeDossierBean.blockedRequestMessage}"/>
+                    </h:panelGroup>
 
                     <div class="demande-shell">
                         <div class="demande-search-line">
@@ -85,7 +94,7 @@
                                 </div>
                                 <div class="info-item">
                                     <div class="label">Statut</div>
-                                    <div class="value">Pret pour envoi</div>
+                                    <div class="value">#{demandeDossierBean.requestBlocked ? 'Bloqué' : 'Pret pour envoi'}</div>
                                 </div>
                             </div>
 

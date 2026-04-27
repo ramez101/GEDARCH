@@ -415,7 +415,6 @@ public class LoginBean implements Serializable {
             return;
         }
         Set<String> currentKeys = new HashSet<>();
-
         long pendingCount = toLongValue(createScopedAdminDemandeQuery(
                         em,
                         "SELECT COUNT(*)",
@@ -539,6 +538,15 @@ public class LoginBean implements Serializable {
                         cutiValue)
                 .getSingleResult());
 
+        long returnedCount = toLongValue(createScopedConsultationDemandeQuery(
+                        em,
+                        "SELECT COUNT(*)",
+                        "dd.DATE_APPROUVE IS NOT NULL AND dd.DATE_RESTITUTION IS NOT NULL",
+                        null,
+                        unix,
+                        cutiValue)
+                .getSingleResult());
+
         List<NotificationItem> loaded = new ArrayList<>();
         if (approvedCount > 0) {
             String summaryKey = "consult.approved.summary";
@@ -616,6 +624,46 @@ public class LoginBean implements Serializable {
                         "PIN " + pin + " refuse par " + recepteur + ".",
                         date,
                         "refused",
+                        "/suivi-demandes",
+                        isNotificationNew(itemKey, currentKeys)
+                ));
+            }
+        }
+
+        if (returnedCount > 0) {
+            String summaryKey = "consult.returned.summary";
+            loaded.add(new NotificationItem(
+                    summaryKey,
+                    "Dossiers restitues",
+                    returnedCount + " dossier(s) ont ete restitues.",
+                    null,
+                    "returned",
+                    "/suivi-demandes",
+                    isNotificationNew(summaryKey, currentKeys, false)
+            ));
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> returnedRows = createScopedConsultationDemandeQuery(
+                            em,
+                            "SELECT dd.ID_DEMANDE, dd.PIN, dd.DATE_RESTITUTION",
+                            "dd.DATE_APPROUVE IS NOT NULL AND dd.DATE_RESTITUTION IS NOT NULL",
+                            "dd.DATE_RESTITUTION DESC",
+                            unix,
+                            cutiValue)
+                    .setMaxResults(5)
+                    .getResultList();
+
+            for (Object[] row : returnedRows) {
+                String id = toText(row[0]);
+                String pin = toText(row[1]);
+                Date date = toDateValue(row[2]);
+                String itemKey = "consult.returned." + safeKeyPart(id);
+                loaded.add(new NotificationItem(
+                        itemKey,
+                        "Restitution #" + id,
+                        "Votre dossier PIN " + pin + " a ete restituer.",
+                        date,
+                        "returned",
                         "/suivi-demandes",
                         isNotificationNew(itemKey, currentKeys)
                 ));
@@ -728,7 +776,7 @@ public class LoginBean implements Serializable {
         }
 
         notifications = loaded;
-        notificationCount = approvedCount + refusedCount + alertCount + rappelCount;
+        notificationCount = approvedCount + refusedCount + returnedCount + alertCount + rappelCount;
         applyNotificationSnapshot(currentKeys);
     }
 

@@ -105,6 +105,11 @@
                 border: 0;
             }
 
+            #suiviDossiersTable_head > tr > th {
+                padding: 8px 10px !important;
+                font-size: .82rem;
+            }
+
             .suivi-dossiers-table.ui-datatable tbody td {
                 padding: 11px 12px;
                 border-top: 1px solid #e7eef5;
@@ -157,6 +162,14 @@
             .rappel-na {
                 color: #98aab8;
                 font-size: .86rem;
+            }
+
+            .restitution-btn.ui-button {
+                min-width: 96px !important;
+                height: 34px !important;
+                border-radius: 10px !important;
+                font-size: .8rem !important;
+                padding: 0 12px !important;
             }
 
             .duree-badge {
@@ -238,11 +251,13 @@
                                  var="dossier"
                                  styleClass="suivi-dossiers-table"
                                  emptyMessage="Aucune demande disponible."
+                                 reflow="true"
+                                 rowHover="true"
                                  paginator="true"
                                  paginatorPosition="bottom"
-                                 rows="20"
-                                 rowsPerPageTemplate="10,20,50,100">
-                        <p:column headerText="ID" style="width: 5%; text-align:center;" sortBy="#{dossier.idDemande}">
+                                 rows="15"
+                                 rowsPerPageTemplate="10,15,30,50">
+                        <p:column headerText="ID" style="width: 4%; text-align:center;" sortBy="#{dossier.idDemande}">
                             <h:outputText value="#{dossier.idDemande}"/>
                         </p:column>
                         <p:column headerText="PIN" style="width: 6%; text-align:center;" sortBy="#{dossier.pin}">
@@ -283,7 +298,7 @@
                                 <h:outputText value="#{dossier.statut}"/>
                             </h:panelGroup>
                         </p:column>
-                        <p:column headerText="Rappel" style="width: 9%; text-align:center;">
+                        <p:column headerText="Rappel" style="width: 6%; text-align:center;">
                             <p:commandButton icon="pi pi-bell"
                                              title="Envoyer rappel"
                                              actionListener="#{suiviDossiersBean.envoyerRappel(dossier)}"
@@ -293,6 +308,18 @@
                                              styleClass="rappel-btn"/>
                             <h:outputText value="-"
                                           rendered="#{not dossier.rappelable}"
+                                          styleClass="rappel-na"/>
+                        </p:column>
+                        <p:column headerText="Action" style="width: 11%; text-align:center;">
+                            <p:commandButton value="Restituer"
+                                             actionListener="#{suiviDossiersBean.restituer(dossier)}"
+                                             process="@this"
+                                             update="@form"
+                                             rendered="#{dossier.restituable}"
+                                             disabled="#{not suiviDossiersBean.canCurrentUserRestituer(dossier)}"
+                                             styleClass="ui-button-secondary restitution-btn"/>
+                            <h:outputText value="-"
+                                          rendered="#{not dossier.restituable}"
                                           styleClass="rappel-na"/>
                         </p:column>
                     </p:dataTable>

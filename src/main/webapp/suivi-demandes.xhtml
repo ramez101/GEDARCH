@@ -95,6 +95,7 @@
                 background: #ececff;
                 color: #324aa3;
             }
+
         </style>
 
         <div class="container is-wide">
@@ -132,7 +133,7 @@
                         <p:column headerText="Boîte">
                             <h:outputText value="#{demande.boite}"/>
                         </p:column>
-                        <p:column headerText="Recepteur">
+                        <p:column headerText="Responsable du traitement">
                             <h:outputText value="#{demande.recepteur}"/>
                         </p:column>
                         <p:column headerText="Date envoi">
@@ -145,14 +146,6 @@
                                           styleClass="suivi-status #{demande.statut eq 'EN ATTENTE' ? 'waiting' : (demande.statut eq 'APPROUVEE' ? 'approved' : 'restituted')}">
                                 <h:outputText value="#{demande.statut}"/>
                             </h:panelGroup>
-                        </p:column>
-                        <p:column headerText="Action" style="width: 150px;">
-                            <p:commandButton value="Restituer"
-                                             action="#{suiviDemandesBean.restituer(demande)}"
-                                             process="@this"
-                                             update="@form"
-                                             styleClass="ui-button-secondary"
-                                             disabled="#{not demande.restituable}"/>
                         </p:column>
                     </p:dataTable>
                 </h:form>
