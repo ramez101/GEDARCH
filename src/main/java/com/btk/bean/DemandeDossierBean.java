@@ -71,7 +71,7 @@ public class DemandeDossierBean implements Serializable {
         String effectiveSearchValue = byRelation ? extractRelationSearchTerm(searchValue) : searchValue;
         String cleanSearchValue = normalize(effectiveSearchValue);
         if (cleanSearchValue.isBlank()) {
-            addError("Saisir PIN ou RELATION.");
+            addError("Veuillez saisir un PIN ou une relation.");
             return;
         }
 
@@ -161,7 +161,7 @@ public class DemandeDossierBean implements Serializable {
 
     public void submit() {
         if (!dossierLoaded) {
-            addError("Rechercher d'abord un dossier.");
+            addError("Veuillez d'abord rechercher un dossier.");
             return;
         }
 
@@ -190,12 +190,12 @@ public class DemandeDossierBean implements Serializable {
             }
 
             if (cleanPin.isBlank() || cleanBoite.isBlank()) {
-                addError("Informations dossier incomplètes.");
+                addError("Informations du dossier incomplètes.");
                 return;
             }
 
             if (cleanTypeDemande.isBlank()) {
-                addError("Choisir un type de demande.");
+                addError("Veuillez choisir un type de demande.");
                 return;
             }
 
@@ -248,7 +248,7 @@ public class DemandeDossierBean implements Serializable {
             utx.commit();
             txStarted = false;
             if (bypassUsed) {
-                addInfo("Deblocage exceptionnel utilise pour cette demande.");
+                addInfo("Déblocage exceptionnel utilisé pour cette demande.");
             }
             addInfo("Demande envoyée avec succès.");
             clear();
@@ -388,7 +388,7 @@ public class DemandeDossierBean implements Serializable {
         String boiteValue = blockedRequest == null ? "" : normalize(blockedRequest.boite);
         message.append(pinValue.isBlank() ? "?" : pinValue);
         if (!boiteValue.isBlank()) {
-            message.append(" (boite ").append(boiteValue).append(")");
+            message.append(" (boîte ").append(boiteValue).append(")");
         }
         message.append(" n'a pas été restitué depuis plus de ")
                 .append(REQUEST_BLOCK_DELAY_DAYS)
@@ -397,23 +397,23 @@ public class DemandeDossierBean implements Serializable {
     }
 
     private String buildStatusBlockedMessage() {
-        return "Attention : votre acces est bloque (STATUT = 1). Merci de contacter un administrateur pour le deblocage.";
+        return "Attention : votre accès est bloqué (STATUT = 1). Merci de contacter un administrateur pour le déblocage.";
     }
 
     private String buildBlockExceptionMessage(BlockedRequestInfo blockedRequest) {
         if (blockedRequest == null) {
-            return "Deblocage exceptionnel. Vous pouvez envoyer une seule nouvelle demande.";
+            return "Déblocage exceptionnel. Vous pouvez envoyer une seule nouvelle demande.";
         }
         StringBuilder message = new StringBuilder();
-        message.append("Deblocage exceptionnel. ");
+        message.append("Déblocage exceptionnel. ");
         message.append("Vous pouvez envoyer une seule nouvelle demande meme si le dossier PIN ");
         String pinValue = blockedRequest == null ? "" : normalize(blockedRequest.pin);
         String boiteValue = blockedRequest == null ? "" : normalize(blockedRequest.boite);
         message.append(pinValue.isBlank() ? "?" : pinValue);
         if (!boiteValue.isBlank()) {
-            message.append(" (boite ").append(boiteValue).append(")");
+            message.append(" (boîte ").append(boiteValue).append(")");
         }
-        message.append(" est toujours non restitue.");
+        message.append(" est toujours non restitué.");
         return message.toString();
     }
 

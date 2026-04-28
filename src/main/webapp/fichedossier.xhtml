@@ -105,14 +105,14 @@
                 <div class="card-title">Fiche dossier</div>
                 <h:form id="ficheDossierForm" prependId="false">
                     <p:defaultCommand target="searchFicheBtn"/>
-                    <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
+                    <p:messages id="messages" showaummary="false" showDetail="true" closable="true"/>
 
                     <div class="form-grid two-cols">
                         <div class="form-row full" style="display: flex; gap: 12px; align-items: end; flex-wrap: wrap;">
                             <div style="flex: 0 0 180px;">
                                 <h:outputLabel for="searchType" value="Recherche par"/>
                                 <h:selectOneMenu id="searchType" value="#{ficheDossierBean.searchType}">
-                                    <f:selectItem itemLabel="Pin Client" itemValue="pin"/>
+                                    <f:selectItem itemLabel="PIN client" itemValue="pin"/>
                                     <f:selectItem itemLabel="Relation" itemValue="relation"/>
                                     <p:ajax process="@this searchValueWrapper" update="searchValueWrapper"/>
                                 </h:selectOneMenu>
@@ -135,7 +135,7 @@
                                                     minQueryLength="1"
                                                     queryDelay="250"
                                                     dropdown="false"
-                                                    forceSelection="false"
+                                                    forceaelection="false"
                                                     scrollHeight="200"
                                                     style="width: 100%"/>
                                 </ui:fragment>
@@ -160,7 +160,7 @@
                     </div>
 
                     <div class="fiche-preview-actions">
-                        <p:commandButton value="Apercu fiche"
+                        <p:commandButton value="Aperçu fiche"
                                          type="button"
                                          styleClass="#{ficheDossierBean.resultLoaded ? 'docs-btn docs-btn-primary fiche-preview-btn fiche-preview-btn-active' : 'docs-btn fiche-preview-btn fiche-preview-btn-disabled'}"
                                          disabled="#{not ficheDossierBean.resultLoaded}"
@@ -198,7 +198,7 @@
                                     <div class="value">#{ficheDossierBean.portefeuille}</div>
                                 </div>
                                 <div class="info-item">
-                                    <div class="label">Pin Client</div>
+                                    <div class="label">PIN client</div>
                                     <div class="value">#{ficheDossierBean.pin}</div>
                                 </div>
                                 <div class="info-item">
@@ -210,7 +210,7 @@
                                     <div class="value">#{ficheDossierBean.filiale}</div>
                                 </div>
                                 <div class="info-item">
-                                    <div class="label">Boites</div>
+                                    <div class="label">Boîtes</div>
                                     <div class="value">#{ficheDossierBean.boite}</div>
                                 </div>
                             </div>
@@ -218,6 +218,10 @@
 
                         <p:dataTable value="#{ficheDossierBean.documents}"
                                      var="doc"
+                                     paginator="true"
+                                     paginatorPosition="bottom"
+                                     rows="15"
+                                     rowsPerPageTemplate="10,15,30,50"
                                      emptyMessage="Aucun document trouve pour ce dossier.">
                             <p:column headerText="Nom document" style="width: 20%;">
                                 <h:outputText value="#{doc.nomDocument}"/>

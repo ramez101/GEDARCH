@@ -8,12 +8,12 @@
                 xmlns:p="http://primefaces.org/ui"
                 template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
 
-    <ui:define name="title">BTK - Liste demande</ui:define>
+    <ui:define name="title">BTK - Liste des demandes</ui:define>
 
     <ui:define name="content">
         <div class="container is-wide">
             <div class="card">
-                <div class="card-title">Transmission dossiers - Liste demande</div>
+                <div class="card-title">Transmission des dossiers - Liste des demandes</div>
 
                 <h:form id="listeDemandesForm" prependId="false">
                     <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
@@ -71,7 +71,7 @@
                                 <h:outputText value="-" rendered="#{empty demande.commentaire}" styleClass="cell-empty"/>
                             </h:panelGroup>
                         </p:column>
-                        <p:column headerText="Date envoi" style="width: 10%; text-align:center;">
+                        <p:column headerText="Date d’envoi" style="width: 10%; text-align:center;">
                             <h:outputText value="#{demande.dateEnvoi}">
                                 <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
                             </h:outputText>
@@ -100,7 +100,7 @@
                                 </div>
                             </h:panelGroup>
                             <h:panelGroup rendered="#{not demande.pending}" styleClass="decision-done">
-                                Traitee
+                                Traitée
                             </h:panelGroup>
                         </p:column>
                     </p:dataTable>

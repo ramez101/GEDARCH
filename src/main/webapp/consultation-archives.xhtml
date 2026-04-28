@@ -8,7 +8,7 @@
                 xmlns:p="http://primefaces.org/ui"
                 template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
 
-    <ui:define name="title">BTK - Consultation dossier</ui:define>
+    <ui:define name="title">BTK - Consultation des dossiers</ui:define>
 
     <ui:define name="content">
         <style type="text/css">
@@ -185,7 +185,7 @@
 
         <div class="container">
             <div class="card">
-                <div class="card-title">Consultation dossier</div>
+                <div class="card-title">Consultation des dossiers</div>
                 <h:form id="consultationForm" prependId="false">
                     <p:defaultCommand target="searchArchivesBtn" />
                     <p:messages id="messages" showSummary="false" showDetail="true" closable="true" />
@@ -196,7 +196,7 @@
                                 <h:outputLabel for="searchType" value="Recherche par"/>
                                 <h:selectOneMenu id="searchType"
                                                  value="#{consultationArchivesBean.searchType}">
-                                    <f:selectItem itemLabel="Pin Client" itemValue="pin"/>
+                                    <f:selectItem itemLabel="PIN client" itemValue="pin"/>
                                     <f:selectItem itemLabel="Relation" itemValue="relation"/>
                                     <p:ajax process="@this searchValueWrapper" update="searchValueWrapper"/>
                                 </h:selectOneMenu>
@@ -250,7 +250,7 @@
                             </div>
 
                             <div class="form-row">
-                                <h:outputLabel for="pin" value="Pin Client"/>
+                                <h:outputLabel for="pin" value="PIN client"/>
                                 <h:inputText id="pin" value="#{consultationArchivesBean.pin}" readonly="true"/>
                             </div>
 
@@ -265,7 +265,7 @@
                             </div>
 
                             <div class="form-row">
-                                <h:outputLabel for="typeArchive" value="Type archive"/>
+                                <h:outputLabel for="typeArchive" value="Type d'archive"/>
                                 <h:inputText id="typeArchive" value="#{consultationArchivesBean.typeArchive}" readonly="true"/>
                             </div>
 
@@ -282,7 +282,7 @@
                     </div>
 
                     <div class="consultation-bottom-actions">
-                        <p:commandButton value="Documents scanes"
+                        <p:commandButton value="Documents scannés"
                                          actionListener="#{consultationArchivesBean.loadScannedDocuments}"
                                          process="@this"
                                          update="messages scannedDocsContent"
@@ -307,7 +307,7 @@
                         <h:outputText value="Le pin ou la relation saisi n'existe pas."/>
                     </p:dialog>
 
-                    <p:dialog header="Documents scannes"
+                    <p:dialog header="Documents scannés"
                               widgetVar="scannedDocsDialog"
                               modal="true"
                               resizable="false"
@@ -317,6 +317,10 @@
                         <h:panelGroup id="scannedDocsContent" layout="block">
                                 <p:dataTable value="#{consultationArchivesBean.scannedDocuments}"
                                              var="doc"
+                                             paginator="true"
+                                             paginatorPosition="bottom"
+                                             rows="15"
+                                             rowsPerPageTemplate="10,15,30,50"
                                              emptyMessage="Aucun document scanné pour ce client."
                                              style="margin-top: 8px;">
                                 <p:column headerText="Nom document" style="width: 20%;">
@@ -369,7 +373,11 @@
                             <p:dataTable value="#{consultationArchivesBean.transmissionHistory}"
                                          var="history"
                                          emptyMessage="Aucun historique de transmission pour ce dossier."
-                                         styleClass="history-table">
+                                         styleClass="history-table"
+                                         paginator="true"
+                                         paginatorPosition="bottom"
+                                         rows="15"
+                                         rowsPerPageTemplate="10,15,30,50">
                                 <p:column headerText="Emetteur" style="width: 26%;">
                                     <h:outputText value="#{empty history.emetteur ? '-' : history.emetteur}"/>
                                 </p:column>

@@ -71,6 +71,10 @@
                 width: 100% !important;
             }
 
+            .charge-filter-panel .ui-noselection-option {
+                display: none !important;
+            }
+
             .suivi-refresh-btn.ui-button {
                 min-width: 38px !important;
                 width: 38px !important;
@@ -231,7 +235,7 @@
 
         <div class="container is-wide">
             <div class="card">
-                <div class="card-title">Transmission dossiers - Suivi dossiers</div>
+                <div class="card-title">Transmission des dossiers - Suivi des dossiers</div>
 
                 <h:form id="suiviDossiersForm" prependId="false">
                     <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
@@ -256,9 +260,11 @@
 
                     <div class="suivi-dossiers-filterbar">
                         <div class="filter-row">
-                            <h:outputLabel for="selectedCharge" value="Choisir charge"/>
-                            <p:selectOneMenu id="selectedCharge" value="#{suiviDossiersBean.selectedCharge}">
-                                <f:selectItem itemLabel="Tous les charges" itemValue="#{null}"/>
+                            <h:outputLabel for="selectedCharge" value="Choisir un chargé :"/>
+                            <p:selectOneMenu id="selectedCharge"
+                                             value="#{suiviDossiersBean.selectedCharge}"
+                                             panelStyleClass="charge-filter-panel">
+                                <f:selectItem itemLabel="Tous les chargés" itemValue="#{null}" noSelectionOption="true"/>
                                 <f:selectItems value="#{suiviDossiersBean.consultationOptions}"
                                                var="charge"
                                                itemLabel="#{charge.label}"
@@ -301,7 +307,7 @@
                                 <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
                             </h:outputText>
                         </p:column>
-                        <p:column headerText="Date approuve" style="width: 11%; text-align:center;" sortBy="#{dossier.dateApprouve}">
+                        <p:column headerText="Date approuvée" style="width: 11%; text-align:center;" sortBy="#{dossier.dateApprouve}">
                             <h:outputText value="#{dossier.dateApprouve}">
                                 <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
                             </h:outputText>
@@ -343,7 +349,7 @@
                                                  rendered="#{dossier.restituable}"
                                                  disabled="#{not suiviDossiersBean.canCurrentUserRestituer(dossier)}"
                                                  styleClass="ui-button-secondary restitution-btn"/>
-                                <p:commandButton value="#{suiviDossiersBean.hasActiveException(dossier) ? 'Exception active' : 'Debloquer'}"
+                                <p:commandButton value="#{suiviDossiersBean.hasActiveException(dossier) ? 'Exception active' : 'Débloquer'}"
                                                  actionListener="#{suiviDossiersBean.accorderExceptionBlocage(dossier)}"
                                                  process="@this"
                                                  update="@form"

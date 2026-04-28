@@ -102,6 +102,7 @@
                                  rows="15"
                                  paginator="true"
                                  paginatorPosition="bottom"
+                                 rowsPerPageTemplate="10,15,30,50"
                                  emptyMessage="Aucun dossier archivé trouvé."
                                  rowIndexVar="idx">
                         <p:column headerText="#" styleClass="archives-index-col">
@@ -116,7 +117,7 @@
                         <p:column headerText="Relation" sortBy="#{item.relation}">
                             <h:outputText value="#{item.relation}"/>
                         </p:column>
-                        <p:column headerText="Charge" sortBy="#{item.charge}">
+                        <p:column headerText="Chargé" sortBy="#{item.charge}">
                             <h:outputText value="#{item.charge}"/>
                         </p:column>
                         <p:column headerText="Type archive" sortBy="#{item.typeArchive}">

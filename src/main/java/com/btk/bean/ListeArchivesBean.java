@@ -210,9 +210,9 @@ public class ListeArchivesBean implements Serializable {
         addHeaderCell(table, "Pin", tableHeaderFont, deepBlue);
         addHeaderCell(table, "Relation", tableHeaderFont, deepBlue);
         addHeaderCell(table, "Charge", tableHeaderFont, deepBlue);
-        addHeaderCell(table, "Type archive", tableHeaderFont, deepBlue);
+        addHeaderCell(table, "Type d'archive", tableHeaderFont, deepBlue);
         addHeaderCell(table, "Filiale", tableHeaderFont, deepBlue);
-        addHeaderCell(table, "Boite", tableHeaderFont, deepBlue);
+        addHeaderCell(table, "Boîte", tableHeaderFont, deepBlue);
         addHeaderCell(table, "Docs", tableHeaderFont, deepBlue);
 
         if (archives == null || archives.isEmpty()) {

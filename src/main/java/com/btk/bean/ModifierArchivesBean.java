@@ -81,7 +81,7 @@ public class ModifierArchivesBean implements Serializable {
         boolean searchByRelation = "relation".equalsIgnoreCase(searchType);
         String effectiveSearchValue = searchByRelation ? extractRelationSearchTerm(searchValue) : searchValue;
         if (effectiveSearchValue == null || effectiveSearchValue.isBlank()) {
-            addWarn("Veuillez saisir un pin ou une relation.");
+            addWarn("Veuillez saisir un PIN ou une relation.");
             return;
         }
 
@@ -143,7 +143,7 @@ public class ModifierArchivesBean implements Serializable {
             String sessionLegacyFiliale = resolveSessionLegacyFiliale();
             List<Integer> boitesToSave = DossierEmpUtil.normalizeBoites(resolveBoitesToSave());
             if (boitesToSave.isEmpty()) {
-                addWarn("Ajouter au moins une boite.");
+                addWarn("Ajoutez au moins une boîte.");
                 markValidationFailed();
                 return;
             }
@@ -170,7 +170,7 @@ public class ModifierArchivesBean implements Serializable {
 
             for (Integer boiteValue : boitesToSave) {
                 if (!DossierEmpUtil.boiteExists(em, boiteValue, sessionFiliale)) {
-                    addError("La boite " + boiteValue + " est introuvable.");
+                    addError("La boîte " + boiteValue + " est introuvable.");
                     markValidationFailed();
                     return;
                 }
@@ -375,19 +375,19 @@ public class ModifierArchivesBean implements Serializable {
 
     public void addBoiteSelection() {
         if (boite == null) {
-            addWarn("Saisir un numéro de boite avant d'ajouter.");
+            addWarn("Saisissez un numéro de boîte avant d'ajouter.");
             markValidationFailed();
             return;
         }
 
         if (boites == null || !boites.contains(boite)) {
-            addError("La boite " + boite + " est introuvable.");
+            addError("La boîte " + boite + " est introuvable.");
             markValidationFailed();
             return;
         }
 
         if (selectedBoites.contains(boite)) {
-            addWarn("La boite " + boite + " est déjà associée.");
+            addWarn("La boîte " + boite + " est déjà associée.");
             boite = null;
             markValidationFailed();
             return;
@@ -395,7 +395,7 @@ public class ModifierArchivesBean implements Serializable {
 
         selectedBoites.add(boite);
         selectedBoites = new ArrayList<>(DossierEmpUtil.normalizeBoites(selectedBoites));
-        addInfo("Boite " + boite + " ajoutée.");
+        addInfo("Boîte " + boite + " ajoutée.");
         boite = null;
     }
 
@@ -405,7 +405,7 @@ public class ModifierArchivesBean implements Serializable {
         }
 
         selectedBoites.remove(boiteToRemove);
-        addInfo("Boite " + boiteToRemove + " retirée.");
+        addInfo("Boîte " + boiteToRemove + " retirée.");
         boiteToRemove = null;
     }
 

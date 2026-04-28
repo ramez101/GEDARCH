@@ -6,34 +6,43 @@
                 xmlns:h="jakarta.faces.html"
                 template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
 
-    <ui:define name="title">BTK - Transmission dossiers</ui:define>
+    <ui:define name="title">BTK - Transmission des dossiers</ui:define>
 
     <ui:define name="content">
+        <style type="text/css">
+            .link-disabled {
+                color: #8fa0b3;
+                text-decoration: none;
+                pointer-events: none;
+                cursor: not-allowed;
+            }
+        </style>
         <div class="container">
             <div class="card">
-                <div class="card-title">Transmission dossiers</div>
+                <div class="card-title">Transmission des dossiers</div>
                 <div class="info-grid">
                     <div class="info-item">
                         <div class="label">Action</div>
                         <div class="value">
-                            <h:link outcome="/demande-dossier">Demande dossier</h:link>
+                            <ui:fragment rendered="#{loginBean.consultationRole}">
+                                <h:link outcome="/demande-dossier">Demande de dossier</h:link>
+                                <span> | </span>
+                                <h:link outcome="/suivi-demandes">Suivi des demandes</h:link>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{loginBean.adminRole}">
+                                <h:outputLink value="#" styleClass="link-disabled">Demande de dossier</h:outputLink>
+                                <span> | </span>
+                                <h:outputLink value="#" styleClass="link-disabled">Suivi des demandes</h:outputLink>
+                            </ui:fragment>
                         </div>
                     </div>
                     <ui:fragment rendered="#{loginBean.adminRole}">
                         <div class="info-item">
                             <div class="label">Admin</div>
                             <div class="value">
-                                <h:link outcome="/liste-demandes">Liste demande</h:link>
+                                <h:link outcome="/liste-demandes">Liste des demandes</h:link>
                                 <span> | </span>
                                 <h:link outcome="/suivi-dossiers">Suivi dossiers</h:link>
-                            </div>
-                        </div>
-                    </ui:fragment>
-                    <ui:fragment rendered="#{loginBean.consultationRole}">
-                        <div class="info-item">
-                            <div class="label">Consultation</div>
-                            <div class="value">
-                                <h:link outcome="/suivi-demandes">Suivi demande</h:link>
                             </div>
                         </div>
                     </ui:fragment>

@@ -95,7 +95,7 @@ public class BoiteBean implements Serializable {
 
     public void prepareEditEmplacement() {
         if (selectedEmplacement == null) {
-            addError("Aucune boite sélectionnée pour la modification.");
+            addError("Aucune boîte sélectionnée pour la modification.");
             markValidationFailed();
             return;
         }
@@ -115,7 +115,7 @@ public class BoiteBean implements Serializable {
 
         Integer boiteValue = parseBoiteValue(newBoite);
         if (boiteValue == null) {
-            addError("Le numéro de boite doit être numérique.");
+            addError("Le numéro de boîte doit être numérique.");
             markValidationFailed();
             return;
         }
@@ -135,7 +135,7 @@ public class BoiteBean implements Serializable {
             boolean existsInBoiteTable = archBoiteExists(em, boiteValue);
 
             if ((existing != null && existing > 0) || existsInBoiteTable) {
-                addError("Boite déjà existante.");
+                addError("Boîte déjà existante.");
                 markValidationFailed();
                 return;
             }
@@ -181,13 +181,13 @@ public class BoiteBean implements Serializable {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur d'ajout de boite : " + e.getMessage());
+            addError("Erreur d'ajout de boîte : " + e.getMessage());
             markValidationFailed();
         } catch (RuntimeException e) {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur d'ajout de boite : " + e.getMessage());
+            addError("Erreur d'ajout de boîte : " + e.getMessage());
             markValidationFailed();
         } finally {
             em.close();
@@ -196,7 +196,7 @@ public class BoiteBean implements Serializable {
 
     public void updateEmplacement() {
         if (selectedEmplacement == null || selectedEmplacement.getIdEmplacement() == null) {
-            addError("Aucune boite sélectionnée pour la modification.");
+            addError("Aucune boîte sélectionnée pour la modification.");
             markValidationFailed();
             return;
         }
@@ -264,7 +264,7 @@ public class BoiteBean implements Serializable {
     public void deleteBoite() {
         Integer boiteValue = parseBoiteValue(deleteBoite);
         if (boiteValue == null) {
-            addError("Le numéro de boite doit être numérique.");
+            addError("Le numéro de boîte doit être numérique.");
             markValidationFailed();
             return;
         }
@@ -284,7 +284,7 @@ public class BoiteBean implements Serializable {
             boolean existsInBoiteTable = archBoiteExists(em, boiteValue);
 
             if ((existing == null || existing == 0) && !existsInBoiteTable) {
-                addError("Boite inexistante.");
+                addError("Boîte inexistante.");
                 markValidationFailed();
                 return;
             }
@@ -332,13 +332,13 @@ public class BoiteBean implements Serializable {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur de suppression de boite : " + e.getMessage());
+            addError("Erreur de suppression de boîte : " + e.getMessage());
             markValidationFailed();
         } catch (RuntimeException e) {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur de suppression de boite : " + e.getMessage());
+            addError("Erreur de suppression de boîte : " + e.getMessage());
             markValidationFailed();
         } finally {
             em.close();

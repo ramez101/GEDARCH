@@ -336,9 +336,10 @@
                     <p:dataTable id="boiteTable"
                                  value="#{boiteBean.emplacements}"
                                  var="emp"
-                                 rows="10"
+                                 rows="15"
                                  paginator="true"
                                  paginatorPosition="bottom"
+                                 rowsPerPageTemplate="10,15,30,50"
                                  styleClass="boite-table"
                                  emptyMessage="Aucune boite trouvee.">
                         <p:column headerText="Num&#176; Bo&#238;te"

@@ -266,7 +266,7 @@
                             </div>
 
                             <div class="info-item">
-                                <div class="label">Role</div>
+                                <div class="label">Rôle</div>
                                 <div class="value">
                                     <h:panelGroup rendered="#{not empty loginBean.utilisateur.role}">
                                         <span class="badge">#{loginBean.utilisateur.role}</span>
@@ -325,12 +325,12 @@
                                         <span class="stats-track-fill" data-rate="#{dashboardStatsBean.tauxTraitement}"></span>
                                     </div>
                                     <div class="stats-hero-row">
-                                        <span>Traitees: #{dashboardStatsBean.demandesTraitees}</span>
+                                        <span>Traitées: #{dashboardStatsBean.demandesTraitees}</span>
                                         <span>Total: #{dashboardStatsBean.totalDemandes}</span>
                                     </div>
                                     <div class="stats-hero-row">
                                         <span>En attente: #{dashboardStatsBean.demandesEnAttente}</span>
-                                        <span>Restitues: #{dashboardStatsBean.dossiersRestitues}</span>
+                                        <span>Restitués: #{dashboardStatsBean.dossiersRestitues}</span>
                                     </div>
                                 </div>
                             </div>
@@ -342,7 +342,7 @@
                                         <div class="stats-value">#{dashboardStatsBean.totalDossiers}</div>
                                     </div>
                                     <div class="stats-item">
-                                        <div class="stats-label">Boites</div>
+                                        <div class="stats-label">Boîtes</div>
                                         <div class="stats-value">#{dashboardStatsBean.totalBoites}</div>
                                     </div>
                                     <div class="stats-item">
@@ -354,7 +354,7 @@
                                         <div class="stats-value">#{dashboardStatsBean.demandesEnAttente}</div>
                                     </div>
                                     <div class="stats-item">
-                                        <div class="stats-label">Demandes approuvees</div>
+                                        <div class="stats-label">Demandes approuvées</div>
                                         <div class="stats-value">#{dashboardStatsBean.demandesApprouvees}</div>
                                     </div>
                                     <div class="stats-item">
@@ -362,7 +362,7 @@
                                         <div class="stats-value">#{dashboardStatsBean.demandesRefusees}</div>
                                     </div>
                                     <div class="stats-item">
-                                        <div class="stats-label">Dossiers restitues</div>
+                                        <div class="stats-label">Dossiers restitués</div>
                                         <div class="stats-value">#{dashboardStatsBean.dossiersRestitues}</div>
                                     </div>
                                     <div class="stats-item">
@@ -388,7 +388,7 @@
                                         <div class="stats-value">#{dashboardStatsBean.demandesEnAttente}</div>
                                     </div>
                                     <div class="stats-item">
-                                        <div class="stats-label">Demandes approuvees</div>
+                                        <div class="stats-label">Demandes approuvées</div>
                                         <div class="stats-value">#{dashboardStatsBean.demandesApprouvees}</div>
                                     </div>
                                     <div class="stats-item">
@@ -396,18 +396,18 @@
                                         <div class="stats-value">#{dashboardStatsBean.demandesRefusees}</div>
                                     </div>
                                     <div class="stats-item">
-                                        <div class="stats-label">Dossiers restitues</div>
+                                        <div class="stats-label">Dossiers restitués</div>
                                         <div class="stats-value">#{dashboardStatsBean.dossiersRestitues}</div>
                                     </div>
                                     <div class="stats-item">
-                                        <div class="stats-label">Dossiers non restitues</div>
+                                        <div class="stats-label">Dossiers non restitués</div>
                                         <div class="stats-value">#{dashboardStatsBean.dossiersNonRestitues}</div>
                                     </div>
                                 </ui:fragment>
                             </div>
 
                             <div class="stats-meta">
-                                <span class="stats-chip">Taux traitement demandes: #{dashboardStatsBean.tauxTraitement}%</span>
+                                <span class="stats-chip">Taux de traitement des demandes : #{dashboardStatsBean.tauxTraitement}%</span>
                                 <span class="stats-chip">
                                     Dernière mise à jour:
                                     <h:outputText value="#{dashboardStatsBean.refreshedAt}">
@@ -421,7 +421,7 @@
                     <div class="dashboard-autorotate">
                         <span class="dashboard-note">Changement automatique chaque 10 secondes avec navigation manuelle.</span>
                         <div class="dashboard-controls">
-                            <button type="button" class="dashboard-nav" onclick="BTKDashboardSlider.prev()" aria-label="Afficher le slide precedent">&#8249;</button>
+                            <button type="button" class="dashboard-nav" onclick="BTKDashboardSlider.prev()" aria-label="Afficher la diapositive précédente">&#8249;</button>
                             <div class="dashboard-dots" aria-label="Navigation du slider">
                                 <button type="button" class="dashboard-dot is-active" onclick="BTKDashboardSlider.goTo(0)" aria-label="Afficher les informations utilisateur" aria-pressed="true"></button>
                                 <button type="button" class="dashboard-dot" onclick="BTKDashboardSlider.goTo(1)" aria-label="Afficher les statistiques" aria-pressed="false"></button>

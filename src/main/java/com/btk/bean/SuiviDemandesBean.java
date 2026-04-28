@@ -93,9 +93,9 @@ public class SuiviDemandesBean implements Serializable {
 
                 String statut;
                 if (dateRestitution != null) {
-                    statut = "RESTITUEE";
+                    statut = "RESTITUÉE";
                 } else if (dateApprouve != null) {
-                    statut = "APPROUVEE";
+                    statut = "APPROUVÉE";
                 } else {
                     statut = "EN ATTENTE";
                 }

@@ -41,7 +41,7 @@
 
         <div class="container">
             <div class="card">
-                <div class="card-title">Parametres - Modifier utilisateur</div>
+                <div class="card-title">Paramètres - Modifier un utilisateur</div>
 
                 <h:form id="modifierUserForm" prependId="false">
                     <p:defaultCommand target="searchModifierUserBtn"/>
@@ -133,12 +133,12 @@
                             </div>
 
                             <div class="form-row">
-                                <h:outputLabel for="modRole" value="Role"/>
+                                <h:outputLabel for="modRole" value="Rôle"/>
                                 <h:selectOneMenu id="modRole"
                                                  value="#{ajouterUtilisateurBean.modRole}"
                                                  required="true"
                                                  disabled="#{not ajouterUtilisateurBean.modResultLoaded}">
-                                    <f:selectItem itemLabel="Choisir role" itemValue="" noSelectionOption="true"/>
+                                    <f:selectItem itemLabel="Choisir rôle" itemValue="" noSelectionOption="true"/>
                                     <f:selectItem itemLabel="admin" itemValue="admin"/>
                                     <f:selectItem itemLabel="Super_admin" itemValue="Super_admin"/>
                                     <f:selectItem itemLabel="Consultation" itemValue="Consultation"/>

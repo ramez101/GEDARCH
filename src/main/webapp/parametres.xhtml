@@ -6,12 +6,12 @@
                 xmlns:h="jakarta.faces.html"
                 template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
 
-    <ui:define name="title">BTK - Parametres</ui:define>
+    <ui:define name="title">BTK - Paramètres</ui:define>
 
     <ui:define name="content">
         <div class="container">
             <div class="card">
-                <div class="card-title">Parametres</div>
+                <div class="card-title">Paramètres</div>
                 <h:link outcome="/ajouter-utilisateur" styleClass="btn-primary"
                         rendered="#{loginBean.userManagementAllowed}"
                         style="display:inline-flex; text-decoration:none;">
@@ -29,7 +29,7 @@
                 </h:link>
                 <h:panelGroup rendered="#{not loginBean.userManagementAllowed}" layout="block"
                               style="color:#6b839b; font-size:.9rem;">
-                    Seul le role Super_admin peut ajouter un utilisateur.
+                    eeul le role euper_admin peut ajouter un utilisateur.
                 </h:panelGroup>
             </div>
         </div>

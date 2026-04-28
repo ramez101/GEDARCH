@@ -8,7 +8,7 @@
                 xmlns:p="http://primefaces.org/ui"
                 template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
 
-    <ui:define name="title">BTK - Suivi demande</ui:define>
+    <ui:define name="title">BTK - Suivi des demandes</ui:define>
 
     <ui:define name="content">
         <style type="text/css">
@@ -100,14 +100,14 @@
 
         <div class="container is-wide">
             <div class="card">
-                <div class="card-title">Transmission dossiers - Suivi demande</div>
+                <div class="card-title">Transmission des dossiers - Suivi des demandes</div>
 
                 <h:form id="suiviDemandesForm" prependId="false">
                     <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
 
                     <div class="suivi-toolbar">
                         <div class="suivi-summary">
-                            Demandes a restituer: <strong>#{suiviDemandesBean.restituableCount}</strong>
+                            Demandes à restituer: <strong>#{suiviDemandesBean.restituableCount}</strong>
                         </div>
                         <div class="suivi-actions">
                             <p:commandButton icon="pi pi-refresh"
@@ -123,6 +123,10 @@
                                  value="#{suiviDemandesBean.demandes}"
                                  var="demande"
                                  styleClass="suivi-table"
+                                 paginator="true"
+                                 paginatorPosition="bottom"
+                                 rows="15"
+                                 rowsPerPageTemplate="10,15,30,50"
                                  emptyMessage="Aucune demande envoyée.">
                         <p:column headerText="ID" style="width: 80px;">
                             <h:outputText value="#{demande.idDemande}"/>
@@ -143,7 +147,7 @@
                         </p:column>
                         <p:column headerText="Statut" style="width: 140px;">
                             <h:panelGroup layout="inline"
-                                          styleClass="suivi-status #{demande.statut eq 'EN ATTENTE' ? 'waiting' : (demande.statut eq 'APPROUVEE' ? 'approved' : 'restituted')}">
+                                          styleClass="suivi-status #{demande.statut eq 'EN ATTENTE' ? 'waiting' : (demande.statut eq 'APPROUVÉE' ? 'approved' : 'restituted')}">
                                 <h:outputText value="#{demande.statut}"/>
                             </h:panelGroup>
                         </p:column>

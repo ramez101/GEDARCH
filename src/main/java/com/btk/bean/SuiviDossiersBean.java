@@ -200,7 +200,7 @@ public class SuiviDossiersBean implements Serializable {
                 if (txStarted) {
                     try { utx.rollback(); } catch (Exception ignored) {}
                 }
-                addWarn("Demande deja restituee, non approuvee, ou recepteur invalide.");
+                addWarn("Demande déjà restituée, non approuvée ou récepteur invalide.");
                 reload();
                 return;
             }
@@ -242,11 +242,11 @@ public class SuiviDossiersBean implements Serializable {
             return;
         }
         if (loginBean == null || !loginBean.isAdminRole()) {
-            addWarn("Seul un admin peut accorder un deblocage exceptionnel.");
+            addWarn("Seul un administrateur peut accorder un déblocage exceptionnel.");
             return;
         }
         if (!isExceptionGrantable(row)) {
-            addWarn("Deblocage exceptionnel indisponible pour ce dossier.");
+            addWarn("Déblocage exceptionnel indisponible pour ce dossier.");
             return;
         }
 
@@ -289,24 +289,24 @@ public class SuiviDossiersBean implements Serializable {
                 if (txStarted) {
                     try { utx.rollback(); } catch (Exception ignored) {}
                 }
-                addWarn("Impossible d'accorder l'exception de deblocage.");
+                addWarn("Impossible d'accorder l'exception de déblocage.");
                 return;
             }
 
             utx.commit();
             txStarted = false;
-            addInfo("Deblocage exceptionnel accorde a " + emetteur + " pour une seule nouvelle demande.");
+            addInfo("Déblocage exceptionnel accordé à " + emetteur + " pour une seule nouvelle demande.");
         } catch (NotSupportedException | SystemException | RollbackException
                  | HeuristicMixedException | HeuristicRollbackException e) {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur deblocage exceptionnel : " + e.getMessage());
+            addError("Erreur de déblocage exceptionnel : " + e.getMessage());
         } catch (RuntimeException e) {
             if (txStarted) {
                 try { utx.rollback(); } catch (Exception ignored) {}
             }
-            addError("Erreur deblocage exceptionnel : " + e.getMessage());
+            addError("Erreur de déblocage exceptionnel : " + e.getMessage());
         } finally {
             em.close();
         }
@@ -336,15 +336,15 @@ public class SuiviDossiersBean implements Serializable {
     }
 
     public long getApprovedCount() {
-        return countByStatus("APPROUVEE");
+        return countByStatus("APPROUVÉE");
     }
 
     public long getRefusedCount() {
-        return countByStatus("REFUSEE");
+        return countByStatus("REFUSÉE");
     }
 
     public long getReturnedCount() {
-        return countByStatus("RESTITUEE");
+        return countByStatus("RESTITUÉE");
     }
 
     private long countByStatus(String status) {
@@ -365,12 +365,12 @@ public class SuiviDossiersBean implements Serializable {
             return "EN ATTENTE";
         }
         if (dateApprouve != null && dateRestitution == null) {
-            return "APPROUVEE";
+            return "APPROUVÉE";
         }
         if (dateApprouve == null) {
-            return "REFUSEE";
+            return "REFUSÉE";
         }
-        return "RESTITUEE";
+        return "RESTITUÉE";
     }
 
     private List<ChargeOption> loadConsultationOptions(EntityManager em) {

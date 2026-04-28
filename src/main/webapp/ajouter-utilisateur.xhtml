@@ -41,7 +41,7 @@
 
         <div class="container">
             <div class="card">
-                <div class="card-title">Parametres - Ajouter utilisateur</div>
+                <div class="card-title">Paramètres - Ajouter un utilisateur</div>
 
                 <h:form id="ajouterUserForm" prependId="false">
                     <p:messages id="messages" showSummary="false" showDetail="true" closable="true"/>
@@ -97,9 +97,9 @@
                             </div>
 
                             <div class="form-row">
-                                <h:outputLabel for="role" value="Role"/>
+                                <h:outputLabel for="role" value="Rôle"/>
                                 <h:selectOneMenu id="role" value="#{ajouterUtilisateurBean.role}" required="true">
-                                    <f:selectItem itemLabel="Choisir role" itemValue="" noSelectionOption="true"/>
+                                    <f:selectItem itemLabel="Choisir rôle" itemValue="" noSelectionOption="true"/>
                                     <f:selectItem itemLabel="admin" itemValue="admin"/>
                                     <f:selectItem itemLabel="Super_admin" itemValue="Super_admin"/>
                                     <f:selectItem itemLabel="Consultation" itemValue="Consultation"/>

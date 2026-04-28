@@ -83,9 +83,9 @@ public class ListeDemandesBean implements Serializable {
 
                 String statut;
                 if (dateApprouve != null) {
-                    statut = "ACCEPTEE";
+                    statut = "ACCEPTÉE";
                 } else if (dateRestitution != null) {
-                    statut = "REFUSEE";
+                    statut = "REFUSÉE";
                 } else {
                     statut = "EN ATTENTE";
                 }

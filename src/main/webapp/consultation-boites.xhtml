@@ -230,8 +230,12 @@
                                 <p:dataTable value="#{consultationBoitesBean.dossiers}"
                                              var="dossier"
                                              styleClass="boites-results-table"
+                                             paginator="true"
+                                             paginatorPosition="bottom"
+                                             rows="15"
+                                             rowsPerPageTemplate="10,15,30,50"
                                              emptyMessage="Aucun dossier trouvé.">
-                                    <p:column headerText="Pin Client">
+                                    <p:column headerText="PIN client">
                                         <h:outputText value="#{dossier.pin}" />
                                     </p:column>
                                     <p:column headerText="Relation">
@@ -272,7 +276,7 @@
                             <ui:fragment rendered="#{not empty consultationBoitesBean.selectedDossier}">
                                 <div class="info-grid">
                                     <div class="info-item">
-                                        <div class="label">Pin Client</div>
+                                        <div class="label">PIN client</div>
                                         <div class="value">#{consultationBoitesBean.selectedDossier.pin}</div>
                                     </div>
                                     <div class="info-item">
@@ -288,7 +292,7 @@
                                         <div class="value">#{consultationBoitesBean.selectedDossier.charge}</div>
                                     </div>
                                     <div class="info-item">
-                                        <div class="label">Type archive</div>
+                                        <div class="label">Type d'archive</div>
                                         <div class="value">#{consultationBoitesBean.selectedDossier.typeArchive}</div>
                                     </div>
                                     <div class="info-item">

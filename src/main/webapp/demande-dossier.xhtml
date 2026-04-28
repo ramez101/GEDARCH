@@ -12,12 +12,12 @@
         <f:viewAction action="#{demandeDossierBean.refreshBlockNotification}"/>
     </f:metadata>
 
-    <ui:define name="title">BTK - Demande dossier</ui:define>
+    <ui:define name="title">BTK - Demande de dossier</ui:define>
 
     <ui:define name="content">
         <div class="container">
             <div class="card">
-                <div class="card-title">Transmission dossiers - Demande dossier</div>
+                <div class="card-title">Transmission des dossiers - Demande de dossier</div>
 
                 <h:form id="demandeForm" prependId="false">
                     <p:defaultCommand target="searchDemandeBtn"/>
@@ -93,21 +93,21 @@
                                     <div class="value">#{demandeDossierBean.relation}</div>
                                 </div>
                                 <div class="info-item">
-                                    <div class="label">Boite</div>
+                                    <div class="label">Boîte</div>
                                     <div class="value">#{demandeDossierBean.boite}</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="label">Statut</div>
-                                    <div class="value">#{demandeDossierBean.requestBlocked ? 'Bloque' : (demandeDossierBean.blockExceptionActive ? 'Exception admin active' : 'Pret pour envoi')}</div>
+                                    <div class="value">#{demandeDossierBean.requestBlocked ? 'Bloqué' : (demandeDossierBean.blockExceptionActive ? 'Exception admin active' : 'Prêt pour envoi')}</div>
                                 </div>
                             </div>
 
                             <div class="form-grid two-cols" style="margin-top: 14px;">
                                 <div class="form-row full">
-                                    <h:outputLabel for="typeDemande" value="Type demande"/>
+                                    <h:outputLabel for="typeDemande" value="Type de demande"/>
                                     <p:selectOneMenu id="typeDemande" value="#{demandeDossierBean.typeDemande}" required="true">
-                                        <f:selectItem itemLabel="Demande dossier complet" itemValue="demande dossier complet"/>
-                                        <f:selectItem itemLabel="Demande document du dossier" itemValue="demande document du dossier"/>
+                                        <f:selectItem itemLabel="Demande de dossier complet" itemValue="demande dossier complet"/>
+                                        <f:selectItem itemLabel="Demande de document du dossier" itemValue="demande document du dossier"/>
                                     </p:selectOneMenu>
                                 </div>
                                 <div class="form-row full">

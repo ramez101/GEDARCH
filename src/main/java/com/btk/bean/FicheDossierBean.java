@@ -88,7 +88,7 @@ public class FicheDossierBean implements Serializable {
         String effectiveValue = resolveSearchValue();
         if (effectiveValue == null || effectiveValue.isBlank()) {
             FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Veuillez saisir un pin ou une relation.", null));
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Veuillez saisir un PIN ou une relation.", null));
             return;
         }
 
@@ -276,9 +276,9 @@ public class FicheDossierBean implements Serializable {
         addInfoPair(infoTable, "Pin", pin, labelFont, valueFont, lightBlue);
         addInfoPair(infoTable, "Relation", relation, labelFont, valueFont, lightBlue);
         addInfoPair(infoTable, "Charge", charge, labelFont, valueFont, lightBlue);
-        addInfoPair(infoTable, "Type archive", typeArchive, labelFont, valueFont, lightBlue);
+        addInfoPair(infoTable, "Type d'archive", typeArchive, labelFont, valueFont, lightBlue);
         addInfoPair(infoTable, "Filiale", filiale, labelFont, valueFont, lightBlue);
-        addInfoPair(infoTable, "Boites", safe(boite), labelFont, valueFont, lightBlue);
+        addInfoPair(infoTable, "Boîtes", safe(boite), labelFont, valueFont, lightBlue);
         document.add(infoTable);
 
         document.add(new Paragraph(" "));

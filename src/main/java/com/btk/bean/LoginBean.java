@@ -215,6 +215,11 @@ public class LoginBean implements Serializable {
                 || "/liste-utilisateurs.xhtml".equals(viewId);
     }
 
+    private boolean isConsultationOnlyTransmissionPage(String viewId) {
+        return "/demande-dossier.xhtml".equals(viewId)
+                || "/suivi-demandes.xhtml".equals(viewId);
+    }
+
     private String getDefaultLandingPage() {
         if (isBankProfile()) {
             return "/dashboard2.xhtml";
@@ -237,6 +242,10 @@ public class LoginBean implements Serializable {
 
         if (isAdminOnlyPage(viewId)) {
             return isAdminRole();
+        }
+
+        if (isConsultationOnlyTransmissionPage(viewId)) {
+            return isConsultationRole();
         }
 
         if (isAdminRole()) {
@@ -472,8 +481,8 @@ public class LoginBean implements Serializable {
             String summaryKey = "admin.returned.summary";
             loaded.add(new NotificationItem(
                     summaryKey,
-                    "Dossiers restitues",
-                    returnedCount + " dossier(s) ont ete restitues.",
+                    "Dossiers restitués",
+                    returnedCount + " dossier(s) ont été restitués.",
                     null,
                     "returned",
                     "/suivi-dossiers",
@@ -497,7 +506,7 @@ public class LoginBean implements Serializable {
                 loaded.add(new NotificationItem(
                         itemKey,
                         "Restitution #" + id,
-                        "Le dossier PIN " + pin + " a ete restitue.",
+                        "Le dossier PIN " + pin + " a été restitué.",
                         date,
                         "returned",
                         "/suivi-dossiers",
@@ -552,8 +561,8 @@ public class LoginBean implements Serializable {
             String summaryKey = "consult.approved.summary";
             loaded.add(new NotificationItem(
                     summaryKey,
-                    "Demandes approuvees",
-                    approvedCount + " demande(s) approuvee(s).",
+                    "Demandes approuvées",
+                    approvedCount + " demande(s) approuvée(s).",
                     null,
                     "approved",
                     "/suivi-demandes",
@@ -579,7 +588,7 @@ public class LoginBean implements Serializable {
                 String itemKey = "consult.approved." + safeKeyPart(id);
                 loaded.add(new NotificationItem(
                         itemKey,
-                        "Demande #" + id + " approuvee",
+                        "Demande #" + id + " approuvée",
                         "PIN " + pin + " approuve par " + recepteur + ".",
                         date,
                         "approved",
@@ -621,7 +630,7 @@ public class LoginBean implements Serializable {
                 loaded.add(new NotificationItem(
                         itemKey,
                         "Demande #" + id + " refusée",
-                        "PIN " + pin + " refuse par " + recepteur + ".",
+                        "PIN " + pin + " refusé par " + recepteur + ".",
                         date,
                         "refused",
                         "/suivi-demandes",
@@ -634,8 +643,8 @@ public class LoginBean implements Serializable {
             String summaryKey = "consult.returned.summary";
             loaded.add(new NotificationItem(
                     summaryKey,
-                    "Dossiers restitues",
-                    returnedCount + " dossier(s) ont ete restitues.",
+                    "Dossiers restitués",
+                    returnedCount + " dossier(s) ont été restitués.",
                     null,
                     "returned",
                     "/suivi-demandes",
@@ -661,7 +670,7 @@ public class LoginBean implements Serializable {
                 loaded.add(new NotificationItem(
                         itemKey,
                         "Restitution #" + id,
-                        "Votre dossier PIN " + pin + " a ete restituer.",
+                        "Votre dossier PIN " + pin + " a été restitué.",
                         date,
                         "returned",
                         "/suivi-demandes",
@@ -688,7 +697,7 @@ public class LoginBean implements Serializable {
             loaded.add(new NotificationItem(
                     summaryKey,
                     "Alertes de restitution",
-                    alertCount + " dossier(s) ont depasse la duree de 10 jours sans restitution.",
+                    alertCount + " dossier(s) ont dépassé la durée de 10 jours sans restitution.",
                     null,
                     "alert",
                     "/suivi-demandes",
@@ -709,12 +718,12 @@ public class LoginBean implements Serializable {
                 StringBuilder message = new StringBuilder();
                 message.append("ALERTE : le dossier PIN ").append(pin);
                 if (boite != null && !boite.isBlank()) {
-                    message.append(" (boite ").append(boite).append(")");
+                    message.append(" (boîte ").append(boite).append(")");
                 }
                 message.append(" a atteint ").append(dureeJours)
                         .append(dureeJours == 1L ? " jour" : " jours")
-                        .append(" depuis son approbation et n'a pas encore ete restitue. ")
-                        .append("Merci de proceder a la restitution du dossier au plus vite.");
+                        .append(" depuis son approbation et n'a pas encore été restitué. ")
+                        .append("Merci de procéder à la restitution du dossier au plus vite.");
 
                 loaded.add(new NotificationItem(
                         itemKey,
@@ -736,7 +745,7 @@ public class LoginBean implements Serializable {
             loaded.add(new NotificationItem(
                     summaryKey,
                     "Rappels de restitution",
-                    rappelCount + " rappel(s) recu(s) pour des dossiers non restitues.",
+                    rappelCount + " rappel(s) reçu(s) pour des dossiers non restitués.",
                     null,
                     "reminder",
                     "/suivi-demandes",
@@ -755,10 +764,10 @@ public class LoginBean implements Serializable {
                 StringBuilder message = new StringBuilder();
                 message.append("Merci de restituer le dossier PIN ").append(pin);
                 if (boite != null && !boite.isBlank()) {
-                    message.append(" (boite ").append(boite).append(")");
+                    message.append(" (boîte ").append(boite).append(")");
                 }
                 if (sentBy != null && !sentBy.isBlank()) {
-                    message.append(". Rappel envoye par ").append(sentBy).append(".");
+                    message.append(". Rappel envoyé par ").append(sentBy).append(".");
                 } else {
                     message.append(".");
                 }
@@ -1070,9 +1079,9 @@ public class LoginBean implements Serializable {
     public String getPendingDemandesMenuLabel() {
         long count = readPendingDemandesCount();
         if (count > 0L) {
-            return "Liste demande (" + count + ")";
+            return "Liste des demandes (" + count + ")";
         }
-        return "Liste demande";
+        return "Liste des demandes";
     }
 
     public boolean isArchiveManagementAllowed() {
