@@ -71,6 +71,31 @@
                 width: 100% !important;
             }
 
+            .charge-filter-input {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .charge-filter-input .ui-selectonemenu {
+                flex: 1 1 auto;
+            }
+
+            .charge-clear-btn.ui-button {
+                min-width: 34px !important;
+                width: 34px !important;
+                height: 34px !important;
+                border-radius: 8px !important;
+                padding: 0 !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .charge-clear-btn .ui-button-text {
+                display: none;
+            }
+
             .charge-filter-panel .ui-noselection-option {
                 display: none !important;
             }
@@ -217,19 +242,19 @@
                 color: #70869c;
             }
 
-            .duree-yellow {
-                background: #fff7db;
-                color: #9b7200;
+            .duree-green {
+                background: #e8f7ef;
+                color: #1d7a49;
             }
 
             .duree-orange {
-                background: #ffe8d8;
-                color: #bf5b07;
+                background: #fff0dc;
+                color: #b86a09;
             }
 
             .duree-red {
                 background: #fde7e7;
-                color: #b02b2b;
+                color: #a31313;
             }
         </style>
 
@@ -261,6 +286,7 @@
                     <div class="suivi-dossiers-filterbar">
                         <div class="filter-row">
                             <h:outputLabel for="selectedCharge" value="Choisir un chargé :"/>
+                            <div class="charge-filter-input">
                             <p:selectOneMenu id="selectedCharge"
                                              value="#{suiviDossiersBean.selectedCharge}"
                                              panelStyleClass="charge-filter-panel">
@@ -273,6 +299,14 @@
                                         listener="#{suiviDossiersBean.onChargeChange}"
                                         update="@form"/>
                             </p:selectOneMenu>
+                                <p:commandButton icon="pi pi-times"
+                                                 title="RÃ©initialiser le filtre"
+                                                 action="#{suiviDossiersBean.clearChargeFilter}"
+                                                 process="@this"
+                                                 update="@form"
+                                                 rendered="#{not empty suiviDossiersBean.selectedCharge}"
+                                                 styleClass="ui-button-secondary ui-button-icon-only charge-clear-btn"/>
+                            </div>
                         </div>
                     </div>
 
@@ -317,14 +351,14 @@
                                 <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
                             </h:outputText>
                         </p:column>
-                        <p:column headerText="Duree" style="width: 8%; text-align:center;" sortBy="#{dossier.dureeJours}">
+                        <p:column headerText="Durée" style="width: 8%; text-align:center;" sortBy="#{dossier.dureeJours}">
                             <h:panelGroup layout="inline" styleClass="#{dossier.dureeStyleClass}">
                                 <h:outputText value="#{dossier.dureeLabel}"/>
                             </h:panelGroup>
                         </p:column>
                         <p:column headerText="Statut" style="width: 13%; text-align:center;" sortBy="#{dossier.statut}">
                             <h:panelGroup layout="inline"
-                                          styleClass="dossier-status #{dossier.statut eq 'EN ATTENTE' ? 'pending' : (dossier.statut eq 'APPROUVEE' ? 'approved' : (dossier.statut eq 'REFUSEE' ? 'refused' : 'returned'))}">
+                                          styleClass="dossier-status #{dossier.statut eq 'EN ATTENTE' ? 'pending' : ((not empty dossier.statut and dossier.statut.startsWith('APPROUV')) ? 'approved' : ((not empty dossier.statut and dossier.statut.startsWith('REFUS')) ? 'refused' : ((not empty dossier.statut and dossier.statut.startsWith('RESTITU')) ? 'returned' : 'pending')))}">
                                 <h:outputText value="#{dossier.statut}"/>
                             </h:panelGroup>
                         </p:column>

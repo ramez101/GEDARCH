@@ -78,7 +78,7 @@
                         </p:column>
                         <p:column headerText="Statut" style="width: 8%; text-align:center;">
                             <h:panelGroup layout="inline"
-                                          styleClass="demande-status #{demande.pending ? 'pending' : (demande.statut eq 'ACCEPTEE' ? 'accepted' : 'refused')}">
+                                          styleClass="demande-status #{demande.pending ? 'pending' : ((not empty demande.statut and demande.statut.startsWith('REFUS')) ? 'refused' : ((not empty demande.statut and demande.statut.startsWith('ACCEP')) ? 'accepted' : 'pending'))}">
                                 <h:outputText value="#{demande.statut}"/>
                             </h:panelGroup>
                         </p:column>

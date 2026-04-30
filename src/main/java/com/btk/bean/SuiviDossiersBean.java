@@ -116,6 +116,11 @@ public class SuiviDossiersBean implements Serializable {
         reload();
     }
 
+    public void clearChargeFilter() {
+        selectedCharge = null;
+        reload();
+    }
+
     public void envoyerRappel(SuiviDossierRow row) {
         if (row == null || row.getIdDemande() == null) {
             return;
@@ -660,10 +665,10 @@ public class SuiviDossiersBean implements Serializable {
             if (jours == null) {
                 return "duree-badge duree-neutral";
             }
-            if (jours <= 6L) {
-                return "duree-badge duree-yellow";
+            if (jours < 10L) {
+                return "duree-badge duree-green";
             }
-            if (jours <= 9L) {
+            if (jours <= 15L) {
                 return "duree-badge duree-orange";
             }
             return "duree-badge duree-red";
