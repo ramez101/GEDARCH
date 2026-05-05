@@ -32,12 +32,14 @@ public class AjouterUtilisateurBean implements Serializable {
 
     private String cuti;
     private String unix;
+    private String mdp;
     private String lib;
     private String puti;
     private String age;
     private String role;
     private String modCuti;
     private String modUnix;
+    private String modMdp;
     private String modLib;
     private String modPuti;
     private String modAge;
@@ -49,14 +51,15 @@ public class AjouterUtilisateurBean implements Serializable {
     public void save() {
         String cleanCuti = normalize(cuti);
         String cleanUnix = normalize(unix);
+        String cleanMdp = normalize(mdp);
         String cleanLib = normalize(lib);
         String cleanPuti = normalize(puti);
         String cleanAge = normalize(age);
         String cleanRole = normalize(role);
 
-        if (cleanCuti.isBlank() || cleanUnix.isBlank() || cleanLib.isBlank()
+        if (cleanCuti.isBlank() || cleanUnix.isBlank() || cleanMdp.isBlank() || cleanLib.isBlank()
                 || cleanPuti.isBlank() || cleanRole.isBlank()) {
-            addError("CUTI, Mot de passe, Nom, PUTI et ROLE sont obligatoires.");
+            addError("CUTI, UNIX, Mot de passe, Nom, PUTI et ROLE sont obligatoires.");
             markValidationFailed();
             return;
         }
@@ -73,9 +76,9 @@ public class AjouterUtilisateurBean implements Serializable {
             return;
         }
 
-        if (cleanCuti.length() > 24 || cleanUnix.length() > 20 || cleanLib.length() > 20
+        if (cleanCuti.length() > 24 || cleanUnix.length() > 20 || cleanMdp.length() > 20 || cleanLib.length() > 20
                 || cleanPuti.length() > 20 || cleanAge.length() > 8 || cleanRole.length() > 30) {
-            addError("Vérifier les longueurs des champs (CUTI 24, UNIX 20, LIB 20, PUTI 20, AGE 8, ROLE 30).");
+            addError("Vérifier les longueurs des champs (CUTI 24, MDP 20, LIB 20, PUTI 20, AGE 8, ROLE 30).");
             markValidationFailed();
             return;
         }
@@ -100,6 +103,7 @@ public class AjouterUtilisateurBean implements Serializable {
             Utilisateur utilisateur = new Utilisateur();
             utilisateur.setCuti(cleanCuti);
             utilisateur.setUnix(cleanUnix);
+            utilisateur.setMdp(cleanMdp);
             utilisateur.setLib(cleanLib);
             utilisateur.setPuti(normalizePuti(cleanPuti));
             utilisateur.setAge(cleanAge);
@@ -164,6 +168,7 @@ public class AjouterUtilisateurBean implements Serializable {
             if (results.isEmpty()) {
                 modCuti = null;
                 modUnix = null;
+                modMdp = null;
                 modLib = null;
                 modPuti = null;
                 modAge = null;
@@ -177,6 +182,7 @@ public class AjouterUtilisateurBean implements Serializable {
             if (searchByLib && results.size() > 1) {
                 modCuti = null;
                 modUnix = null;
+                modMdp = null;
                 modLib = null;
                 modPuti = null;
                 modAge = null;
@@ -190,6 +196,7 @@ public class AjouterUtilisateurBean implements Serializable {
             Utilisateur found = results.get(0);
             modCuti = found.getCuti();
             modUnix = found.getUnix();
+            modMdp = normalize(found.getMdp()).isBlank() ? found.getUnix() : found.getMdp();
             modLib = found.getLib();
             modPuti = found.getPuti();
             modAge = found.getAge();
@@ -200,6 +207,7 @@ public class AjouterUtilisateurBean implements Serializable {
         } catch (RuntimeException e) {
             modCuti = null;
             modUnix = null;
+            modMdp = null;
             modLib = null;
             modPuti = null;
             modAge = null;
@@ -221,14 +229,15 @@ public class AjouterUtilisateurBean implements Serializable {
 
         String cleanCuti = normalize(modCuti);
         String cleanUnix = normalize(modUnix);
+        String cleanMdp = normalize(modMdp);
         String cleanLib = normalize(modLib);
         String cleanPuti = normalize(modPuti);
         String cleanAge = normalize(modAge);
         String cleanRole = normalize(modRole);
 
-        if (cleanCuti.isBlank() || cleanUnix.isBlank() || cleanLib.isBlank()
+        if (cleanCuti.isBlank() || cleanUnix.isBlank() || cleanMdp.isBlank() || cleanLib.isBlank()
                 || cleanPuti.isBlank() || cleanRole.isBlank()) {
-            addError("CUTI, Mot de passe, Nom, PUTI et ROLE sont obligatoires.");
+            addError("CUTI, UNIX, Mot de passe, Nom, PUTI et ROLE sont obligatoires.");
             markValidationFailed();
             return;
         }
@@ -245,9 +254,9 @@ public class AjouterUtilisateurBean implements Serializable {
             return;
         }
 
-        if (cleanCuti.length() > 24 || cleanUnix.length() > 20 || cleanLib.length() > 20
+        if (cleanCuti.length() > 24 || cleanUnix.length() > 20 || cleanMdp.length() > 20 || cleanLib.length() > 20
                 || cleanPuti.length() > 20 || cleanAge.length() > 8 || cleanRole.length() > 30) {
-            addError("Vérifier les longueurs des champs (CUTI 24, UNIX 20, LIB 20, PUTI 20, AGE 8, ROLE 30).");
+            addError("Vérifier les longueurs des champs (CUTI 24, MDP 20, LIB 20, PUTI 20, AGE 8, ROLE 30).");
             markValidationFailed();
             return;
         }
@@ -281,6 +290,7 @@ public class AjouterUtilisateurBean implements Serializable {
             }
 
             utilisateur.setUnix(cleanUnix);
+            utilisateur.setMdp(cleanMdp);
             utilisateur.setLib(cleanLib);
             utilisateur.setPuti(normalizePuti(cleanPuti));
             utilisateur.setAge(cleanAge);
@@ -315,6 +325,7 @@ public class AjouterUtilisateurBean implements Serializable {
     public void clear() {
         cuti = null;
         unix = null;
+        mdp = null;
         lib = null;
         puti = null;
         age = null;
@@ -324,6 +335,7 @@ public class AjouterUtilisateurBean implements Serializable {
     public void clearModification() {
         modCuti = null;
         modUnix = null;
+        modMdp = null;
         modLib = null;
         modPuti = null;
         modAge = null;
@@ -398,6 +410,14 @@ public class AjouterUtilisateurBean implements Serializable {
         this.unix = unix;
     }
 
+    public String getMdp() {
+        return mdp;
+    }
+
+    public void setMdp(String mdp) {
+        this.mdp = mdp;
+    }
+
     public String getLib() {
         return lib;
     }
@@ -444,6 +464,14 @@ public class AjouterUtilisateurBean implements Serializable {
 
     public void setModUnix(String modUnix) {
         this.modUnix = modUnix;
+    }
+
+    public String getModMdp() {
+        return modMdp;
+    }
+
+    public void setModMdp(String modMdp) {
+        this.modMdp = modMdp;
     }
 
     public String getModLib() {

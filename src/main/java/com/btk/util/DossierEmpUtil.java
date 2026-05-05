@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public final class DossierEmpUtil {
@@ -61,6 +62,46 @@ public final class DossierEmpUtil {
                 .getResultList();
     }
 
+    public static List<Integer> findBoitesByReference(EntityManager em, String pin, String relation) {
+        String normalizedPin = normalizeReferenceValue(pin);
+        if (normalizedPin.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        String normalizedRelation = normalizeReferenceValue(relation);
+        if (!normalizedRelation.isBlank()) {
+            List<Integer> byPinAndRelation = em.createQuery(
+                            "select distinct de.boite from " + DossierEmp.class.getSimpleName() + " de " +
+                                    "where de.boite is not null " +
+                                    "and upper(trim(de.pin)) = :pin " +
+                                    "and upper(trim(de.relation)) = :relation " +
+                                    "order by de.boite",
+                            Integer.class)
+                    .setParameter("pin", normalizedPin)
+                    .setParameter("relation", normalizedRelation)
+                    .getResultList();
+            if (!byPinAndRelation.isEmpty()) {
+                return byPinAndRelation;
+            }
+        }
+
+        return em.createQuery(
+                        "select distinct de.boite from " + DossierEmp.class.getSimpleName() + " de " +
+                                "where de.boite is not null and upper(trim(de.pin)) = :pin " +
+                                "order by de.boite",
+                        Integer.class)
+                .setParameter("pin", normalizedPin)
+                .getResultList();
+    }
+
+    public static List<Integer> findBoitesByDossierIdOrReference(EntityManager em, Long idDossier, String pin, String relation) {
+        List<Integer> byDossierId = findBoitesByDossierId(em, idDossier);
+        if (!byDossierId.isEmpty()) {
+            return byDossierId;
+        }
+        return findBoitesByReference(em, pin, relation);
+    }
+
     public static Map<Long, List<Integer>> findBoitesByDossierIds(EntityManager em, Collection<Long> dossierIds) {
         if (dossierIds == null || dossierIds.isEmpty()) {
             return Collections.emptyMap();
@@ -96,8 +137,103 @@ public final class DossierEmpUtil {
         return grouped;
     }
 
+    public static Map<Long, List<Integer>> findBoitesByDossiers(EntityManager em, Collection<ArchDossier> dossiers) {
+        if (dossiers == null || dossiers.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Long> dossierIds = new ArrayList<>();
+        for (ArchDossier dossier : dossiers) {
+            if (dossier != null && dossier.getIdDossier() != null) {
+                dossierIds.add(dossier.getIdDossier());
+            }
+        }
+        if (dossierIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<Long, List<Integer>> boitesByDossier = new LinkedHashMap<>(findBoitesByDossierIds(em, dossierIds));
+
+        List<ArchDossier> unresolved = new ArrayList<>();
+        LinkedHashSet<String> pins = new LinkedHashSet<>();
+        for (ArchDossier dossier : dossiers) {
+            if (dossier == null || dossier.getIdDossier() == null) {
+                continue;
+            }
+            List<Integer> current = boitesByDossier.get(dossier.getIdDossier());
+            if (current != null && !current.isEmpty()) {
+                continue;
+            }
+
+            String pin = normalizeReferenceValue(dossier.getPin());
+            if (pin.isBlank()) {
+                continue;
+            }
+            unresolved.add(dossier);
+            pins.add(pin);
+        }
+        if (unresolved.isEmpty() || pins.isEmpty()) {
+            return boitesByDossier;
+        }
+
+        List<Object[]> rows = em.createQuery(
+                        "select upper(trim(de.pin)), upper(trim(de.relation)), de.boite " +
+                                "from " + DossierEmp.class.getSimpleName() + " de " +
+                                "where de.boite is not null and upper(trim(de.pin)) in :pins " +
+                                "order by upper(trim(de.pin)), upper(trim(de.relation)), de.boite",
+                        Object[].class)
+                .setParameter("pins", new ArrayList<>(pins))
+                .getResultList();
+
+        Map<String, List<Integer>> boitesByPin = new LinkedHashMap<>();
+        Map<String, List<Integer>> boitesByPinRelation = new LinkedHashMap<>();
+        for (Object[] row : rows) {
+            String pin = normalizeReferenceValue(toStringValue(row[0]));
+            String relation = normalizeReferenceValue(toStringValue(row[1]));
+            Integer boite = row[2] instanceof Number ? ((Number) row[2]).intValue() : null;
+            if (pin.isBlank() || boite == null) {
+                continue;
+            }
+
+            appendBoite(boitesByPin, pin, boite);
+            if (!relation.isBlank()) {
+                appendBoite(boitesByPinRelation, buildPinRelationKey(pin, relation), boite);
+            }
+        }
+
+        for (ArchDossier dossier : unresolved) {
+            Long dossierId = dossier.getIdDossier();
+            if (dossierId == null) {
+                continue;
+            }
+
+            String pin = normalizeReferenceValue(dossier.getPin());
+            if (pin.isBlank()) {
+                continue;
+            }
+
+            String relation = normalizeReferenceValue(dossier.getRelation());
+            List<Integer> resolved = relation.isBlank()
+                    ? Collections.emptyList()
+                    : boitesByPinRelation.getOrDefault(buildPinRelationKey(pin, relation), Collections.emptyList());
+            if (resolved.isEmpty()) {
+                resolved = boitesByPin.getOrDefault(pin, Collections.emptyList());
+            }
+            if (!resolved.isEmpty()) {
+                boitesByDossier.put(dossierId, new ArrayList<>(resolved));
+            }
+        }
+
+        return boitesByDossier;
+    }
+
     public static Integer findPrimaryBoite(EntityManager em, Long idDossier) {
-        List<Integer> boites = findBoitesByDossierId(em, idDossier);
+        List<Integer> boites = findBoitesByDossierIdOrReference(em, idDossier, null, null);
+        return boites.isEmpty() ? null : boites.get(0);
+    }
+
+    public static Integer findPrimaryBoite(EntityManager em, Long idDossier, String pin, String relation) {
+        List<Integer> boites = findBoitesByDossierIdOrReference(em, idDossier, pin, relation);
         return boites.isEmpty() ? null : boites.get(0);
     }
 
@@ -115,7 +251,11 @@ public final class DossierEmpUtil {
         }
 
         String filiale = resolveDossierFiliale(dossier);
-        return findEmplacementByBoite(em, findPrimaryBoite(em, dossier.getIdDossier()), filiale);
+        return findEmplacementByBoite(
+                em,
+                findPrimaryBoite(em, dossier.getIdDossier(), dossier.getPin(), dossier.getRelation()),
+                filiale
+        );
     }
 
     public static ArchEmplacement findEmplacementByBoite(EntityManager em, Integer boite) {
@@ -211,7 +351,11 @@ public final class DossierEmpUtil {
     }
 
     public static String findBoitesSummary(EntityManager em, Long idDossier) {
-        return formatBoites(findBoitesByDossierId(em, idDossier));
+        return formatBoites(findBoitesByDossierIdOrReference(em, idDossier, null, null));
+    }
+
+    public static String findBoitesSummary(EntityManager em, Long idDossier, String pin, String relation) {
+        return formatBoites(findBoitesByDossierIdOrReference(em, idDossier, pin, relation));
     }
 
     public static boolean matchesSessionFiliale(ArchDossier dossier, String filiale) {
@@ -235,5 +379,30 @@ public final class DossierEmpUtil {
 
     private static String safeTrim(String value) {
         return value == null ? null : value.trim();
+    }
+
+    private static String normalizeReferenceValue(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private static String toStringValue(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    private static String buildPinRelationKey(String pin, String relation) {
+        return pin + "||" + relation;
+    }
+
+    private static void appendBoite(Map<String, List<Integer>> target, String key, Integer boite) {
+        if (key == null || key.isBlank() || boite == null) {
+            return;
+        }
+        List<Integer> boites = target.computeIfAbsent(key, ignored -> new ArrayList<>());
+        if (!boites.contains(boite)) {
+            boites.add(boite);
+        }
     }
 }

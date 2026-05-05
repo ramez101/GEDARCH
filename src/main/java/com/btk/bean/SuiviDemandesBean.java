@@ -54,9 +54,10 @@ public class SuiviDemandesBean implements Serializable {
             return;
         }
 
-        String unix = normalize(loginBean.getUtilisateur().getUnix());
-        String cuti = normalize(loginBean.getUtilisateur().getCuti());
-        if (unix.isBlank() && cuti.isBlank()) {
+        String unix = resolveCurrentUserUnix();
+        String cuti = resolveCurrentUserCuti();
+        String lib = resolveCurrentUserLib();
+        if (unix.isBlank() && cuti.isBlank() && lib.isBlank()) {
             demandes = Collections.emptyList();
             return;
         }
@@ -71,7 +72,7 @@ public class SuiviDemandesBean implements Serializable {
                             "SELECT ID_DEMANDE, PIN, BOITE, RECEPTEUR, DATE_ENVOI, DATE_APPROUVE, DATE_RESTITUTION " +
                                     "FROM DEMANDE_DOSSIER dd " +
                                     "WHERE " + filialePredicate + " " +
-                                    "AND UPPER(TRIM(EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti))) " +
+                                    "AND UPPER(TRIM(EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti)), UPPER(TRIM(:emetteurLib))) " +
                                     "ORDER BY DATE_ENVOI DESC");
             DemandeFilialeUtil.bindParameters(query, filiale, legacyFiliale);
 
@@ -79,6 +80,7 @@ public class SuiviDemandesBean implements Serializable {
             List<Object[]> rows = query
                     .setParameter("emetteurUnix", unix)
                     .setParameter("emetteurCuti", cuti)
+                    .setParameter("emetteurLib", lib)
                     .getResultList();
 
             List<SuiviDemandeRow> loaded = new ArrayList<>();
@@ -122,11 +124,10 @@ public class SuiviDemandesBean implements Serializable {
             return;
         }
 
-        String unix = normalize(loginBean == null || loginBean.getUtilisateur() == null
-                ? null : loginBean.getUtilisateur().getUnix());
-        String cuti = normalize(loginBean == null || loginBean.getUtilisateur() == null
-                ? null : loginBean.getUtilisateur().getCuti());
-        if (unix.isBlank() && cuti.isBlank()) {
+        String unix = resolveCurrentUserUnix();
+        String cuti = resolveCurrentUserCuti();
+        String lib = resolveCurrentUserLib();
+        if (unix.isBlank() && cuti.isBlank() && lib.isBlank()) {
             addError("Utilisateur emetteur introuvable.");
             return;
         }
@@ -148,11 +149,12 @@ public class SuiviDemandesBean implements Serializable {
                                     "WHERE ID_DEMANDE = :id " +
                                     "AND DATE_APPROUVE IS NOT NULL " +
                                     "AND DATE_RESTITUTION IS NULL " +
-                                    "AND UPPER(TRIM(EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti))) " +
+                                    "AND UPPER(TRIM(EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti)), UPPER(TRIM(:emetteurLib))) " +
                                     "AND " + filialePredicate)
                     .setParameter("id", row.getIdDemande())
                     .setParameter("emetteurUnix", unix)
-                    .setParameter("emetteurCuti", cuti);
+                    .setParameter("emetteurCuti", cuti)
+                    .setParameter("emetteurLib", lib);
             DemandeFilialeUtil.bindParameters(updateQuery, filiale, legacyFiliale);
 
             int updated = updateQuery.executeUpdate();
@@ -166,7 +168,7 @@ public class SuiviDemandesBean implements Serializable {
                 return;
             }
 
-            if (hasStatutColumn(em) && !hasApprovedNonRestitutedDossierForCurrentUser(em, unix, cuti)) {
+            if (hasStatutColumn(em) && !hasApprovedNonRestitutedDossierForCurrentUser(em, unix, cuti, lib)) {
                 updateCurrentUserBlockStatus(em, unix, cuti, USER_UNBLOCKED_STATUS);
             }
 
@@ -225,6 +227,21 @@ public class SuiviDemandesBean implements Serializable {
         return loginBean == null ? "" : loginBean.getCurrentFilialeId();
     }
 
+    private String resolveCurrentUserUnix() {
+        return normalize(loginBean == null || loginBean.getUtilisateur() == null
+                ? null : loginBean.getUtilisateur().getUnix());
+    }
+
+    private String resolveCurrentUserCuti() {
+        return normalize(loginBean == null || loginBean.getUtilisateur() == null
+                ? null : loginBean.getUtilisateur().getCuti());
+    }
+
+    private String resolveCurrentUserLib() {
+        return normalize(loginBean == null || loginBean.getUtilisateur() == null
+                ? null : loginBean.getUtilisateur().getLib());
+    }
+
     private boolean hasStatutColumn(EntityManager em) {
         Number count = (Number) em.createNativeQuery(
                         "SELECT COUNT(*) FROM USER_TAB_COLUMNS " +
@@ -257,10 +274,11 @@ public class SuiviDemandesBean implements Serializable {
                 .executeUpdate();
     }
 
-    private boolean hasApprovedNonRestitutedDossierForCurrentUser(EntityManager em, String unix, String cuti) {
+    private boolean hasApprovedNonRestitutedDossierForCurrentUser(EntityManager em, String unix, String cuti, String lib) {
         String cleanUnix = normalize(unix);
         String cleanCuti = normalize(cuti);
-        if (cleanUnix.isBlank() && cleanCuti.isBlank()) {
+        String cleanLib = normalize(lib);
+        if (cleanUnix.isBlank() && cleanCuti.isBlank() && cleanLib.isBlank()) {
             return false;
         }
 
@@ -272,11 +290,12 @@ public class SuiviDemandesBean implements Serializable {
                         "SELECT COUNT(*) " +
                                 "FROM DEMANDE_DOSSIER dd " +
                                 "WHERE " + filialePredicate + " " +
-                                "AND UPPER(TRIM(dd.EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti))) " +
+                                "AND UPPER(TRIM(dd.EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti)), UPPER(TRIM(:emetteurLib))) " +
                                 "AND dd.DATE_APPROUVE IS NOT NULL " +
                                 "AND dd.DATE_RESTITUTION IS NULL")
                 .setParameter("emetteurUnix", cleanUnix)
-                .setParameter("emetteurCuti", cleanCuti);
+                .setParameter("emetteurCuti", cleanCuti)
+                .setParameter("emetteurLib", cleanLib);
         DemandeFilialeUtil.bindParameters(countQuery, filiale, legacyFiliale);
 
         Number count = (Number) countQuery.getSingleResult();

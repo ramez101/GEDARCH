@@ -60,8 +60,12 @@ public class ConsultationBoitesBean implements Serializable {
         try {
             dossiers = em.createQuery(
                             "select d from " + ArchDossier.class.getSimpleName() + " d " +
-                                    "where d.idDossier in (" +
+                                    "where (" +
+                                    "d.idDossier in (" +
                                     "select de.idDossier from DossierEmp de where de.boite = :boite" +
+                                    ") or upper(trim(d.pin)) in (" +
+                                    "select upper(trim(de.pin)) from DossierEmp de where de.boite = :boite and de.pin is not null" +
+                                    ")" +
                                     ") and (lower(trim(d.filiale)) = :filiale " +
                                     "or (d.filiale is null and lower(trim(d.idFiliale)) = :legacyFiliale)) " +
                                     "order by d.pin, d.relation, d.idDossier",
@@ -128,7 +132,12 @@ public class ConsultationBoitesBean implements Serializable {
 
         EntityManager em = getEMF().createEntityManager();
         try {
-            selectedDossierBoites = DossierEmpUtil.findBoitesSummary(em, selectedDossier.getIdDossier());
+            selectedDossierBoites = DossierEmpUtil.findBoitesSummary(
+                    em,
+                    selectedDossier.getIdDossier(),
+                    selectedDossier.getPin(),
+                    selectedDossier.getRelation()
+            );
         } finally {
             em.close();
         }

@@ -117,13 +117,7 @@ public class ListeArchivesBean implements Serializable {
                     .setParameter("legacyFiliale", resolveSessionLegacyFiliale())
                     .getResultList();
 
-            List<Long> dossierIds = new ArrayList<>(rows.size());
-            for (ArchDossier row : rows) {
-                if (row.getIdDossier() != null) {
-                    dossierIds.add(row.getIdDossier());
-                }
-            }
-            var boitesByDossier = DossierEmpUtil.findBoitesByDossierIds(em, dossierIds);
+            var boitesByDossier = DossierEmpUtil.findBoitesByDossiers(em, rows);
 
             List<ArchiveRow> loaded = new ArrayList<>(rows.size());
             for (ArchDossier row : rows) {

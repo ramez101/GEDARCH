@@ -118,7 +118,12 @@ public class ModifierArchivesBean implements Serializable {
             filialeId = dossier.getIdFiliale();
             resultLoaded = true;
 
-            selectedBoites = new ArrayList<>(DossierEmpUtil.findBoitesByDossierId(em, dossierId));
+            selectedBoites = new ArrayList<>(DossierEmpUtil.findBoitesByDossierIdOrReference(
+                    em,
+                    dossierId,
+                    dossier.getPin(),
+                    dossier.getRelation()
+            ));
             boite = null;
             boiteToRemove = null;
             boites = fetchBoites();

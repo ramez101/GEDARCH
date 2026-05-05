@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.primefaces.PrimeFaces;
+
 import com.btk.model.ArchDossier;
 import com.btk.util.DossierEmpUtil;
 import com.btk.util.FilialeUtil;
@@ -42,14 +44,14 @@ import jakarta.persistence.Persistence;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
 import jakarta.transaction.UserTransaction;
-import org.primefaces.PrimeFaces;
 
 @Named("ajoutArchivesBean")
 @ViewScoped
 public class AjoutArchivesBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private static final Path DOCUMENTS_ROOT = Paths.get("C:\\Documents_Archives");
+    private static final Path DOCUMENTS_ROOT_FINANCE = Paths.get("C:\\Documents_Archives\\BTK - Finance");
+    private static final Path DOCUMENTS_ROOT_BANK = Paths.get("C:\\Documents_Archives\\BTK - Bank");
     private static final String RELATION_SUGGESTION_SEPARATOR = " | ";
 
     private static EntityManagerFactory emf;
@@ -114,8 +116,8 @@ public class AjoutArchivesBean implements Serializable {
             idDossier = row.getIdDossier();
             pin = row.getPin();
             relation = row.getRelation();
-            boitePrincipale = DossierEmpUtil.findPrimaryBoite(em, idDossier);
-            boite = DossierEmpUtil.findBoitesSummary(em, idDossier);
+            boitePrincipale = DossierEmpUtil.findPrimaryBoite(em, idDossier, row.getPin(), row.getRelation());
+            boite = DossierEmpUtil.findBoitesSummary(em, idDossier, row.getPin(), row.getRelation());
             dossierLoaded = true;
 
             loadExistingDocuments(em);
@@ -477,7 +479,18 @@ public class AjoutArchivesBean implements Serializable {
         if (!paths.isEmpty() && paths.get(0) != null && !paths.get(0).isBlank()) {
             return Paths.get(paths.get(0));
         }
-        return DOCUMENTS_ROOT.resolve(dossierName);
+        return resolveDocumentsRoot().resolve(dossierName);
+    }
+
+    private Path resolveDocumentsRoot() {
+        String filiale = FilialeUtil.normalizeKey(resolveSessionFiliale());
+        if ("finance".equals(filiale)) {
+            return DOCUMENTS_ROOT_FINANCE;
+        }
+        if ("bank".equals(filiale)) {
+            return DOCUMENTS_ROOT_BANK;
+        }
+        throw new IllegalStateException("Session filiale invalide : seules les sessions finance et bank sont autorisées.");
     }
 
     private Map<String, DocMeta> readMetadataFile(Path dossierPath) {

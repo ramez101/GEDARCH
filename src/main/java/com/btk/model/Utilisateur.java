@@ -22,6 +22,10 @@ public class Utilisateur {
     @Column(name = "UNIX", length = 20)
     private String unix;
 
+    /** Mot de passe */
+    @Column(name = "MDP", length = 20)
+    private String mdp;
+
     /** Nom complet */
     @Column(name = "LIB", length = 20)
     private String lib;
@@ -51,6 +55,9 @@ public class Utilisateur {
 
     public String getUnix()            { return unix; }
     public void   setUnix(String unix) { this.unix = unix; }
+
+    public String getMdp()             { return mdp; }
+    public void   setMdp(String mdp)   { this.mdp = mdp; }
 
     public String getLib()             { return lib; }
     public void   setLib(String lib)   { this.lib = lib; }

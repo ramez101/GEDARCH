@@ -17,6 +17,7 @@ import com.btk.model.Utilisateur;
 import com.btk.util.DemandeFilialeUtil;
 import com.btk.util.FilialeUtil;
 
+import jakarta.annotation.Resource;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -26,6 +27,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.Query;
+import jakarta.transaction.UserTransaction;
 
 /**
  * CDI Bean (Jakarta EE 9) – handles login, logout, and session guard.
@@ -40,6 +42,9 @@ public class LoginBean implements Serializable {
     // ── Input fields bound to login.xhtml ────────────────────────────────────
     private String cuti;
     private String password;
+    private String currentPassword;
+    private String newPassword;
+    private String confirmNewPassword;
 
     // ── Authenticated user stored in session ─────────────────────────────────
     private Utilisateur utilisateur;
@@ -52,6 +57,8 @@ public class LoginBean implements Serializable {
 
     // ── Shared EntityManagerFactory ──────────────────────────────────────────
     private static EntityManagerFactory emf;
+    @Resource
+    private UserTransaction utx;
 
     private static synchronized EntityManagerFactory getEMF() {
         if (emf == null || !emf.isOpen()) {
@@ -74,6 +81,7 @@ public class LoginBean implements Serializable {
             Utilisateur generic = new Utilisateur();
             generic.setCuti("admin");
             generic.setUnix("admin");
+            generic.setMdp("admin");
             generic.setLib("admin");
             generic.setPuti("finance");
             generic.setAge("00000");
@@ -125,13 +133,14 @@ public class LoginBean implements Serializable {
         }
 
         boolean activeColumnAvailable = hasActiveColumn(em);
+        boolean mdpColumnAvailable = hasMdpColumn(em);
         String sql;
         if (activeColumnAvailable) {
-            sql = "SELECT CUTI, UNIX, LIB, PUTI, AGE, ROLE, NVL(TO_CHAR(ACTIVE), '1') " +
+            sql = "SELECT CUTI, UNIX, " + (mdpColumnAvailable ? "MDP" : "UNIX") + ", LIB, PUTI, AGE, ROLE, NVL(TO_CHAR(ACTIVE), '1') " +
                   "FROM ARCH_UTILISATEURS " +
                   "WHERE UPPER(TRIM(CUTI)) = UPPER(TRIM(?))";
         } else {
-            sql = "SELECT CUTI, UNIX, LIB, PUTI, AGE, ROLE, '1' " +
+            sql = "SELECT CUTI, UNIX, " + (mdpColumnAvailable ? "MDP" : "UNIX") + ", LIB, PUTI, AGE, ROLE, '1' " +
                   "FROM ARCH_UTILISATEURS " +
                   "WHERE UPPER(TRIM(CUTI)) = UPPER(TRIM(?))";
         }
@@ -148,11 +157,12 @@ public class LoginBean implements Serializable {
         Utilisateur utilisateurTrouve = new Utilisateur();
         utilisateurTrouve.setCuti(toText(row[0]));
         utilisateurTrouve.setUnix(toText(row[1]));
-        utilisateurTrouve.setLib(toText(row[2]));
-        utilisateurTrouve.setPuti(toText(row[3]));
-        utilisateurTrouve.setAge(toText(row[4]));
-        utilisateurTrouve.setRole(toText(row[5]));
-        utilisateurTrouve.setActif(parseActive(row[6]));
+        utilisateurTrouve.setMdp(toText(row[2]));
+        utilisateurTrouve.setLib(toText(row[3]));
+        utilisateurTrouve.setPuti(toText(row[4]));
+        utilisateurTrouve.setAge(toText(row[5]));
+        utilisateurTrouve.setRole(toText(row[6]));
+        utilisateurTrouve.setActif(parseActive(row[7]));
         return utilisateurTrouve;
     }
 
@@ -256,18 +266,116 @@ public class LoginBean implements Serializable {
     }
 
     /**
-     * Temporary password verification using the UNIX column as password.
-     * Replace later with AD/LDAP verification (or a real password check).
+     * Password verification: use MDP when present, fallback to UNIX for legacy rows.
      */
     private boolean verifyPassword(Utilisateur user, String rawPassword) {
         if (user == null) return false;
         if (rawPassword == null) return false;
 
-        String unix = user.getUnix();
-        if (unix == null) return false;
+        String mdp = user.getMdp();
+        if (mdp != null && !mdp.isBlank()) {
+            return rawPassword.equals(mdp.trim());
+        }
 
-        // Current rule: password must equal the value stored in UNIX.
+        String unix = user.getUnix();
+        if (unix == null || unix.isBlank()) {
+            return false;
+        }
         return rawPassword.equals(unix.trim());
+    }
+
+    public void clearPasswordChangeForm() {
+        currentPassword = null;
+        newPassword = null;
+        confirmNewPassword = null;
+    }
+
+    public void changeMyPassword() {
+        if (utilisateur == null) {
+            addError("Session invalide. Veuillez vous reconnecter.");
+            markValidationFailed();
+            return;
+        }
+
+        String oldPwd = currentPassword == null ? "" : currentPassword.trim();
+        String nextPwd = newPassword == null ? "" : newPassword.trim();
+        String confirmPwd = confirmNewPassword == null ? "" : confirmNewPassword.trim();
+
+        if (oldPwd.isBlank() || nextPwd.isBlank() || confirmPwd.isBlank()) {
+            addError("Tous les champs mot de passe sont obligatoires.");
+            markValidationFailed();
+            return;
+        }
+
+        if (!verifyPassword(utilisateur, oldPwd)) {
+            addError("L'ancien mot de passe est incorrect.");
+            markValidationFailed();
+            return;
+        }
+
+        if (!nextPwd.equals(confirmPwd)) {
+            addError("La confirmation ne correspond pas au nouveau mot de passe.");
+            markValidationFailed();
+            return;
+        }
+
+        if (nextPwd.length() > 20) {
+            addError("Le mot de passe ne doit pas depasser 20 caracteres.");
+            markValidationFailed();
+            return;
+        }
+
+        if (nextPwd.equals(oldPwd)) {
+            addError("Le nouveau mot de passe doit etre different de l'ancien.");
+            markValidationFailed();
+            return;
+        }
+
+        String currentCuti = normalizeIdentifier(utilisateur.getCuti());
+        String currentUnix = normalizeIdentifier(utilisateur.getUnix());
+        if (currentCuti.isBlank()) {
+            addError("Compte utilisateur invalide (CUTI manquant).");
+            markValidationFailed();
+            return;
+        }
+
+        EntityManager em = getEMF().createEntityManager();
+        boolean txStarted = false;
+        try {
+            utx.begin();
+            txStarted = true;
+            em.joinTransaction();
+
+            int updated = updatePasswordInDatabase(em, currentCuti, currentUnix, nextPwd);
+
+            if (updated <= 0) {
+                addError("Aucun utilisateur mis a jour.");
+                markValidationFailed();
+                try {
+                    utx.rollback();
+                } catch (Exception ignored) {}
+                txStarted = false;
+                return;
+            }
+
+            em.flush();
+            utx.commit();
+            txStarted = false;
+
+            utilisateur.setMdp(nextPwd);
+            clearPasswordChangeForm();
+            addInfo("Mot de passe modifie avec succes.");
+        } catch (Exception e) {
+            if (txStarted) {
+                try {
+                    utx.rollback();
+                } catch (Exception ignored) {}
+            }
+            addError("Erreur lors du changement du mot de passe : " + e.getMessage());
+            markValidationFailed();
+        } finally {
+            em.close();
+        }
     }
 
     // ── Logout action ─────────────────────────────────────────────────────────
@@ -278,6 +386,49 @@ public class LoginBean implements Serializable {
                         "AND COLUMN_NAME = 'ACTIVE'")
                 .getSingleResult();
         return count != null && count.longValue() > 0;
+    }
+
+    private boolean hasMdpColumn(EntityManager em) {
+        Number count = (Number) em.createNativeQuery(
+                        "SELECT COUNT(*) FROM USER_TAB_COLUMNS " +
+                        "WHERE TABLE_NAME = 'ARCH_UTILISATEURS' " +
+                        "AND COLUMN_NAME = 'MDP'")
+                .getSingleResult();
+        return count != null && count.longValue() > 0;
+    }
+
+    private int updatePasswordInDatabase(EntityManager em, String cutiValue, String unixValue, String nextPwd) {
+        try {
+            return em.createNativeQuery(
+                            "UPDATE ARCH_UTILISATEURS " +
+                            "SET MDP = ? " +
+                            "WHERE UPPER(TRIM(CUTI)) = UPPER(TRIM(?)) " +
+                            "OR UPPER(TRIM(UNIX)) = UPPER(TRIM(?))")
+                    .setParameter(1, nextPwd)
+                    .setParameter(2, cutiValue)
+                    .setParameter(3, unixValue)
+                    .executeUpdate();
+        } catch (RuntimeException e) {
+            if (!isInvalidIdentifierError(e)) {
+                throw e;
+            }
+            throw new RuntimeException("La colonne MDP est introuvable dans ARCH_UTILISATEURS.", e);
+        }
+    }
+
+    private boolean isInvalidIdentifierError(Throwable error) {
+        Throwable current = error;
+        while (current != null) {
+            String message = current.getMessage();
+            if (message != null) {
+                String normalized = message.toLowerCase();
+                if (normalized.contains("ora-00904") || normalized.contains("invalid identifier")) {
+                    return true;
+                }
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     private String toText(Object value) {
@@ -826,6 +977,7 @@ public class LoginBean implements Serializable {
                                                        String orderByClause,
                                                        String unix,
                                                        String cutiValue) {
+        String emetteurLib = normalizeIdentifier(utilisateur == null ? null : utilisateur.getLib());
         String filiale = getCurrentFilialeCode();
         String legacyFiliale = getCurrentFilialeId();
         String filialePredicate = DemandeFilialeUtil.buildPredicate(em, "dd", filiale, legacyFiliale);
@@ -834,7 +986,7 @@ public class LoginBean implements Serializable {
                 .append(" FROM DEMANDE_DOSSIER dd ")
                 .append("WHERE ")
                 .append(filialePredicate)
-                .append(" AND UPPER(TRIM(dd.EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti)))");
+                .append(" AND UPPER(TRIM(dd.EMETTEUR)) IN (UPPER(TRIM(:emetteurUnix)), UPPER(TRIM(:emetteurCuti)), UPPER(TRIM(:emetteurLib)))");
 
         if (additionalWhere != null && !additionalWhere.isBlank()) {
             sql.append(" AND ").append(additionalWhere);
@@ -845,7 +997,8 @@ public class LoginBean implements Serializable {
 
         Query query = em.createNativeQuery(sql.toString())
                 .setParameter("emetteurUnix", unix)
-                .setParameter("emetteurCuti", cutiValue);
+                .setParameter("emetteurCuti", cutiValue)
+                .setParameter("emetteurLib", emetteurLib);
         DemandeFilialeUtil.bindParameters(query, filiale, legacyFiliale);
         return query;
     }
@@ -934,12 +1087,30 @@ public class LoginBean implements Serializable {
                 .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, null));
     }
 
+    private void addInfo(String msg) {
+        FacesContext.getCurrentInstance()
+                .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, msg, null));
+    }
+
+    private void markValidationFailed() {
+        FacesContext fc = FacesContext.getCurrentInstance();
+        if (fc != null) {
+            fc.validationFailed();
+        }
+    }
+
     // ── Getters & Setters ─────────────────────────────────────────────────────
     public String getCuti()                          { return cuti; }
     public void   setCuti(String cuti)               { this.cuti = cuti; }
 
     public String getPassword()                      { return password; }
     public void   setPassword(String password)       { this.password = password; }
+    public String getCurrentPassword()               { return currentPassword; }
+    public void   setCurrentPassword(String value)   { this.currentPassword = value; }
+    public String getNewPassword()                   { return newPassword; }
+    public void   setNewPassword(String value)       { this.newPassword = value; }
+    public String getConfirmNewPassword()            { return confirmNewPassword; }
+    public void   setConfirmNewPassword(String value){ this.confirmNewPassword = value; }
 
     public Utilisateur getUtilisateur()              { return utilisateur; }
     public void        setUtilisateur(Utilisateur u) { this.utilisateur = u; }

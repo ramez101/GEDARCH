@@ -75,7 +75,17 @@ public final class DemandeFilialeUtil {
                         "SELECT LISTAGG(TO_CHAR(de.BOITE), ', ') WITHIN GROUP (ORDER BY de.BOITE) " +
                         "FROM DOSSIER_EMP de " +
                         "WHERE de.ID_DOSSIER = ad.ID_DOSSIER" +
-                    "), '') = NVL(" + boiteColumn + ", '')" +
+                    "), '') = NVL(" + boiteColumn + ", '') " +
+                    "OR NVL((" +
+                        "SELECT LISTAGG(TO_CHAR(de.BOITE), ', ') WITHIN GROUP (ORDER BY de.BOITE) " +
+                        "FROM DOSSIER_EMP de " +
+                        "WHERE UPPER(TRIM(de.PIN)) = UPPER(TRIM(ad.PIN))" +
+                    "), '') = NVL(" + boiteColumn + ", '') " +
+                    "OR EXISTS (" +
+                        "SELECT 1 FROM DOSSIER_EMP de " +
+                        "WHERE (de.ID_DOSSIER = ad.ID_DOSSIER OR UPPER(TRIM(de.PIN)) = UPPER(TRIM(ad.PIN))) " +
+                        "AND TO_CHAR(de.BOITE) = TRIM(" + boiteColumn + ")" +
+                    ")" +
                 ")" +
                 ")";
     }

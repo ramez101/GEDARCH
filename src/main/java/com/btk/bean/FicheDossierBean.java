@@ -129,7 +129,7 @@ public class FicheDossierBean implements Serializable {
             salle = emplacement == null ? null : emplacement.getSalle();
             rayon = emplacement == null ? null : emplacement.getRayon();
             rangee = emplacement == null ? null : emplacement.getRangee();
-            boite = DossierEmpUtil.findBoitesSummary(em, idDossier);
+            boite = DossierEmpUtil.findBoitesSummary(em, idDossier, row.getPin(), row.getRelation());
             resultLoaded = true;
 
             loadDocumentsForCurrentDossier(em);

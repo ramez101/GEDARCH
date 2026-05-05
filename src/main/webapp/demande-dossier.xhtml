@@ -108,8 +108,34 @@
                                     <p:selectOneMenu id="typeDemande" value="#{demandeDossierBean.typeDemande}" required="true">
                                         <f:selectItem itemLabel="Demande de dossier complet" itemValue="demande dossier complet"/>
                                         <f:selectItem itemLabel="Demande de document du dossier" itemValue="demande document du dossier"/>
+                                        <p:ajax process="@this"
+                                                listener="#{demandeDossierBean.onTypeDemandeChange}"
+                                                update="documentsSelection"/>
                                     </p:selectOneMenu>
                                 </div>
+                                <h:panelGroup id="documentsSelection" layout="block" styleClass="form-row full">
+                                    <ui:fragment rendered="#{demandeDossierBean.documentRequest}">
+                                        <h:outputLabel for="documentsDemande" value="Documents demandés"/>
+                                        <p:selectCheckboxMenu id="documentsDemande"
+                                                              value="#{demandeDossierBean.selectedDocuments}"
+                                                              label="Sélectionner documents"
+                                                              updateLabel="true"
+                                                              filter="true"
+                                                              filterMatchMode="contains"
+                                                              scrollHeight="220"
+                                                              style="width: 100%">
+                                            <f:selectItems value="#{demandeDossierBean.availableDocumentOptions}"
+                                                           var="doc"
+                                                           itemLabel="#{doc.label}"
+                                                           itemValue="#{doc.value}"/>
+                                        </p:selectCheckboxMenu>
+                                        <h:panelGroup rendered="#{empty demandeDossierBean.availableDocumentOptions}"
+                                                      layout="block"
+                                                      style="margin-top: 6px; color: #8a5a00; font-size: .82rem;">
+                                            <h:outputText value="Aucun document trouvé pour ce dossier."/>
+                                        </h:panelGroup>
+                                    </ui:fragment>
+                                </h:panelGroup>
                                 <div class="form-row full">
                                     <h:outputLabel for="commentaire" value="Justification"/>
                                     <p:inputTextarea id="commentaire"

@@ -207,95 +207,8 @@
             </div>
 
             <div class="dashboard-slider" data-current="0">
-                <div class="dashboard-slide is-active">
-                    <div class="card">
-                        <div class="card-title">Informations utilisateur</div>
-
-                        <div class="info-grid">
-
-                            <div class="info-item">
-                                <div class="label">Code Utilisateur (CUTI)</div>
-                                <div class="value">#{loginBean.utilisateur.cuti}</div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="label">Nom complet (LIB)</div>
-                                <div class="value">
-                                    <h:outputText value="#{loginBean.utilisateur.lib}"
-                                                  rendered="#{not empty loginBean.utilisateur.lib}"/>
-                                    <span class="empty">
-                                        <h:outputText value="Non renseigne"
-                                                      rendered="#{empty loginBean.utilisateur.lib}"/>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="label">Username Unix</div>
-                                <div class="value">
-                                    <h:panelGroup rendered="#{not empty loginBean.utilisateur.unix}">
-                                        <span class="secret-field">
-                                            <span class="secret-masked">********</span>
-                                            <span class="secret-plain">#{loginBean.utilisateur.unix}</span>
-                                            <button type="button" class="secret-toggle" onclick="BTKSecrets.toggle(this)" aria-label="Afficher/Masquer">
-                                                <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-                                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
-                                                    <circle cx="12" cy="12" r="3"/>
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </h:panelGroup>
-                                    <span class="empty">
-                                        <h:outputText value="Non renseigne"
-                                                      rendered="#{empty loginBean.utilisateur.unix}"/>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="label">Profil (PUTI)</div>
-                                <div class="value">
-                                    <h:panelGroup rendered="#{not empty loginBean.utilisateur.puti}">
-                                        <span class="badge">#{loginBean.utilisateur.puti}</span>
-                                    </h:panelGroup>
-                                    <span class="empty">
-                                        <h:outputText value="Non renseigne"
-                                                      rendered="#{empty loginBean.utilisateur.puti}"/>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="label">Rôle</div>
-                                <div class="value">
-                                    <h:panelGroup rendered="#{not empty loginBean.utilisateur.role}">
-                                        <span class="badge">#{loginBean.utilisateur.role}</span>
-                                    </h:panelGroup>
-                                    <span class="empty">
-                                        <h:outputText value="Non renseigne"
-                                                      rendered="#{empty loginBean.utilisateur.role}"/>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="label">Agence (AGE)</div>
-                                <div class="value">
-                                    <h:outputText value="#{loginBean.utilisateur.age}"
-                                                  rendered="#{not empty loginBean.utilisateur.age}"/>
-                                    <span class="empty">
-                                        <h:outputText value="Non renseigne"
-                                                      rendered="#{empty loginBean.utilisateur.age}"/>
-                                    </span>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
                 <ui:fragment rendered="#{dashboardStatsBean.visible}">
-                    <div class="dashboard-slide">
+                    <div class="dashboard-slide is-active">
                         <div class="stats-panel">
                             <div class="card-title">
                                 <h:outputText value="Statistiques de la session #{dashboardStatsBean.currentFilialeLabel}"
@@ -415,18 +328,6 @@
                                     </h:outputText>
                                 </span>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="dashboard-autorotate">
-                        <span class="dashboard-note">Changement automatique chaque 10 secondes avec navigation manuelle.</span>
-                        <div class="dashboard-controls">
-                            <button type="button" class="dashboard-nav" onclick="BTKDashboardSlider.prev()" aria-label="Afficher la diapositive précédente">&#8249;</button>
-                            <div class="dashboard-dots" aria-label="Navigation du slider">
-                                <button type="button" class="dashboard-dot is-active" onclick="BTKDashboardSlider.goTo(0)" aria-label="Afficher les informations utilisateur" aria-pressed="true"></button>
-                                <button type="button" class="dashboard-dot" onclick="BTKDashboardSlider.goTo(1)" aria-label="Afficher les statistiques" aria-pressed="false"></button>
-                            </div>
-                            <button type="button" class="dashboard-nav" onclick="BTKDashboardSlider.next()" aria-label="Afficher le slide suivant">&#8250;</button>
                         </div>
                     </div>
                 </ui:fragment>

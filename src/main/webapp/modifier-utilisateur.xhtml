@@ -89,9 +89,20 @@
                             </div>
 
                             <div class="form-row">
-                                <h:outputLabel for="modUnix" value="Mot de passe (UNIX)"/>
-                                <p:password id="modUnix"
+                                <h:outputLabel for="modUnix" value="Username Unix"/>
+                                <p:inputText id="modUnix"
                                             value="#{ajouterUtilisateurBean.modUnix}"
+                                            required="true"
+                                            requiredMessage="Username Unix obligatoire."
+                                            maxlength="20"
+                                            disabled="#{not ajouterUtilisateurBean.modResultLoaded}"
+                                            placeholder="Nouveau username unix"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="modMdp" value="Mot de passe (MDP)"/>
+                                <p:password id="modMdp"
+                                            value="#{ajouterUtilisateurBean.modMdp}"
                                             required="true"
                                             requiredMessage="Mot de passe obligatoire."
                                             feedback="false"
@@ -150,7 +161,7 @@
                             <p:commandButton id="updateModifierUserBtn"
                                              value="Valider"
                                              action="#{ajouterUtilisateurBean.update}"
-                                             process="@this modCuti modUnix modLib modAge modPuti modRole"
+                                             process="@this modCuti modUnix modMdp modLib modAge modPuti modRole"
                                              update="@form"
                                              disabled="#{not ajouterUtilisateurBean.modResultLoaded}"
                                              styleClass="btn-primary"/>

@@ -73,7 +73,11 @@ public class SuiviDossiersBean implements Serializable {
                     "WHERE " + filialePredicate);
 
             if (selectedOption != null) {
-                sql.append(" AND UPPER(TRIM(EMETTEUR)) IN (UPPER(TRIM(:selectedUnix)), UPPER(TRIM(:selectedCuti)))");
+                sql.append(" AND UPPER(TRIM(EMETTEUR)) IN (" +
+                        "UPPER(TRIM(:selectedUnix)), " +
+                        "UPPER(TRIM(:selectedCuti)), " +
+                        "UPPER(TRIM(:selectedLib)), " +
+                        "UPPER(TRIM(:selectedValue)))");
             }
             sql.append(" ORDER BY DATE_ENVOI DESC");
 
@@ -82,6 +86,8 @@ public class SuiviDossiersBean implements Serializable {
             if (selectedOption != null) {
                 query.setParameter("selectedUnix", selectedOption.getUnix());
                 query.setParameter("selectedCuti", selectedOption.getCuti());
+                query.setParameter("selectedLib", selectedOption.getLib());
+                query.setParameter("selectedValue", selectedOption.getValue());
             }
 
             @SuppressWarnings("unchecked")
@@ -404,7 +410,7 @@ public class SuiviDossiersBean implements Serializable {
                 continue;
             }
 
-            options.add(new ChargeOption(value, cuti, unix, buildChargeLabel(lib, unix, cuti)));
+            options.add(new ChargeOption(value, cuti, unix, lib, buildChargeLabel(lib, unix, cuti)));
         }
         return options;
     }
@@ -695,12 +701,14 @@ public class SuiviDossiersBean implements Serializable {
         private final String value;
         private final String cuti;
         private final String unix;
+        private final String lib;
         private final String label;
 
-        ChargeOption(String value, String cuti, String unix, String label) {
+        ChargeOption(String value, String cuti, String unix, String lib, String label) {
             this.value = value;
             this.cuti = cuti == null ? "" : cuti;
             this.unix = unix == null ? "" : unix;
+            this.lib = lib == null ? "" : lib;
             this.label = label == null ? "" : label;
         }
 
@@ -714,6 +722,10 @@ public class SuiviDossiersBean implements Serializable {
 
         public String getUnix() {
             return unix;
+        }
+
+        public String getLib() {
+            return lib;
         }
 
         public String getLabel() {

@@ -43,7 +43,8 @@ import jakarta.inject.Inject;
 public class AjoutDossiersArchivesBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private static final Path DOCUMENTS_ROOT = Paths.get("C:\\Documents_Archives");
+    private static final Path DOCUMENTS_ROOT_FINANCE = Paths.get("C:\\Documents_Archives\\BTK - Finance");
+    private static final Path DOCUMENTS_ROOT_BANK = Paths.get("C:\\Documents_Archives\\BTK - Bank");
 
     private static EntityManagerFactory emf;
 
@@ -434,10 +435,22 @@ public class AjoutDossiersArchivesBean implements Serializable {
     }
 
     private Path prepareDossierDirectory(ArchDossier dossier) throws Exception {
-        Files.createDirectories(DOCUMENTS_ROOT);
-        Path dossierPath = DOCUMENTS_ROOT.resolve(buildDossierName(dossier));
+        Path documentsRoot = resolveDocumentsRoot();
+        Files.createDirectories(documentsRoot);
+        Path dossierPath = documentsRoot.resolve(buildDossierName(dossier));
         Files.createDirectories(dossierPath);
         return dossierPath;
+    }
+
+    private Path resolveDocumentsRoot() {
+        String filiale = FilialeUtil.normalizeKey(resolveSessionFiliale());
+        if ("finance".equals(filiale)) {
+            return DOCUMENTS_ROOT_FINANCE;
+        }
+        if ("bank".equals(filiale)) {
+            return DOCUMENTS_ROOT_BANK;
+        }
+        throw new IllegalStateException("Session filiale invalide : seules les sessions finance et bank sont autorisées.");
     }
 
     private void writeMetadataFile(Path dossierPath, List<DocItem> docs) throws Exception {

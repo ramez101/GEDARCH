@@ -59,9 +59,19 @@
                             </div>
 
                             <div class="form-row">
-                                <h:outputLabel for="unix" value="Mot de passe (UNIX)"/>
-                                <p:password id="unix"
+                                <h:outputLabel for="unix" value="Username Unix"/>
+                                <p:inputText id="unix"
                                             value="#{ajouterUtilisateurBean.unix}"
+                                            required="true"
+                                            requiredMessage="Username Unix obligatoire."
+                                            maxlength="20"
+                                            placeholder="Ex: user.unix"/>
+                            </div>
+
+                            <div class="form-row">
+                                <h:outputLabel for="mdp" value="Mot de passe (MDP)"/>
+                                <p:password id="mdp"
+                                            value="#{ajouterUtilisateurBean.mdp}"
                                             required="true"
                                             requiredMessage="Mot de passe obligatoire."
                                             feedback="false"

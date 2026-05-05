@@ -1,10 +1,17 @@
 package com.btk.bean;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import com.btk.model.ArchDossier;
 import com.btk.util.DemandeFilialeUtil;
@@ -18,6 +25,10 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -50,11 +61,14 @@ public class DemandeDossierBean implements Serializable {
 
     private String searchType = "pin";
     private String searchValue;
+    private Long dossierId;
     private String pin;
     private String relation;
     private String boite;
     private String typeDemande = "demande dossier complet";
     private String commentaire;
+    private List<DocumentOption> availableDocumentOptions = Collections.emptyList();
+    private List<String> selectedDocuments = new ArrayList<>();
     private boolean dossierLoaded;
     private boolean requestBlocked;
     private String blockedRequestMessage;
@@ -89,13 +103,16 @@ public class DemandeDossierBean implements Serializable {
 
             if (row == null) {
                 clearDossierFields();
-                addError("Aucun dossier trouvé.");
+                addError("Aucun dossier trouvÃ©.");
                 return;
             }
 
+            dossierId = row.getIdDossier();
             pin = normalize(row.getPin());
             relation = normalize(row.getRelation());
-            boite = DossierEmpUtil.findBoitesSummary(em, row.getIdDossier());
+            boite = DossierEmpUtil.findBoitesSummary(em, row.getIdDossier(), row.getPin(), row.getRelation());
+            availableDocumentOptions = loadAvailableDocuments(em, row);
+            selectedDocuments = new ArrayList<>();
             dossierLoaded = true;
 
             addInfo("Dossier chargé. Compléter les informations puis soumettre.");
@@ -169,6 +186,8 @@ public class DemandeDossierBean implements Serializable {
         String cleanBoite = normalize(boite);
         String cleanTypeDemande = normalize(typeDemande);
         String cleanCommentaire = normalize(commentaire);
+        List<String> cleanSelectedDocuments = normalizeSelectedDocuments(selectedDocuments);
+        List<String> selectedDocumentLabels = resolveSelectedDocumentLabels(cleanSelectedDocuments);
         String emetteur = resolveEmitter();
         String emitterUnix = resolveCurrentUserUnix();
         String emitterCuti = resolveCurrentUserCuti();
@@ -190,13 +209,24 @@ public class DemandeDossierBean implements Serializable {
             }
 
             if (cleanPin.isBlank() || cleanBoite.isBlank()) {
-                addError("Informations du dossier incomplètes.");
+                addError("Informations du dossier incomplÃ¨tes.");
                 return;
             }
 
             if (cleanTypeDemande.isBlank()) {
                 addError("Veuillez choisir un type de demande.");
                 return;
+            }
+
+            if (isDocumentRequest(cleanTypeDemande)) {
+                if (availableDocumentOptions == null || availableDocumentOptions.isEmpty()) {
+                    addError("Aucun document disponible pour ce dossier.");
+                    return;
+                }
+                if (cleanSelectedDocuments.isEmpty()) {
+                    addError("Veuillez sÃƒÂ©lectionner au moins un document.");
+                    return;
+                }
             }
 
             if (cleanCommentaire.isBlank()) {
@@ -206,6 +236,20 @@ public class DemandeDossierBean implements Serializable {
 
             if (!hasEligibleAdminReceiver(em, sessionFiliale)) {
                 addError("Aucun administrateur actif disponible pour la filiale " + resolveTargetFilialeLabel() + ".");
+                return;
+            }
+
+            String storedTypeDemande = buildStoredTypeDemande(cleanTypeDemande, selectedDocumentLabels);
+            String storedCommentaire = cleanCommentaire;
+            Integer maxTypeLength = resolveTypeDemandeColumnMaxLength(em);
+            if (maxTypeLength != null && storedTypeDemande.length() > maxTypeLength) {
+                addError("La liste des documents demandÃ©s est trop longue pour TYPE_DEMANDE. RÃ©duisez la sÃ©lection.");
+                return;
+            }
+
+            Integer maxCommentLength = resolveCommentColumnMaxLength(em);
+            if (maxCommentLength != null && storedCommentaire.length() > maxCommentLength) {
+                addError("Justification trop longue. Réduisez le texte saisi.");
                 return;
             }
 
@@ -235,8 +279,8 @@ public class DemandeDossierBean implements Serializable {
                     .setParameter("boite", cleanBoite)
                     .setParameter("emetteur", emetteur)
                     .setParameter("recepteur", targetReceiver)
-                    .setParameter("typeDemande", cleanTypeDemande)
-                    .setParameter("commentaire", cleanCommentaire)
+                    .setParameter("typeDemande", storedTypeDemande)
+                    .setParameter("commentaire", storedCommentaire)
                     .setParameter("filiale", sessionFiliale);
             insertQuery.executeUpdate();
 
@@ -273,6 +317,7 @@ public class DemandeDossierBean implements Serializable {
         searchValue = null;
         typeDemande = "demande dossier complet";
         commentaire = null;
+        selectedDocuments = new ArrayList<>();
         clearDossierFields();
         refreshRequestBlockStatus();
     }
@@ -282,9 +327,12 @@ public class DemandeDossierBean implements Serializable {
     }
 
     private void clearDossierFields() {
+        dossierId = null;
         pin = null;
         relation = null;
         boite = null;
+        availableDocumentOptions = Collections.emptyList();
+        selectedDocuments = new ArrayList<>();
         dossierLoaded = false;
     }
 
@@ -383,37 +431,37 @@ public class DemandeDossierBean implements Serializable {
 
     private String buildBlockedRequestMessage(BlockedRequestInfo blockedRequest) {
         StringBuilder message = new StringBuilder();
-        message.append("Attention : votre accès est actuellement bloqué car le dossier PIN ");
+        message.append("Attention : votre accÃ¨s est actuellement bloquÃ© car le dossier PIN ");
         String pinValue = blockedRequest == null ? "" : normalize(blockedRequest.pin);
         String boiteValue = blockedRequest == null ? "" : normalize(blockedRequest.boite);
         message.append(pinValue.isBlank() ? "?" : pinValue);
         if (!boiteValue.isBlank()) {
-            message.append(" (boîte ").append(boiteValue).append(")");
+            message.append(" (boÃ®te ").append(boiteValue).append(")");
         }
-        message.append(" n'a pas été restitué depuis plus de ")
+        message.append(" n'a pas Ã©tÃ© restituÃ© depuis plus de ")
                 .append(REQUEST_BLOCK_DELAY_DAYS)
-                .append(" jours. Merci de procéder à sa restitution afin de pouvoir effectuer une nouvelle demande de dossier.");
+                .append(" jours. Merci de procÃ©der Ã  sa restitution afin de pouvoir effectuer une nouvelle demande de dossier.");
         return message.toString();
     }
 
     private String buildStatusBlockedMessage() {
-        return "Attention : votre accès est bloqué (STATUT = 1). Merci de contacter un administrateur pour le déblocage.";
+        return "Attention : votre accÃ¨s est bloquÃ© (STATUT = 1). Merci de contacter un administrateur pour le dÃ©blocage.";
     }
 
     private String buildBlockExceptionMessage(BlockedRequestInfo blockedRequest) {
         if (blockedRequest == null) {
-            return "Déblocage exceptionnel. Vous pouvez envoyer une seule nouvelle demande.";
+            return "DÃ©blocage exceptionnel. Vous pouvez envoyer une seule nouvelle demande.";
         }
         StringBuilder message = new StringBuilder();
-        message.append("Déblocage exceptionnel. ");
+        message.append("DÃ©blocage exceptionnel. ");
         message.append("Vous pouvez envoyer une seule nouvelle demande meme si le dossier PIN ");
         String pinValue = blockedRequest == null ? "" : normalize(blockedRequest.pin);
         String boiteValue = blockedRequest == null ? "" : normalize(blockedRequest.boite);
         message.append(pinValue.isBlank() ? "?" : pinValue);
         if (!boiteValue.isBlank()) {
-            message.append(" (boîte ").append(boiteValue).append(")");
+            message.append(" (boÃ®te ").append(boiteValue).append(")");
         }
-        message.append(" est toujours non restitué.");
+        message.append(" est toujours non restituÃ©.");
         return message.toString();
     }
 
@@ -570,6 +618,68 @@ public class DemandeDossierBean implements Serializable {
         return count != null && count.longValue() > 0L;
     }
 
+    private Integer resolveCommentColumnMaxLength(EntityManager em) {
+        if (em == null) {
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = em.createNativeQuery(
+                        "SELECT DATA_TYPE, DATA_LENGTH " +
+                                "FROM USER_TAB_COLUMNS " +
+                                "WHERE TABLE_NAME = 'DEMANDE_DOSSIER' " +
+                                "AND COLUMN_NAME = 'COMMENTAIRE'")
+                .setMaxResults(1)
+                .getResultList();
+
+        if (rows.isEmpty() || rows.get(0) == null || rows.get(0).length < 2) {
+            return null;
+        }
+
+        String dataType = toStringValue(rows.get(0)[0]).trim().toUpperCase(Locale.ROOT);
+        if (dataType.contains("CLOB")) {
+            return null;
+        }
+
+        Object lengthValue = rows.get(0)[1];
+        if (lengthValue instanceof Number) {
+            int value = ((Number) lengthValue).intValue();
+            return value > 0 ? value : null;
+        }
+        return null;
+    }
+
+    private Integer resolveTypeDemandeColumnMaxLength(EntityManager em) {
+        if (em == null) {
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = em.createNativeQuery(
+                        "SELECT DATA_TYPE, DATA_LENGTH " +
+                                "FROM USER_TAB_COLUMNS " +
+                                "WHERE TABLE_NAME = 'DEMANDE_DOSSIER' " +
+                                "AND COLUMN_NAME = 'TYPE_DEMANDE'")
+                .setMaxResults(1)
+                .getResultList();
+
+        if (rows.isEmpty() || rows.get(0) == null || rows.get(0).length < 2) {
+            return null;
+        }
+
+        String dataType = toStringValue(rows.get(0)[0]).trim().toUpperCase(Locale.ROOT);
+        if (dataType.contains("CLOB")) {
+            return null;
+        }
+
+        Object lengthValue = rows.get(0)[1];
+        if (lengthValue instanceof Number) {
+            int value = ((Number) lengthValue).intValue();
+            return value > 0 ? value : null;
+        }
+        return null;
+    }
+
     private String resolveCurrentUserAccountKey() {
         String cuti = resolveCurrentUserCuti();
         if (!cuti.isBlank()) {
@@ -624,6 +734,207 @@ public class DemandeDossierBean implements Serializable {
             return cleanRelation;
         }
         return cleanPin + RELATION_SUGGESTION_SEPARATOR + cleanRelation;
+    }
+
+    public void onTypeDemandeChange() {
+        if (!isDocumentRequest(typeDemande)) {
+            selectedDocuments = new ArrayList<>();
+        }
+    }
+
+    private List<DocumentOption> loadAvailableDocuments(EntityManager em, ArchDossier dossier) {
+        if (em == null || dossier == null || dossier.getIdDossier() == null) {
+            return Collections.emptyList();
+        }
+
+        String dossierName = buildDossierName(dossier.getIdDossier(), dossier.getRelation(), dossier.getPin());
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = em.createNativeQuery(
+                        "select distinct DOCUMENTS, PATH_DOSSIER from ARCH_DOCUMENT " +
+                                "where upper(NOM_DOSSIER) = :nom and DOCUMENTS is not null " +
+                                "order by DOCUMENTS")
+                .setParameter("nom", dossierName.toUpperCase(Locale.ROOT))
+                .getResultList();
+
+        LinkedHashSet<String> seenValues = new LinkedHashSet<>();
+        Map<String, Map<String, String>> labelsByPath = new HashMap<>();
+        List<DocumentOption> options = new ArrayList<>();
+        for (Object[] row : rows) {
+            if (row == null || row.length < 1) {
+                continue;
+            }
+            String fileName = normalize(toStringValue(row[0]));
+            String dossierPath = row.length < 2 ? "" : normalize(toStringValue(row[1]));
+            if (fileName.isBlank()) {
+                continue;
+            }
+
+            String fileKey = fileName.toUpperCase(Locale.ROOT);
+            if (seenValues.contains(fileKey)) {
+                continue;
+            }
+            seenValues.add(fileKey);
+
+            String label = resolveDocumentLabel(fileName, dossierPath, labelsByPath);
+            options.add(new DocumentOption(fileName, label));
+        }
+        return options;
+    }
+
+    private List<String> normalizeSelectedDocuments(List<String> rawDocuments) {
+        if (rawDocuments == null || rawDocuments.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        LinkedHashSet<String> unique = new LinkedHashSet<>();
+        for (String rawDocument : rawDocuments) {
+            String cleanDocument = normalize(rawDocument);
+            if (cleanDocument.isBlank()) {
+                continue;
+            }
+            if (!containsDocumentValue(cleanDocument)) {
+                continue;
+            }
+            unique.add(cleanDocument);
+        }
+        return new ArrayList<>(unique);
+    }
+
+    private boolean containsDocumentValue(String candidate) {
+        if (availableDocumentOptions == null || availableDocumentOptions.isEmpty()
+                || candidate == null || candidate.isBlank()) {
+            return false;
+        }
+        for (DocumentOption option : availableDocumentOptions) {
+            if (option == null) {
+                continue;
+            }
+            String value = normalize(option.getValue());
+            if (!value.isBlank() && value.equalsIgnoreCase(candidate.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<String> resolveSelectedDocumentLabels(List<String> selectedValues) {
+        if (selectedValues == null || selectedValues.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        LinkedHashSet<String> labels = new LinkedHashSet<>();
+        for (String selectedValue : selectedValues) {
+            String cleanValue = normalize(selectedValue);
+            if (cleanValue.isBlank()) {
+                continue;
+            }
+            labels.add(resolveDocumentLabelByValue(cleanValue));
+        }
+        return new ArrayList<>(labels);
+    }
+
+    private String resolveDocumentLabelByValue(String selectedValue) {
+        if (availableDocumentOptions != null) {
+            for (DocumentOption option : availableDocumentOptions) {
+                if (option == null) {
+                    continue;
+                }
+                String value = normalize(option.getValue());
+                if (!value.isBlank() && value.equalsIgnoreCase(selectedValue)) {
+                    String label = normalize(option.getLabel());
+                    return label.isBlank() ? selectedValue : label;
+                }
+            }
+        }
+        return selectedValue;
+    }
+
+    private String resolveDocumentLabel(String fileName,
+                                        String dossierPath,
+                                        Map<String, Map<String, String>> labelsByPath) {
+        String cleanFileName = normalize(fileName);
+        if (cleanFileName.isBlank()) {
+            return "";
+        }
+        if (dossierPath == null || dossierPath.isBlank()) {
+            return cleanFileName;
+        }
+
+        Map<String, String> labels = labelsByPath.computeIfAbsent(
+                dossierPath,
+                this::readDocumentLabelsFromMetadata
+        );
+        if (labels.isEmpty()) {
+            return cleanFileName;
+        }
+
+        String label = labels.get(cleanFileName.toLowerCase(Locale.ROOT));
+        if (label == null || label.isBlank()) {
+            return cleanFileName;
+        }
+        return label;
+    }
+
+    private Map<String, String> readDocumentLabelsFromMetadata(String dossierPath) {
+        if (dossierPath == null || dossierPath.isBlank()) {
+            return Collections.emptyMap();
+        }
+
+        Path metadataFile = Paths.get(dossierPath).resolve("_metadata.json");
+        if (!Files.exists(metadataFile)) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> labels = new HashMap<>();
+        try (JsonReader reader = Json.createReader(Files.newBufferedReader(metadataFile, StandardCharsets.UTF_8))) {
+            JsonArray entries = reader.readArray();
+            for (var value : entries) {
+                if (!(value instanceof JsonObject)) {
+                    continue;
+                }
+                JsonObject object = (JsonObject) value;
+                String file = normalize(object.getString("file", ""));
+                if (file.isBlank()) {
+                    continue;
+                }
+                String documentName = normalize(object.getString("nomDocument", ""));
+                labels.put(file.toLowerCase(Locale.ROOT), documentName.isBlank() ? file : documentName);
+            }
+        } catch (Exception ignored) {
+            return Collections.emptyMap();
+        }
+        return labels;
+    }
+
+    private String buildStoredTypeDemande(String demandeTypeValue, List<String> documents) {
+        String cleanType = normalize(demandeTypeValue);
+        if (!isDocumentRequest(cleanType)) {
+            return cleanType;
+        }
+
+        String docs = documents == null || documents.isEmpty() ? "" : String.join(" | ", documents);
+        if (docs.isBlank()) {
+            return cleanType;
+        }
+        return docs;
+    }
+
+    private boolean isDocumentRequest(String demandeTypeValue) {
+        return "demande document du dossier".equalsIgnoreCase(normalize(demandeTypeValue));
+    }
+
+    private String buildDossierName(Long dossierIdValue, String relationValue, String pinValue) {
+        String relationPart = relationValue == null ? "" : relationValue.trim();
+        String pinPart = pinValue == null ? "" : pinValue.trim();
+        String base = "Dossier num " + dossierIdValue + " : " + relationPart + "-" + pinPart;
+        return sanitizeFolderName(base);
+    }
+
+    private String sanitizeFolderName(String value) {
+        if (value == null) {
+            return "Dossier";
+        }
+        return value.replaceAll("[\\\\/:*?\"<>|]", "-").trim();
     }
 
     private String toStringValue(Object value) {
@@ -683,6 +994,22 @@ public class DemandeDossierBean implements Serializable {
         this.typeDemande = typeDemande;
     }
 
+    public boolean isDocumentRequest() {
+        return isDocumentRequest(typeDemande);
+    }
+
+    public List<DocumentOption> getAvailableDocumentOptions() {
+        return availableDocumentOptions;
+    }
+
+    public List<String> getSelectedDocuments() {
+        return selectedDocuments;
+    }
+
+    public void setSelectedDocuments(List<String> selectedDocuments) {
+        this.selectedDocuments = selectedDocuments == null ? new ArrayList<>() : new ArrayList<>(selectedDocuments);
+    }
+
     public String getCommentaire() {
         return commentaire;
     }
@@ -722,6 +1049,26 @@ public class DemandeDossierBean implements Serializable {
         return FilialeUtil.toLegacyId("");
     }
 
+    public static final class DocumentOption implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final String value;
+        private final String label;
+
+        private DocumentOption(String value, String label) {
+            this.value = value == null ? "" : value;
+            this.label = label == null || label.isBlank() ? this.value : label;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+    }
+
     private static final class BlockedRequestInfo {
         private final String pin;
         private final String boite;
@@ -732,3 +1079,4 @@ public class DemandeDossierBean implements Serializable {
         }
     }
 }
+

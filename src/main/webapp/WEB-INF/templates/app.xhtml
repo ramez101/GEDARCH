@@ -486,17 +486,237 @@
             to { opacity: 0; transform: translateX(20px); }
         }
 
-        .btn-logout.ui-button {
-            padding: 7px 18px !important;
-            background: rgba(255,255,255,.15) !important;
-            border: 1.5px solid rgba(255,255,255,.4) !important;
-            border-radius: 6px !important;
-            color: #fff !important;
-            font-size: .82rem !important;
-            font-weight: 600 !important;
-            text-transform: uppercase !important;
+        .profile-menu-form {
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
         }
-        .btn-logout.ui-button:hover { background: rgba(255,255,255,.28) !important; }
+        .profile-menu-trigger {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,.46);
+            background: linear-gradient(160deg, rgba(255,255,255,.28), rgba(255,255,255,.08));
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(3, 25, 44, .24), inset 0 1px 0 rgba(255,255,255,.28);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+        }
+        .profile-menu-trigger:hover {
+            background: linear-gradient(160deg, rgba(255,255,255,.36), rgba(255,255,255,.14));
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 14px 28px rgba(3, 25, 44, .28), inset 0 1px 0 rgba(255,255,255,.34);
+        }
+        .profile-menu-trigger:active {
+            transform: translateY(0) scale(.98);
+        }
+        .profile-menu-trigger:focus-visible {
+            outline: 2px solid rgba(255,255,255,.82);
+            outline-offset: 2px;
+        }
+        .profile-menu-trigger .pi {
+            font-size: 1.05rem;
+            opacity: .97;
+        }
+        .profile-menu-panel.ui-overlaypanel {
+            width: 276px;
+            border-radius: 16px;
+            border: 1px solid #d2e2f1;
+            box-shadow: 0 18px 42px rgba(8, 37, 55, .26);
+            padding: 0;
+            overflow: hidden;
+            animation: profileMenuIn .16s ease-out;
+        }
+        .profile-menu-panel.ui-overlaypanel .ui-overlaypanel-content {
+            padding: 10px;
+            background: linear-gradient(170deg, #fcfeff 0%, #f2f8ff 100%);
+        }
+        .profile-menu-list {
+            display: grid;
+            gap: 8px;
+        }
+        .profile-menu-user {
+            position: relative;
+            border: 1px solid #cfe1f4;
+            border-radius: 13px;
+            background: linear-gradient(145deg, #f9fcff, #e9f3ff);
+            padding: 11px 12px;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            box-shadow: 0 6px 16px rgba(10, 52, 82, .08), inset 0 1px 0 rgba(255,255,255,.8);
+            overflow: hidden;
+        }
+        .profile-menu-user:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #1ca8dd, #0f6794);
+        }
+        .profile-menu-user-avatar {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.02rem;
+            color: #0f5d88;
+            background: linear-gradient(155deg, #ffffff, #dcedff);
+            border: 1px solid #c9def2;
+            box-shadow: 0 4px 10px rgba(8, 58, 95, .14);
+        }
+        .profile-menu-user-body {
+            min-width: 0;
+            display: grid;
+            gap: 2px;
+        }
+        .profile-menu-user .label {
+            font-size: .68rem;
+            color: #527794;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+        .profile-menu-user .value {
+            font-size: .91rem;
+            color: #103a58;
+            font-weight: 800;
+            line-height: 1.28;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .profile-menu-user .meta {
+            font-size: .73rem;
+            color: #5a809d;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .profile-menu-user .meta:before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #1fa463;
+            box-shadow: 0 0 0 3px rgba(31, 164, 99, .15);
+        }
+        .profile-menu-separator {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #cfe1f1, transparent);
+            margin: 2px 0 1px;
+        }
+        .profile-messages {
+            margin: 0 0 10px;
+        }
+        .profile-menu-item {
+            width: 100%;
+            border: 1px solid transparent;
+            border-radius: 11px;
+            background: linear-gradient(180deg, #fbfdff, #eef6ff);
+            color: #153d5a;
+            text-align: left;
+            padding: 11px 13px;
+            cursor: pointer;
+            display: grid;
+            gap: 3px;
+            font: inherit;
+            box-shadow: 0 4px 12px rgba(15, 62, 94, .08);
+            transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease, background .14s ease;
+        }
+        .profile-menu-item:not(.ui-button) {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .profile-menu-item-icon {
+            width: 20px;
+            min-width: 20px;
+            text-align: center;
+            font-size: .98rem;
+            color: #1b6a94;
+        }
+        .profile-menu-item-copy {
+            display: grid;
+            gap: 3px;
+        }
+        .profile-menu-item:hover,
+        .profile-menu-item:focus-visible {
+            border-color: #b7d4ee;
+            background: linear-gradient(180deg, #ffffff, #e8f3ff);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(15, 62, 94, .12);
+            outline: none;
+        }
+        .profile-menu-item .title {
+            font-size: .86rem;
+            font-weight: 800;
+        }
+        .profile-menu-item .hint {
+            font-size: .75rem;
+            color: #5f829f;
+        }
+        .profile-menu-item.ui-button {
+            width: 100%;
+            justify-content: flex-start;
+            border: 1px solid transparent !important;
+            border-radius: 11px !important;
+            background: linear-gradient(180deg, #fbfdff, #eef6ff) !important;
+            color: #153d5a !important;
+            font-size: .84rem !important;
+            font-weight: 800 !important;
+            padding: 11px 13px !important;
+            text-shadow: none !important;
+            box-shadow: 0 4px 12px rgba(15, 62, 94, .08) !important;
+            transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease, background .14s ease;
+        }
+        .profile-menu-item.ui-button .ui-button-icon-left {
+            left: 13px !important;
+            color: currentColor;
+        }
+        .profile-menu-item.ui-button .ui-button-text {
+            text-align: left;
+            padding-left: 26px !important;
+        }
+        .profile-menu-item.ui-button:hover {
+            border-color: #b7d4ee !important;
+            background: linear-gradient(180deg, #ffffff, #e8f3ff) !important;
+            box-shadow: 0 8px 18px rgba(15, 62, 94, .12) !important;
+            transform: translateY(-1px);
+        }
+        .profile-menu-item.logout.ui-button {
+            border-color: #f3d4d4 !important;
+            background: linear-gradient(180deg, #fff7f7, #ffeded) !important;
+            color: #8d2323 !important;
+        }
+        .profile-menu-item.logout.ui-button:hover {
+            border-color: #efbcbc !important;
+            background: linear-gradient(180deg, #fff2f2, #ffe3e3) !important;
+            box-shadow: 0 8px 18px rgba(141, 35, 35, .14) !important;
+        }
+        .profile-dialog .ui-dialog-content { padding: 16px 18px 18px !important; }
+
+        @keyframes profileMenuIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px) scale(.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
 
         /* Content */
         .container {
@@ -1336,7 +1556,7 @@
                     <span class="brand brand-helonik">BTK Finance - Recouvrement </span>
                 </div>
                 <div class="nav-user">
-                    <span>Connecté : <strong>#{loginBean.utilisateur.unix}</strong></span>
+                    <span>Connecté : <strong>#{empty loginBean.utilisateur.lib ? loginBean.utilisateur.cuti : loginBean.utilisateur.lib}</strong></span>
                     <h:form id="notifForm"
                             prependId="false"
                             styleClass="notif-form"
@@ -1421,12 +1641,226 @@
                         </h:panelGroup>
                         <div id="notifPopupHost" class="notif-popup-host"/>
                     </h:form>
-                    <h:form>
-                        <p:commandButton value="Déconnexion"
-                                         action="#{loginBean.logout}"
-                                         styleClass="btn-logout"
-                                         ajax="false"/>
+                    <h:form id="profileMenuForm" prependId="false" styleClass="profile-menu-form">
+                        <h:panelGroup id="profileMenuTrigger"
+                                      layout="block"
+                                      styleClass="profile-menu-trigger"
+                                      title="Profil">
+                            <span class="pi pi-user"/>
+                        </h:panelGroup>
+                        <p:overlayPanel id="profileMenuPanel"
+                                        for="profileMenuTrigger"
+                                        widgetVar="profileMenuPanelWV"
+                                        showEffect="fade"
+                                        hideEffect="fade"
+                                        dismissable="true"
+                                        showCloseIcon="false"
+                                        hideOnEscape="true"
+                                        appendTo="@(body)"
+                                        styleClass="profile-menu-panel">
+                            <div class="profile-menu-list">
+                                <div class="profile-menu-user">
+                                    <span class="profile-menu-user-avatar pi pi-id-card" aria-hidden="true"></span>
+                                    <div class="profile-menu-user-body">
+                                        <span class="label">Utilisateur connect&#233;</span>
+                                        <span class="value">#{empty loginBean.utilisateur.lib ? loginBean.utilisateur.cuti : loginBean.utilisateur.lib}</span>
+                                        <span class="meta">Session active</span>
+                                    </div>
+                                </div>
+                                <div class="profile-menu-separator"/>
+                                <button type="button"
+                                        class="profile-menu-item"
+                                        onclick="if (PF('profileDialogWV')) { PF('profileDialogWV').show(); } if (PF('profileMenuPanelWV')) { PF('profileMenuPanelWV').hide(); }">
+                                    <span class="profile-menu-item-icon pi pi-user" aria-hidden="true"></span>
+                                    <span class="profile-menu-item-copy">
+                                        <span class="title">Mon profil</span>
+                                        <span class="hint">Informations utilisateur</span>
+                                    </span>
+                                </button>
+                                <button type="button"
+                                        class="profile-menu-item"
+                                        onclick="if (PF('changePasswordDialogWV')) { PF('changePasswordDialogWV').show(); } if (PF('profileMenuPanelWV')) { PF('profileMenuPanelWV').hide(); }">
+                                    <span class="profile-menu-item-icon pi pi-key" aria-hidden="true"></span>
+                                    <span class="profile-menu-item-copy">
+                                        <span class="title">Mot de passe</span>
+                                        <span class="hint">Modifier le mot de passe</span>
+                                    </span>
+                                </button>
+                                <p:commandButton value="Déconnexion"
+                                                 icon="pi pi-sign-out"
+                                                 action="#{loginBean.logout}"
+                                                 form="profileMenuForm"
+                                                 process="@this"
+                                                 update="@none"
+                                                 styleClass="profile-menu-item logout"/>
+                            </div>
+                        </p:overlayPanel>
                     </h:form>
+                    <p:dialog header="Informations utilisateur"
+                              widgetVar="profileDialogWV"
+                              modal="true"
+                              resizable="false"
+                              draggable="false"
+                              appendTo="@(body)"
+                              styleClass="profile-dialog"
+                              width="700">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="label">Code Utilisateur (CUTI)</div>
+                                    <div class="value">#{loginBean.utilisateur.cuti}</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="label">Nom complet (LIB)</div>
+                                    <div class="value">
+                                        <h:outputText value="#{loginBean.utilisateur.lib}"
+                                                      rendered="#{not empty loginBean.utilisateur.lib}"/>
+                                        <span class="empty">
+                                            <h:outputText value="Non renseigne"
+                                                          rendered="#{empty loginBean.utilisateur.lib}"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="label">Username Unix</div>
+                                    <div class="value">
+                                        <h:panelGroup rendered="#{not empty loginBean.utilisateur.unix}">
+                                            <h:outputText value="#{loginBean.utilisateur.unix}"/>
+                                        </h:panelGroup>
+                                        <span class="empty">
+                                            <h:outputText value="Non renseigne"
+                                                          rendered="#{empty loginBean.utilisateur.unix}"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="label">Mot de passe (MDP)</div>
+                                    <div class="value">
+                                        <h:panelGroup rendered="#{not empty loginBean.utilisateur.mdp or not empty loginBean.utilisateur.unix}">
+                                            <span class="secret-field">
+                                                <span class="secret-masked">********</span>
+                                                <span class="secret-plain">#{empty loginBean.utilisateur.mdp ? loginBean.utilisateur.unix : loginBean.utilisateur.mdp}</span>
+                                                <button type="button" class="secret-toggle" onclick="BTKSecrets.toggle(this)" aria-label="Afficher/Masquer">
+                                                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                                                        <circle cx="12" cy="12" r="3"/>
+                                                    </svg>
+                                                </button>
+                                            </span>
+                                        </h:panelGroup>
+                                        <span class="empty">
+                                            <h:outputText value="Non renseigne"
+                                                          rendered="#{empty loginBean.utilisateur.mdp and empty loginBean.utilisateur.unix}"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="label">Profil (PUTI)</div>
+                                    <div class="value">
+                                        <h:panelGroup rendered="#{not empty loginBean.utilisateur.puti}">
+                                            <span class="badge">#{loginBean.utilisateur.puti}</span>
+                                        </h:panelGroup>
+                                        <span class="empty">
+                                            <h:outputText value="Non renseigne"
+                                                          rendered="#{empty loginBean.utilisateur.puti}"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="label">Role</div>
+                                    <div class="value">
+                                        <h:panelGroup rendered="#{not empty loginBean.utilisateur.role}">
+                                            <span class="badge">#{loginBean.utilisateur.role}</span>
+                                        </h:panelGroup>
+                                        <span class="empty">
+                                            <h:outputText value="Non renseigne"
+                                                          rendered="#{empty loginBean.utilisateur.role}"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="label">Agence (AGE)</div>
+                                    <div class="value">
+                                        <h:outputText value="#{loginBean.utilisateur.age}"
+                                                      rendered="#{not empty loginBean.utilisateur.age}"/>
+                                        <span class="empty">
+                                            <h:outputText value="Non renseigne"
+                                                          rendered="#{empty loginBean.utilisateur.age}"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                    </p:dialog>
+                    <p:dialog header="Changer mot de passe"
+                              widgetVar="changePasswordDialogWV"
+                              modal="true"
+                              resizable="false"
+                              draggable="false"
+                              appendTo="@(body)"
+                              width="520"
+                              onHide="if (window.releaseDialogFocus) { window.releaseDialogFocus(); } if (window.clearPasswordInputs) { window.clearPasswordInputs(); }">
+                        <h:form id="changePasswordForm" prependId="false">
+                            <p:messages id="passwordMessages" showSummary="false" showDetail="true" closable="true" styleClass="profile-messages"/>
+                            <div class="form-grid">
+                                <div class="form-row full">
+                                    <h:outputLabel for="currentPassword" value="Ancien mot de passe"/>
+                                    <p:password id="currentPassword" value="#{loginBean.currentPassword}" feedback="false" redisplay="true"/>
+                                </div>
+                                <div class="form-row full">
+                                    <h:outputLabel for="newPassword" value="Nouveau mot de passe"/>
+                                    <p:password id="newPassword" value="#{loginBean.newPassword}" feedback="false" redisplay="true"/>
+                                </div>
+                                <div class="form-row full">
+                                    <h:outputLabel for="confirmNewPassword" value="Confirmation mot de passe"/>
+                                    <p:password id="confirmNewPassword" value="#{loginBean.confirmNewPassword}" feedback="false" redisplay="true"/>
+                                </div>
+                                <div class="form-actions">
+                                    <p:commandButton value="Enregistrer"
+                                                     icon="pi pi-check"
+                                                     type="button"
+                                                     onclick="if (PF('changePasswordConfirmWV')) { PF('changePasswordConfirmWV').show(); }"
+                                                     styleClass="btn-primary"/>
+                                    <p:commandButton value="Fermer"
+                                                     icon="pi pi-times"
+                                                     type="button"
+                                                     styleClass="ui-button-danger"
+                                                     style="margin-left: 8px;"
+                                                     onclick="if (window.hideChangePasswordDialog) { window.hideChangePasswordDialog(); } else if (PF('changePasswordDialogWV')) { PF('changePasswordDialogWV').hide(); }"/>
+                                </div>
+                            </div>
+
+                            <p:confirmDialog header="Confirmation"
+                                             widgetVar="changePasswordConfirmWV"
+                                             modal="true"
+                                             resizable="false"
+                                             closable="false"
+                                             appendTo="@(body)">
+                                <p:outputPanel style="margin-bottom: 12px;">
+                                    Confirmer la modification du mot de passe ?
+                                </p:outputPanel>
+                                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                    <p:commandButton value="Confirmer"
+                                                     icon="pi pi-check"
+                                                     action="#{loginBean.changeMyPassword}"
+                                                     form="changePasswordForm"
+                                                     process=":changePasswordForm"
+                                                     update=":changePasswordForm"
+                                                     oncomplete="if (PF('changePasswordConfirmWV')) { PF('changePasswordConfirmWV').hide(); } if (!args.validationFailed) { if (window.hideChangePasswordDialog) { window.hideChangePasswordDialog(); } else if (PF('changePasswordDialogWV')) { PF('changePasswordDialogWV').hide(); } if (window.clearPasswordInputs) { window.clearPasswordInputs(); } }"
+                                                     styleClass="btn-primary"/>
+                                    <p:commandButton value="Annuler"
+                                                     icon="pi pi-times"
+                                                     type="button"
+                                                     styleClass="ui-button-danger"
+                                                     onclick="if (PF('changePasswordConfirmWV')) { PF('changePasswordConfirmWV').hide(); }"/>
+                                </div>
+                            </p:confirmDialog>
+                        </h:form>
+                    </p:dialog>
                 </div>
             </div>
 
@@ -1669,6 +2103,35 @@
                 }
             };
 
+            window.releaseDialogFocus = function () {
+                var active = document.activeElement;
+                if (active &amp;&amp; active !== document.body &amp;&amp; typeof active.blur === 'function') {
+                    active.blur();
+                }
+            };
+
+            window.hideChangePasswordDialog = function () {
+                var dialog = PF('changePasswordDialogWV');
+                if (!dialog) {
+                    return;
+                }
+                if (window.releaseDialogFocus) {
+                    window.releaseDialogFocus();
+                }
+                dialog.hide();
+            };
+
+
+            window.clearPasswordInputs = function () {
+                var ids = ['currentPassword_input', 'newPassword_input', 'confirmNewPassword_input'];
+                for (var i = 0; i &lt; ids.length; i++) {
+                    var el = document.getElementById(ids[i]);
+                    if (el) {
+                        el.value = '';
+                    }
+                }
+            };
+
             window.BTKNotif = (function () {
                 var shown = {};
                 var hostId = 'notifPopupHost';
@@ -1895,4 +2358,3 @@
     </script>
 </h:body>
 </html>
-

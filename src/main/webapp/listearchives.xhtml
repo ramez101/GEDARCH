@@ -23,13 +23,63 @@
                 background: #fff;
                 color: #153b5a;
                 font-weight: 700;
-                border-radius: 4px;
-                min-height: 36px;
+                border-radius: 8px;
+                min-width: 38px;
+                width: 38px;
+                height: 38px;
+                min-height: 38px;
+                padding: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .liste-btn.ui-button.ui-widget .ui-button-text {
-                padding: 8px 12px;
-                font-size: .82rem;
+                display: none;
+            }
+
+            .liste-btn.ui-button.ui-widget .ui-button-icon-left {
+                margin-right: 0;
+            }
+
+            .liste-btn-refresh {
+                background: #f3f8ff !important;
+                border-color: #b9d2f1 !important;
+                color: #1f5787 !important;
+            }
+
+            .liste-btn-refresh .ui-button-icon-left {
+                color: #2d7dd2 !important;
+            }
+
+            .liste-btn-excel {
+                background: #edf9ef !important;
+                border-color: #bde3c4 !important;
+                color: #1f6439 !important;
+            }
+
+            .liste-btn-excel .ui-button-icon-left {
+                color: #2fa24f !important;
+            }
+
+            .liste-btn-pdf {
+                background: #fff0f0 !important;
+                border-color: #efc0c0 !important;
+                color: #8f2626 !important;
+            }
+
+            .liste-btn-pdf .ui-button-icon-left {
+                color: #d64545 !important;
+            }
+
+            .liste-btn-print {
+                background: #eef2f7 !important;
+                border-color: #ccd8e6 !important;
+                color: #2f4f6b !important;
+            }
+
+            .liste-btn-print .ui-button-icon-left {
+                color: #5a6f85 !important;
             }
 
             .archives-index-col {
@@ -75,25 +125,31 @@
                 <div class="card-title">Liste archives</div>
                 <h:form id="listeArchivesForm">
                     <div class="liste-actions">
-                        <p:commandButton value="Rafraichir"
+                        <p:commandButton icon="pi pi-refresh"
+                                         title="Rafraîchir"
                                          action="#{listeArchivesBean.reload}"
                                          process="@this"
                                          update="@form"
-                                         styleClass="liste-btn"/>
+                                         styleClass="liste-btn liste-btn-refresh"/>
 
-                        <p:commandButton value="Exporter Excel" ajax="false" styleClass="liste-btn">
+                        <p:commandButton icon="pi pi-file-excel"
+                                         title="Exporter Excel"
+                                         ajax="false"
+                                         styleClass="liste-btn liste-btn-excel">
                             <p:dataExporter type="xlsx" target="archivesTable" fileName="liste_archives"/>
                         </p:commandButton>
 
-                        <p:commandButton value="Exporter PDF"
+                        <p:commandButton icon="pi pi-file-pdf"
+                                         title="Exporter PDF"
                                          action="#{listeArchivesBean.downloadPdf}"
                                          ajax="false"
-                                         styleClass="liste-btn"/>
+                                         styleClass="liste-btn liste-btn-pdf"/>
 
-                        <p:commandButton value="Imprimer"
+                        <p:commandButton icon="pi pi-print"
+                                         title="Imprimer"
                                          type="button"
                                          onclick="window.print(); return false;"
-                                         styleClass="liste-btn"/>
+                                         styleClass="liste-btn liste-btn-print"/>
                     </div>
 
                     <p:dataTable id="archivesTable"
