@@ -282,3 +282,69 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Dark mode overrides */
+html.theme-dark .demande-search-head .title {
+    color: #9ec6e5;
+}
+html.theme-dark .demande-search-head .hint {
+    color: #8ea6bc;
+}
+html.theme-dark .demande-search-line {
+    border-color: #2d4256;
+    background: #142131;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .28);
+}
+html.theme-dark .demande-search-line .form-row label {
+    color: #a6bdd2;
+}
+html.theme-dark .demande-result {
+    border-top-color: #2b4156;
+}
+html.theme-dark .demandes-summary {
+    background: linear-gradient(135deg, #1a2a3e 0%, #162538 100%);
+    border-color: #35506a;
+    color: #c9ddf1;
+}
+html.theme-dark .demandes-summary .count {
+    background: #2f99c7;
+    color: #f6fbff;
+}
+html.theme-dark .demandes-table.ui-datatable .ui-datatable-tablewrapper {
+    border-color: #30475d;
+    background: #172333;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .35);
+}
+html.theme-dark .demandes-table.ui-datatable thead th {
+    background: #132233;
+    color: #cde1f3;
+}
+html.theme-dark .demandes-table.ui-datatable tbody td {
+    border-top-color: #2f4256;
+    color: #cfe0f1;
+}
+html.theme-dark .demandes-table.ui-datatable tbody tr:nth-child(even) td {
+    background: #152233;
+}
+html.theme-dark .demandes-table.ui-datatable tbody tr:hover td {
+    background: #1d2d42;
+}
+html.theme-dark .cell-empty {
+    color: #8ea5b9;
+}
+html.theme-dark .demande-status.pending {
+    background: #3e3520;
+    color: #f0d18f;
+}
+html.theme-dark .demande-status.accepted {
+    background: #1f3c2d;
+    color: #97ddb6;
+}
+html.theme-dark .demande-status.refused {
+    background: #3f2328;
+    color: #f0a4ae;
+}
+html.theme-dark .decision-done {
+    background: #1f3043;
+    color: #aac0d5;
+}

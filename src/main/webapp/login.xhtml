@@ -10,6 +10,22 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>BTK - Gestionnaire des documents</title>
+    <h:outputStylesheet library="css" name="dark-mode-global.css"/>
+    <script type="text/javascript">
+        (function () {
+            try {
+                var savedTheme = null;
+                if (window.localStorage) {
+                    savedTheme = window.localStorage.getItem("btk.theme.global");
+                }
+                if (savedTheme === "dark") {
+                    document.documentElement.classList.add("theme-dark");
+                }
+            } catch (e) {
+                // Ignore theme preload errors.
+            }
+        })();
+    </script>
     <style>
         :root {
             --login-primary: #146da5;
@@ -34,6 +50,50 @@
             justify-content: center;
             padding: 34px 24px;
             overflow-x: hidden;
+        }
+
+        .login-theme-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 14px;
+        }
+
+        .login-theme-toggle {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            border: 1px solid #b9d4e9;
+            background: linear-gradient(145deg, #f7fcff, #e9f3fb);
+            color: #1b5379;
+            border-radius: 50%;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
+        }
+
+        .login-theme-toggle:hover {
+            border-color: #80b5d9;
+            box-shadow: 0 10px 22px rgba(19, 78, 115, .2);
+            transform: translateY(-1px);
+        }
+
+        .login-theme-toggle:focus-visible {
+            outline: 2px solid #2f90cb;
+            outline-offset: 2px;
+        }
+
+        .login-theme-icon {
+            font-size: 1.1rem;
+            line-height: 1;
+            color: currentColor;
+        }
+
+        .login-theme-toggle.is-active {
+            border-color: #3ea4da;
+            background: linear-gradient(145deg, #193850, #122d44);
+            color: #f7d97b;
         }
 
         .split-shell {
@@ -360,6 +420,65 @@
             filter: brightness(1.03);
         }
 
+        html.theme-dark .login-header .headline {
+            color: #f3f8ff !important;
+        }
+
+        html.theme-dark .login-header .subtitle,
+        html.theme-dark .field label {
+            color: #c1d5e8 !important;
+        }
+
+        html.theme-dark .field .ui-inputfield {
+            background: #142738 !important;
+            border-color: #37536c !important;
+            color: #f3f9ff !important;
+        }
+
+        html.theme-dark .field.field-accent .ui-inputfield {
+            border-left: 4px solid #52b6e4 !important;
+            background: #152c40 !important;
+        }
+
+        html.theme-dark .field .ui-inputfield:focus {
+            border-color: #58bce8 !important;
+            background: #19344b !important;
+            box-shadow: 0 0 0 3px rgba(88, 188, 232, .24) !important;
+        }
+
+        html.theme-dark .field input::placeholder {
+            color: #a7c0d5 !important;
+        }
+
+        html.theme-dark .password-toggle {
+            color: #b7d8ee;
+        }
+
+        html.theme-dark .password-toggle:hover,
+        html.theme-dark .password-toggle:focus {
+            background: rgba(93, 175, 223, .18);
+        }
+
+        html.theme-dark .password-toggle svg {
+            stroke: #9fd1f0;
+        }
+
+        html.theme-dark .btn-login {
+            background: linear-gradient(90deg, #2578af, #39a3dc) !important;
+            color: #f6fbff !important;
+            box-shadow: 0 16px 30px rgba(18, 72, 105, .34) !important;
+        }
+
+        html.theme-dark .btn-login:hover {
+            filter: brightness(1.08);
+        }
+
+        html.theme-dark .ui-messages-error {
+            background: #3b242a !important;
+            border-left: 4px solid #c86978 !important;
+            color: #f6c5ce !important;
+        }
+
         .hero-footer {
             position: relative;
             z-index: 1;
@@ -443,6 +562,16 @@
                 padding: 9px;
             }
 
+            .login-theme-row {
+                margin-bottom: 10px;
+            }
+
+            .login-theme-toggle {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+            }
+
             .split-shell {
                 gap: 9px;
             }
@@ -470,7 +599,7 @@
     </style>
 </h:head>
 
-<h:body>
+<h:body styleClass="login-page">
     <div class="split-shell">
         <div class="hero-panel">
             <div>
@@ -487,6 +616,18 @@
         </div>
 
         <div class="login-card">
+            <div class="login-theme-row">
+                <button type="button"
+                        class="login-theme-toggle"
+                        data-login-theme-toggle="true"
+                        role="switch"
+                        aria-checked="false"
+                        aria-label="Activer le mode sombre"
+                        title="Activer le mode sombre"
+                        onclick="if (window.BTKLoginTheme) { window.BTKLoginTheme.toggle(); }">
+                    <span class="login-theme-icon pi pi-moon" aria-hidden="true"/>
+                </button>
+            </div>
             <div class="login-header">
                 <div class="headline">Connexion</div>
                 <div class="subtitle">Veuillez vous connecter à votre compte</div>
@@ -573,6 +714,85 @@
                 }
             }
         };
+
+        window.BTKLoginTheme = (function () {
+            var darkClass = "theme-dark";
+            var storageKey = "btk.theme.global";
+
+            function isDark() {
+                return document.documentElement.classList.contains(darkClass);
+            }
+
+            function save(mode) {
+                try {
+                    if (window.localStorage) {
+                        window.localStorage.setItem(storageKey, mode);
+
+                        var userInput = document.getElementById('loginForm:cuti');
+                        if (!userInput) {
+                            userInput = document.querySelector('[id$=":cuti"]');
+                        }
+                        if (!userInput) {
+                            userInput = document.getElementById('cuti');
+                        }
+
+                        var cuti = userInput ? String(userInput.value || '').trim().toLowerCase() : "";
+                        if (cuti) {
+                            window.localStorage.setItem("btk.theme." + cuti, mode);
+                        }
+                    }
+                } catch (e) {
+                    // Ignore localStorage errors.
+                }
+            }
+
+            function syncToggle() {
+                var toggle = document.querySelector('[data-login-theme-toggle="true"]');
+                var dark = isDark();
+                if (!toggle) {
+                    return;
+                }
+
+                toggle.classList.toggle('is-active', dark);
+                toggle.setAttribute('aria-checked', dark ? 'true' : 'false');
+                toggle.setAttribute('aria-label', dark ? 'Désactiver le mode sombre' : 'Activer le mode sombre');
+                toggle.setAttribute('title', dark ? 'Désactiver le mode sombre' : 'Activer le mode sombre');
+
+                var icon = toggle.querySelector('.login-theme-icon');
+                if (icon) {
+                    icon.classList.remove('pi-moon', 'pi-sun');
+                    icon.classList.add(dark ? 'pi-sun' : 'pi-moon');
+                }
+            }
+
+            function apply(mode, shouldPersist) {
+                var enableDark = mode === "dark";
+                document.documentElement.classList.toggle(darkClass, enableDark);
+                if (shouldPersist !== false) {
+                    save(enableDark ? "dark" : "light");
+                }
+                syncToggle();
+            }
+
+            function toggle() {
+                apply(isDark() ? "light" : "dark");
+            }
+
+            function init() {
+                syncToggle();
+            }
+
+            return {
+                init: init,
+                toggle: toggle,
+                apply: apply,
+                isDark: isDark
+            };
+        })();
+
+        if (window.BTKLoginTheme) {
+            window.BTKLoginTheme.init();
+        }
     </script>
 </h:body>
 

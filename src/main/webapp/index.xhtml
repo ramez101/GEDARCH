@@ -5,9 +5,25 @@
 
 <h:head>
     <title>PrimeFaces Test</title>
+    <h:outputStylesheet library="css" name="dark-mode-global.css"/>
+    <script type="text/javascript">
+        (function () {
+            try {
+                var savedTheme = null;
+                if (window.localStorage) {
+                    savedTheme = window.localStorage.getItem("btk.theme.global");
+                }
+                if (savedTheme === "dark") {
+                    document.documentElement.classList.add("theme-dark");
+                }
+            } catch (e) {
+                // Ignore theme preload errors.
+            }
+        })();
+    </script>
 </h:head>
 
-<h:body>
+<h:body styleClass="index-page">
 
 <h:form>
 
