@@ -119,6 +119,8 @@
             font-size: .86rem;
             height: 30px;
             min-height: 50px;
+            position: relative;
+            overflow: hidden;
         }
 
         .nav a:hover,
@@ -2057,6 +2059,60 @@
             background: rgba(14, 27, 41, .92) !important;
             border-color: rgba(110, 149, 182, .35) !important;
         }
+        html.theme-dark .nav a.nav-item-active,
+        html.theme-dark .nav .nav-item.nav-item-active,
+        html.theme-dark .nav-group.is-active .nav-toggle {
+            background: linear-gradient(135deg, rgba(39, 143, 198, .94), rgba(19, 79, 116, .94)) !important;
+            border-color: rgba(158, 219, 248, .86) !important;
+            box-shadow: 0 0 0 1px rgba(159, 221, 252, .28), 0 14px 24px rgba(2, 12, 20, .52) !important;
+            color: #f5fbff !important;
+            transform: translateY(-1px);
+        }
+        html.theme-dark .nav a.nav-item-active::before,
+        html.theme-dark .nav .nav-item.nav-item-active::before,
+        html.theme-dark .nav-group.is-active .nav-toggle::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 7px;
+            bottom: 7px;
+            width: 4px;
+            border-radius: 0 4px 4px 0;
+            background: linear-gradient(180deg, #9be3ff, #58bfeb);
+            box-shadow: 0 0 14px rgba(96, 195, 238, .62);
+        }
+        html.theme-dark .nav a.nav-item-active .label,
+        html.theme-dark .nav .nav-item.nav-item-active .label,
+        html.theme-dark .nav-group.is-active .nav-toggle .label {
+            color: #f7fcff !important;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+        html.theme-dark .nav-group.is-restricted > .nav-toggle:not(.nav-item-active) {
+            background: linear-gradient(180deg, rgba(20, 20, 20, .96), rgba(10, 10, 10, .96)) !important;
+            border-color: rgba(64, 64, 64, .58) !important;
+            color: #b4bec8 !important;
+        }
+        html.theme-dark .nav-group.is-restricted > .nav-toggle:not(.nav-item-active) .label {
+            color: #c6cfd8 !important;
+            opacity: .95;
+        }
+        html.theme-dark .nav a.nav-item-disabled,
+        html.theme-dark .nav .nav-item.nav-item-disabled {
+            background: linear-gradient(180deg, rgba(20, 20, 20, .96), rgba(10, 10, 10, .96)) !important;
+            border-color: rgba(64, 64, 64, .58) !important;
+            color: rgba(176, 186, 198, .92) !important;
+            box-shadow: inset 0 0 0 1px rgba(54, 59, 66, .45);
+            opacity: 1 !important;
+        }
+        html.theme-dark .nav a.nav-item-disabled .label,
+        html.theme-dark .nav .nav-item.nav-item-disabled .label {
+            color: rgba(194, 203, 214, .92) !important;
+        }
+        html.theme-dark .nav a.nav-item-disabled .icon,
+        html.theme-dark .nav .nav-item.nav-item-disabled .icon {
+            background: rgba(8, 8, 8, .72) !important;
+        }
 
         /* Mobile drawer behavior */
         .sidebar-scrim {
@@ -2806,11 +2862,50 @@
                 nav.addEventListener('touchstart', triggerPrefetch, { passive: true });
             }
 
+            function markRestrictedMenuGroups() {
+                var nav = document.querySelector('.nav');
+                if (!nav) {
+                    return;
+                }
+
+                var groups = nav.querySelectorAll('.nav-group');
+                Array.prototype.forEach.call(groups, function (group) {
+                    if (!group) {
+                        return;
+                    }
+
+                    group.classList.remove('is-restricted');
+
+                    var submenu = group.querySelector('.nav-submenu');
+                    if (!submenu) {
+                        return;
+                    }
+
+                    var links = submenu.querySelectorAll('a.nav-item');
+                    if (!links || links.length === 0) {
+                        return;
+                    }
+
+                    var enabledCount = 0;
+                    Array.prototype.forEach.call(links, function (link) {
+                        if (link &amp;&amp; !link.classList.contains('nav-item-disabled')) {
+                            enabledCount++;
+                        }
+                    });
+
+                    if (enabledCount === 0) {
+                        group.classList.add('is-restricted');
+                    }
+                });
+            }
+
             function applyActiveMenuState() {
                 var nav = document.querySelector('.nav');
                 if (!nav) {
                     return;
                 }
+
+                markRestrictedMenuGroups();
 
                 var currentPath = window.location ? window.location.pathname : '';
                 var links = nav.querySelectorAll('a.nav-item');
@@ -3200,6 +3295,7 @@
             if (window.jsf &amp;&amp; window.jsf.ajax &amp;&amp; window.jsf.ajax.addOnEvent) {
                 window.jsf.ajax.addOnEvent(function (data) {
                     if (data &amp;&amp; data.status === 'success') {
+                        applyActiveMenuState();
                         hideChooseNoSelectionOptions();
                         if (window.BTKTheme) {
                             BTKTheme.init();
