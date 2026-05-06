@@ -2403,7 +2403,7 @@
                                                     <div class="message">#{notif.message}</div>
                                                     <div class="date">
                                                         <h:outputText value="#{notif.date}" rendered="#{not empty notif.date}">
-                                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="Africa/Tunis"/>
                                                         </h:outputText>
                                                     </div>
                                                 </div>
@@ -3220,3 +3220,4 @@
     </script>
 </h:body>
 </html>
+

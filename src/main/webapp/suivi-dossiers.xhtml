@@ -338,17 +338,17 @@
                         </p:column>
                         <p:column headerText="Date envoi" style="width: 11%; text-align:center;" sortBy="#{dossier.dateEnvoi}">
                             <h:outputText value="#{dossier.dateEnvoi}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="Africa/Tunis"/>
                             </h:outputText>
                         </p:column>
                         <p:column headerText="Date approuvée" style="width: 11%; text-align:center;" sortBy="#{dossier.dateApprouve}">
                             <h:outputText value="#{dossier.dateApprouve}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="Africa/Tunis"/>
                             </h:outputText>
                         </p:column>
                         <p:column headerText="Date restitution" style="width: 11%; text-align:center;" sortBy="#{dossier.dateRestitution}">
                             <h:outputText value="#{dossier.dateRestitution}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="Africa/Tunis"/>
                             </h:outputText>
                         </p:column>
                         <p:column headerText="Durée" style="width: 8%; text-align:center;" sortBy="#{dossier.dureeJours}">
@@ -402,3 +402,4 @@
     </ui:define>
 
 </ui:composition>
+

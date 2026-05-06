@@ -386,13 +386,13 @@
                                 </p:column>
                                 <p:column headerText="Date sortie" style="width: 24%; text-align: center;">
                                     <h:outputText value="#{history.dateSortie}" rendered="#{not empty history.dateSortie}">
-                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="Africa/Tunis"/>
                                     </h:outputText>
                                     <h:outputText value="-" rendered="#{empty history.dateSortie}"/>
                                 </p:column>
                                 <p:column headerText="Date restitution" style="width: 24%; text-align: center;">
                                     <h:outputText value="#{history.dateRestitution}" rendered="#{not empty history.dateRestitution}">
-                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="Africa/Tunis"/>
                                     </h:outputText>
                                     <h:outputText value="-" rendered="#{empty history.dateRestitution}"/>
                                 </p:column>
@@ -406,3 +406,4 @@
     </ui:define>
 
 </ui:composition>
+

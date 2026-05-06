@@ -365,7 +365,7 @@
                                 <span class="stats-chip">
                                     Dernière mise à jour:
                                     <h:outputText value="#{dashboardStatsBean.refreshedAt}">
-                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="Africa/Tunis"/>
                                     </h:outputText>
                                 </span>
                             </div>
@@ -502,3 +502,4 @@
     </ui:define>
 
 </ui:composition>
+

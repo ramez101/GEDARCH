@@ -73,7 +73,7 @@
                         </p:column>
                         <p:column headerText="Date d’envoi" style="width: 10%; text-align:center;">
                             <h:outputText value="#{demande.dateEnvoi}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="Africa/Tunis"/>
                             </h:outputText>
                         </p:column>
                         <p:column headerText="Statut" style="width: 8%; text-align:center;">
@@ -110,3 +110,4 @@
     </ui:define>
 
 </ui:composition>
+

@@ -390,7 +390,7 @@
                         <p:column headerText="Date cr&#233;ation" sortBy="#{emp.dateAjout}">
                             <ui:fragment rendered="#{not empty emp.dateAjout}">
                                 <h:outputText value="#{emp.dateAjout}">
-                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="Africa/Tunis"/>
                                 </h:outputText>
                             </ui:fragment>
                             <ui:fragment rendered="#{empty emp.dateAjout}">
@@ -506,7 +506,7 @@
                                         <div class="boite-info-value">
                                             <ui:fragment rendered="#{not empty boiteBean.selectedEmplacement.dateAjout}">
                                                 <h:outputText value="#{boiteBean.selectedEmplacement.dateAjout}">
-                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="Africa/Tunis"/>
                                                 </h:outputText>
                                             </ui:fragment>
                                             <ui:fragment rendered="#{empty boiteBean.selectedEmplacement.dateAjout}">
@@ -519,7 +519,7 @@
                                         <div class="boite-info-value">
                                             <ui:fragment rendered="#{not empty boiteBean.selectedEmplacement.dateModification}">
                                                 <h:outputText value="#{boiteBean.selectedEmplacement.dateModification}">
-                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+                                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="Africa/Tunis"/>
                                                 </h:outputText>
                                             </ui:fragment>
                                             <ui:fragment rendered="#{empty boiteBean.selectedEmplacement.dateModification}">
@@ -774,3 +774,4 @@
     </ui:define>
 
 </ui:composition>
+

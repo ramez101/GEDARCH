@@ -538,7 +538,7 @@
                                                 <td><h:outputText value="#{empty doc.document ? '-' : doc.document}"/></td>
                                                 <td>
                                                     <h:outputText value="#{doc.dateCreation}">
-                                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="Africa/Tunis"/>
                                                     </h:outputText>
                                                 </td>
                                                 <td><h:outputText value="#{empty doc.utilisateur ? '-' : doc.utilisateur}"/></td>
@@ -863,3 +863,4 @@
     </ui:define>
 
 </ui:composition>
+
