@@ -46,12 +46,14 @@ public class BoiteBean implements Serializable {
     private ArchEmplacement selectedEmplacement;
 
     private Integer etage;
+    private String etageCode;
     private Integer salle;
     private Integer rayon;
     private Integer rangee;
     private String newBoite;
     private String deleteBoite;
     private Integer editEtage;
+    private String editEtageCode;
     private Integer editSalle;
     private Integer editRayon;
     private Integer editRangee;
@@ -102,11 +104,16 @@ public class BoiteBean implements Serializable {
 
         editEtage = selectedEmplacement.getEtage();
         editSalle = selectedEmplacement.getSalle();
+        editEtageCode = formatEtageDisplay(editEtage, editSalle);
         editRayon = selectedEmplacement.getRayon();
         editRangee = selectedEmplacement.getRangee();
     }
 
     public void addBoite() {
+        if (!applyEtageCodeSelection()) {
+            return;
+        }
+
         if (etage == null || salle == null || rayon == null || rangee == null) {
             addError("Veuillez choisir étage, salle, rayon et rangée.");
             markValidationFailed();
@@ -198,6 +205,10 @@ public class BoiteBean implements Serializable {
         if (selectedEmplacement == null || selectedEmplacement.getIdEmplacement() == null) {
             addError("Aucune boîte sélectionnée pour la modification.");
             markValidationFailed();
+            return;
+        }
+
+        if (!applyEditEtageCodeSelection()) {
             return;
         }
 
@@ -373,6 +384,7 @@ public class BoiteBean implements Serializable {
 
     private void resetAddForm() {
         etage = null;
+        etageCode = null;
         salle = null;
         rayon = null;
         rangee = null;
@@ -390,6 +402,7 @@ public class BoiteBean implements Serializable {
 
     private void resetEditForm() {
         editEtage = null;
+        editEtageCode = null;
         editSalle = null;
         editRayon = null;
         editRangee = null;
@@ -450,6 +463,108 @@ public class BoiteBean implements Serializable {
         }
     }
 
+    private boolean applyEtageCodeSelection() {
+        if (etageCode == null || etageCode.isBlank()) {
+            return true;
+        }
+
+        String value = etageCode.trim().toUpperCase();
+        String[] parts = value.split("-");
+        if (parts.length != 2) {
+            addError("Selection etage invalide.");
+            markValidationFailed();
+            return false;
+        }
+
+        String etagePart = parts[0].trim();
+        String sallePart = parts[1].trim();
+        Integer etageValue;
+        try {
+            etageValue = Integer.valueOf(etagePart);
+        } catch (NumberFormatException ex) {
+            addError("Selection etage invalide.");
+            markValidationFailed();
+            return false;
+        }
+
+        int salleValue;
+        if ("A".equals(sallePart)) {
+            salleValue = 1;
+        } else if ("B".equals(sallePart)) {
+            salleValue = 2;
+        } else if ("C".equals(sallePart)) {
+            salleValue = 3;
+        } else {
+            addError("Selection etage invalide.");
+            markValidationFailed();
+            return false;
+        }
+
+        etage = etageValue;
+        salle = salleValue;
+        return true;
+    }
+
+    
+    private boolean applyEditEtageCodeSelection() {
+        if (editEtageCode == null || editEtageCode.isBlank()) {
+            return true;
+        }
+
+        String value = editEtageCode.trim().toUpperCase();
+        String[] parts = value.split("-");
+        if (parts.length != 2) {
+            addError("Selection etage invalide.");
+            markValidationFailed();
+            return false;
+        }
+
+        String etagePart = parts[0].trim();
+        String sallePart = parts[1].trim();
+        Integer etageValue;
+        try {
+            etageValue = Integer.valueOf(etagePart);
+        } catch (NumberFormatException ex) {
+            addError("Selection etage invalide.");
+            markValidationFailed();
+            return false;
+        }
+
+        int salleValue;
+        if ("A".equals(sallePart)) {
+            salleValue = 1;
+        } else if ("B".equals(sallePart)) {
+            salleValue = 2;
+        } else if ("C".equals(sallePart)) {
+            salleValue = 3;
+        } else {
+            addError("Selection etage invalide.");
+            markValidationFailed();
+            return false;
+        }
+
+        editEtage = etageValue;
+        editSalle = salleValue;
+        return true;
+    }
+    public String formatEtageDisplay(Integer etageValue, Integer salleValue) {
+        if (etageValue == null) {
+            return "-";
+        }
+        if (salleValue == null) {
+            return String.valueOf(etageValue);
+        }
+        if (salleValue == 1) {
+            return etageValue + "-A";
+        }
+        if (salleValue == 2) {
+            return etageValue + "-B";
+        }
+        if (salleValue == 3) {
+            return etageValue + "-C";
+        }
+        return String.valueOf(etageValue);
+    }
     private void addInfo(String message) {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO, message, null));
@@ -483,6 +598,9 @@ public class BoiteBean implements Serializable {
     public Integer getEtage() { return etage; }
     public void setEtage(Integer etage) { this.etage = etage; }
 
+    public String getEtageCode() { return etageCode; }
+    public void setEtageCode(String etageCode) { this.etageCode = etageCode; }
+
     public Integer getSalle() { return salle; }
     public void setSalle(Integer salle) { this.salle = salle; }
 
@@ -500,6 +618,9 @@ public class BoiteBean implements Serializable {
 
     public Integer getEditEtage() { return editEtage; }
     public void setEditEtage(Integer editEtage) { this.editEtage = editEtage; }
+
+    public String getEditEtageCode() { return editEtageCode; }
+    public void setEditEtageCode(String editEtageCode) { this.editEtageCode = editEtageCode; }
 
     public Integer getEditSalle() { return editSalle; }
     public void setEditSalle(Integer editSalle) { this.editSalle = editSalle; }
@@ -575,3 +696,5 @@ public class BoiteBean implements Serializable {
         return "";
     }
 }
+
+

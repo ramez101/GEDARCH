@@ -401,7 +401,7 @@
                             <h:outputText value="#{empty emp.userCree ? '-' : emp.userCree}"/>
                         </p:column>
                         <p:column headerText="&#201;tage" sortBy="#{emp.etage}">
-                            <h:outputText value="#{emp.etage}"/>
+                            <h:outputText value="#{boiteBean.formatEtageDisplay(emp.etage, emp.salle)}"/>
                         </p:column>
                         <p:column headerText="Salle" sortBy="#{emp.salle}">
                             <h:outputText value="#{emp.salle}"/>
@@ -418,7 +418,7 @@
                                                  icon="pi pi-print"
                                                  title="Imprimer les coordonnees de la boite"
                                                  styleClass="boite-row-print ui-button-icon-only"
-                                                 onclick="BTKBoitePrint.printCard(#{emp.boite}, #{emp.etage}, #{emp.salle}, #{emp.rayon}, #{emp.rangee});"/>
+                                                 onclick="BTKBoitePrint.printCard(#{emp.boite}, '#{boiteBean.formatEtageDisplay(emp.etage, emp.salle)}', #{emp.salle}, #{emp.rayon}, #{emp.rangee});"/>
                                 <p:commandButton icon="pi pi-eye"
                                                  title="Visualiser les informations de la boite"
                                                  process="@this"
@@ -480,7 +480,7 @@
                                     <div class="boite-info-item">
                                         <div class="boite-info-label">&#201;tage</div>
                                         <div class="boite-info-value">
-                                            <h:outputText value="#{empty boiteBean.selectedEmplacement.etage ? '-' : boiteBean.selectedEmplacement.etage}"/>
+                                            <h:outputText value="#{boiteBean.formatEtageDisplay(boiteBean.selectedEmplacement.etage, boiteBean.selectedEmplacement.salle)}"/>
                                         </div>
                                     </div>
                                     <div class="boite-info-item">
@@ -591,7 +591,38 @@
 
                         <div class="form-row">
                             <h:outputLabel for="editEtage" value="Étage"/>
-                            <h:inputText id="editEtage" value="#{boiteBean.editEtage}"/>
+                            <h:selectOneMenu id="editEtage" value="#{boiteBean.editEtageCode}">
+                                <f:selectItem itemLabel="0-A" itemValue="0-A"/>
+                                <f:selectItem itemLabel="0-B" itemValue="0-B"/>
+                                <f:selectItem itemLabel="0-C" itemValue="0-C"/>
+                                <f:selectItem itemLabel="1-A" itemValue="1-A"/>
+                                <f:selectItem itemLabel="1-B" itemValue="1-B"/>
+                                <f:selectItem itemLabel="1-C" itemValue="1-C"/>
+                                <f:selectItem itemLabel="2-A" itemValue="2-A"/>
+                                <f:selectItem itemLabel="2-B" itemValue="2-B"/>
+                                <f:selectItem itemLabel="2-C" itemValue="2-C"/>
+                                <f:selectItem itemLabel="3-A" itemValue="3-A"/>
+                                <f:selectItem itemLabel="3-B" itemValue="3-B"/>
+                                <f:selectItem itemLabel="3-C" itemValue="3-C"/>
+                                <f:selectItem itemLabel="4-A" itemValue="4-A"/>
+                                <f:selectItem itemLabel="4-B" itemValue="4-B"/>
+                                <f:selectItem itemLabel="4-C" itemValue="4-C"/>
+                                <f:selectItem itemLabel="5-A" itemValue="5-A"/>
+                                <f:selectItem itemLabel="5-B" itemValue="5-B"/>
+                                <f:selectItem itemLabel="5-C" itemValue="5-C"/>
+                                <f:selectItem itemLabel="6-A" itemValue="6-A"/>
+                                <f:selectItem itemLabel="6-B" itemValue="6-B"/>
+                                <f:selectItem itemLabel="6-C" itemValue="6-C"/>
+                                <f:selectItem itemLabel="7-A" itemValue="7-A"/>
+                                <f:selectItem itemLabel="7-B" itemValue="7-B"/>
+                                <f:selectItem itemLabel="7-C" itemValue="7-C"/>
+                                <f:selectItem itemLabel="8-A" itemValue="8-A"/>
+                                <f:selectItem itemLabel="8-B" itemValue="8-B"/>
+                                <f:selectItem itemLabel="8-C" itemValue="8-C"/>
+                                <f:selectItem itemLabel="9-A" itemValue="9-A"/>
+                                <f:selectItem itemLabel="9-B" itemValue="9-B"/>
+                                <f:selectItem itemLabel="9-C" itemValue="9-C"/>
+                            </h:selectOneMenu>
                         </div>
 
                         <div class="form-row">
@@ -635,17 +666,37 @@
                     <div class="form-row-grid">
                         <div class="form-row">
                             <h:outputLabel for="etage" value="Étage"/>
-                            <h:selectOneMenu id="etage" value="#{boiteBean.etage}">
-                                <f:selectItem itemLabel="0" itemValue="0"/>
-                                <f:selectItem itemLabel="1" itemValue="1"/>
-                                <f:selectItem itemLabel="2" itemValue="2"/>
-                                <f:selectItem itemLabel="3" itemValue="3"/>
-                                <f:selectItem itemLabel="4" itemValue="4"/>
-                                <f:selectItem itemLabel="5" itemValue="5"/>
-                                <f:selectItem itemLabel="6" itemValue="6"/>
-                                <f:selectItem itemLabel="7" itemValue="7"/>
-                                <f:selectItem itemLabel="8" itemValue="8"/>
-                                <f:selectItem itemLabel="9" itemValue="9"/>
+                            <h:selectOneMenu id="etage" value="#{boiteBean.etageCode}">
+                                <f:selectItem itemLabel="0-A" itemValue="0-A"/>
+                                <f:selectItem itemLabel="0-B" itemValue="0-B"/>
+                                <f:selectItem itemLabel="0-C" itemValue="0-C"/>
+                                <f:selectItem itemLabel="1-A" itemValue="1-A"/>
+                                <f:selectItem itemLabel="1-B" itemValue="1-B"/>
+                                <f:selectItem itemLabel="1-C" itemValue="1-C"/>
+                                <f:selectItem itemLabel="2-A" itemValue="2-A"/>
+                                <f:selectItem itemLabel="2-B" itemValue="2-B"/>
+                                <f:selectItem itemLabel="2-C" itemValue="2-C"/>
+                                <f:selectItem itemLabel="3-A" itemValue="3-A"/>
+                                <f:selectItem itemLabel="3-B" itemValue="3-B"/>
+                                <f:selectItem itemLabel="3-C" itemValue="3-C"/>
+                                <f:selectItem itemLabel="4-A" itemValue="4-A"/>
+                                <f:selectItem itemLabel="4-B" itemValue="4-B"/>
+                                <f:selectItem itemLabel="4-C" itemValue="4-C"/>
+                                <f:selectItem itemLabel="5-A" itemValue="5-A"/>
+                                <f:selectItem itemLabel="5-B" itemValue="5-B"/>
+                                <f:selectItem itemLabel="5-C" itemValue="5-C"/>
+                                <f:selectItem itemLabel="6-A" itemValue="6-A"/>
+                                <f:selectItem itemLabel="6-B" itemValue="6-B"/>
+                                <f:selectItem itemLabel="6-C" itemValue="6-C"/>
+                                <f:selectItem itemLabel="7-A" itemValue="7-A"/>
+                                <f:selectItem itemLabel="7-B" itemValue="7-B"/>
+                                <f:selectItem itemLabel="7-C" itemValue="7-C"/>
+                                <f:selectItem itemLabel="8-A" itemValue="8-A"/>
+                                <f:selectItem itemLabel="8-B" itemValue="8-B"/>
+                                <f:selectItem itemLabel="8-C" itemValue="8-C"/>
+                                <f:selectItem itemLabel="9-A" itemValue="9-A"/>
+                                <f:selectItem itemLabel="9-B" itemValue="9-B"/>
+                                <f:selectItem itemLabel="9-C" itemValue="9-C"/>
                             </h:selectOneMenu>
                         </div>
 
@@ -774,4 +825,6 @@
     </ui:define>
 
 </ui:composition>
+
+
 

@@ -431,37 +431,37 @@ public class DemandeDossierBean implements Serializable {
 
     private String buildBlockedRequestMessage(BlockedRequestInfo blockedRequest) {
         StringBuilder message = new StringBuilder();
-        message.append("Attention : votre accÃ¨s est actuellement bloquÃ© car le dossier PIN ");
+        message.append("Attention : Votre accès est actuellement bloqué car le dossier PIN ");
         String pinValue = blockedRequest == null ? "" : normalize(blockedRequest.pin);
         String boiteValue = blockedRequest == null ? "" : normalize(blockedRequest.boite);
         message.append(pinValue.isBlank() ? "?" : pinValue);
         if (!boiteValue.isBlank()) {
-            message.append(" (boÃ®te ").append(boiteValue).append(")");
+            message.append(" (boîte ").append(boiteValue).append(")");
         }
-        message.append(" n'a pas Ã©tÃ© restituÃ© depuis plus de ")
+        message.append(" n'a pas été restitué depuis plus de ")
                 .append(REQUEST_BLOCK_DELAY_DAYS)
-                .append(" jours. Merci de procÃ©der Ã  sa restitution afin de pouvoir effectuer une nouvelle demande de dossier.");
+                .append(" jours. Merci de procéder à sa restitution afin de pouvoir effectuer une nouvelle demande de dossier.");
         return message.toString();
     }
 
     private String buildStatusBlockedMessage() {
-        return "Attention : votre accÃ¨s est bloquÃ© (STATUT = 1). Merci de contacter un administrateur pour le dÃ©blocage.";
+        return "Attention : votre accès est bloqué. Merci de contacter un administrateur pour le déblocage.";
     }
 
     private String buildBlockExceptionMessage(BlockedRequestInfo blockedRequest) {
         if (blockedRequest == null) {
-            return "DÃ©blocage exceptionnel. Vous pouvez envoyer une seule nouvelle demande.";
+            return "Déblocage exceptionnel. Vous pouvez envoyer une seule nouvelle demande.";
         }
         StringBuilder message = new StringBuilder();
-        message.append("DÃ©blocage exceptionnel. ");
+        message.append("Déblocage exceptionnel. ");
         message.append("Vous pouvez envoyer une seule nouvelle demande meme si le dossier PIN ");
         String pinValue = blockedRequest == null ? "" : normalize(blockedRequest.pin);
         String boiteValue = blockedRequest == null ? "" : normalize(blockedRequest.boite);
         message.append(pinValue.isBlank() ? "?" : pinValue);
         if (!boiteValue.isBlank()) {
-            message.append(" (boÃ®te ").append(boiteValue).append(")");
+            message.append(" (boîte ").append(boiteValue).append(")");
         }
-        message.append(" est toujours non restituÃ©.");
+        message.append(" est toujours non restitué.");
         return message.toString();
     }
 
