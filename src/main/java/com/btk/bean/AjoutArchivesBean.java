@@ -191,10 +191,13 @@ public class AjoutArchivesBean implements Serializable {
                     }
 
                     String submitted = part.getSubmittedFileName();
-                    String fileName = submitted == null || submitted.isBlank()
-                            ? doc.file
+                    String submittedFileName = submitted == null || submitted.isBlank()
+                            ? ""
                             : Paths.get(submitted).getFileName().toString();
-                    fileName = sanitizeFileName(fileName);
+                    String preferredFileName = doc.file == null || doc.file.isBlank()
+                            ? submittedFileName
+                            : doc.file;
+                    String fileName = resolveAvailableFileName(dossierPath, preferredFileName);
 
                     Path target = dossierPath.resolve(fileName);
                     try (InputStream in = part.getInputStream()) {
@@ -706,6 +709,30 @@ public class AjoutArchivesBean implements Serializable {
             return "document";
         }
         return value.replaceAll("[\\\\/:*?\"<>|]", "-").trim();
+    }
+
+    private String resolveAvailableFileName(Path dossierPath, String desiredFileName) {
+        String sanitized = sanitizeFileName(desiredFileName);
+        Path candidate = dossierPath.resolve(sanitized);
+        if (!Files.exists(candidate)) {
+            return sanitized;
+        }
+
+        String base = sanitized;
+        String extension = "";
+        int dotIndex = sanitized.lastIndexOf('.');
+        if (dotIndex > 0 && dotIndex < sanitized.length() - 1) {
+            base = sanitized.substring(0, dotIndex);
+            extension = sanitized.substring(dotIndex);
+        }
+
+        int suffix = 2;
+        String resolved = base + "_" + suffix + extension;
+        while (Files.exists(dossierPath.resolve(resolved))) {
+            suffix++;
+            resolved = base + "_" + suffix + extension;
+        }
+        return resolved;
     }
 
     private String resolveUtilisateur() {

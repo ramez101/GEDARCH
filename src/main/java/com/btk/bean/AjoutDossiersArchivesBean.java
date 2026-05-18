@@ -315,32 +315,58 @@ public class AjoutDossiersArchivesBean implements Serializable {
         }
         return result;
     }
-
     public void addBoiteSelection() {
-        if (boite == null) {
-            addWarn("Saisissez un numéro de boîte avant d'ajouter.");
+        Integer boiteValue = boite;
+        String rawBoiteInput = resolveBoiteInputText();
+        if (rawBoiteInput != null) {
+            String cleanBoiteInput = rawBoiteInput.trim();
+            if (cleanBoiteInput.isBlank()) {
+                boiteValue = null;
+            } else {
+                try {
+                    boiteValue = Integer.valueOf(cleanBoiteInput);
+                } catch (NumberFormatException e) {
+                    addWarn("Le numero de boite doit etre numerique.");
+                    markValidationFailed();
+                    return;
+                }
+            }
+        }
+
+        Integer expectedNextBoite = resolveExpectedNextBoite();
+        if (boiteValue == null && expectedNextBoite != null) {
+            boiteValue = expectedNextBoite;
+        }
+
+        if (boiteValue == null) {
+            addWarn("Saisissez un numero de boite avant d'ajouter.");
             markValidationFailed();
             return;
         }
 
-        if (boites == null || !boites.contains(boite)) {
-            addError("La boîte " + boite + " est introuvable.");
+        if (expectedNextBoite != null && !expectedNextBoite.equals(boiteValue)) {
+            addWarn("Les boites doivent etre successives. Prochaine boite attendue : " + expectedNextBoite + ".");
             markValidationFailed();
             return;
         }
 
-        if (selectedBoites.contains(boite)) {
-            addWarn("La boîte " + boite + " est déjà associée.");
+        if (boites == null || !boites.contains(boiteValue)) {
+            addError("La boite " + boiteValue + " est introuvable.");
+            markValidationFailed();
+            return;
+        }
+
+        if (selectedBoites.contains(boiteValue)) {
+            addWarn("La boite " + boiteValue + " est deja associee.");
             boite = null;
             markValidationFailed();
             return;
         }
 
-        selectedBoites.add(boite);
-        addInfo("Boîte " + boite + " ajoutée.");
-        boite = null;
+        selectedBoites.add(boiteValue);
+        addInfo("Boite " + boiteValue + " ajoutee.");
+        boite = boiteValue + 1;
     }
-
     public void removeBoiteSelection() {
         if (boiteToRemove == null) {
             return;
@@ -394,17 +420,20 @@ public class AjoutDossiersArchivesBean implements Serializable {
 
         for (DocItem doc : docs) {
             Part part = resolvePart(doc, parts, usedPartNames);
-            String fileName = doc.file;
             if (part == null) {
                 throw new IllegalStateException("Fichier introuvable pour le document : " + doc.label);
             }
 
             String submitted = part.getSubmittedFileName();
-            if (submitted != null && !submitted.isBlank()) {
-                fileName = Paths.get(submitted).getFileName().toString();
-            }
+            String submittedFileName = (submitted == null || submitted.isBlank())
+                    ? ""
+                    : Paths.get(submitted).getFileName().toString();
+            String preferredFileName = (doc.file == null || doc.file.isBlank())
+                    ? submittedFileName
+                    : doc.file;
+            String fileName = resolveAvailableFileName(dossierPath, preferredFileName);
 
-            Path target = dossierPath.resolve(sanitizeFileName(fileName));
+            Path target = dossierPath.resolve(fileName);
             try (InputStream in = part.getInputStream()) {
                 Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
             }
@@ -623,22 +652,84 @@ public class AjoutDossiersArchivesBean implements Serializable {
     }
 
     private String sanitizeFileName(String value) {
-        if (value == null) {
+        if (value == null || value.isBlank()) {
             return "document";
         }
         return value.replaceAll("[\\\\/:*?\"<>|]", "-").trim();
     }
 
-    private List<Integer> resolveBoitesToSave() {
-        List<Integer> resolved = new ArrayList<>(selectedBoites);
-        if (boite != null && !resolved.contains(boite)) {
-            resolved.add(boite);
+    private String resolveAvailableFileName(Path dossierPath, String desiredFileName) {
+        String sanitized = sanitizeFileName(desiredFileName);
+        Path candidate = dossierPath.resolve(sanitized);
+        if (!Files.exists(candidate)) {
+            return sanitized;
+        }
+
+        String base = sanitized;
+        String extension = "";
+        int dotIndex = sanitized.lastIndexOf('.');
+        if (dotIndex > 0 && dotIndex < sanitized.length() - 1) {
+            base = sanitized.substring(0, dotIndex);
+            extension = sanitized.substring(dotIndex);
+        }
+
+        int suffix = 2;
+        String resolved = base + "_" + suffix + extension;
+        while (Files.exists(dossierPath.resolve(resolved))) {
+            suffix++;
+            resolved = base + "_" + suffix + extension;
         }
         return resolved;
+    }
+    private List<Integer> resolveBoitesToSave() {
+        return new ArrayList<>(selectedBoites);
     }
 
     private String formatBoites(List<Integer> dossierBoites) {
         return DossierEmpUtil.formatBoites(dossierBoites);
+    }
+
+
+    private Integer resolveExpectedNextBoite() {
+        if (selectedBoites == null || selectedBoites.isEmpty()) {
+            return null;
+        }
+
+        Integer maxBoite = null;
+        for (Integer value : selectedBoites) {
+            if (value == null) {
+                continue;
+            }
+            if (maxBoite == null || value > maxBoite) {
+                maxBoite = value;
+            }
+        }
+        return maxBoite == null ? null : maxBoite + 1;
+    }
+    private String resolveBoiteInputText() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        if (context == null) {
+            return null;
+        }
+
+        Object requestObject = context.getExternalContext().getRequest();
+        if (!(requestObject instanceof HttpServletRequest)) {
+            return null;
+        }
+
+        HttpServletRequest request = (HttpServletRequest) requestObject;
+        String directValue = request.getParameter("boite_input");
+        if (directValue != null) {
+            return directValue;
+        }
+
+        for (Entry<String, String> entry : context.getExternalContext().getRequestParameterMap().entrySet()) {
+            String key = entry.getKey();
+            if (key != null && key.endsWith("boite_input")) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
     private String resolveUtilisateur() {

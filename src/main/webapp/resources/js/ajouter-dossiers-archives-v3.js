@@ -37,6 +37,30 @@
             .replace(/'/g, '&#39;');
     }
 
+    function btkFileExtension(fileName) {
+        var clean = String(fileName == null ? '' : fileName).trim();
+        var lastDot = clean.lastIndexOf('.');
+        if (lastDot <= 0 || lastDot === clean.length - 1) {
+            return '';
+        }
+        return clean.substring(lastDot).toLowerCase();
+    }
+
+    function btkFileBaseFromLabel(label) {
+        var value = String(label == null ? '' : label).trim().toLowerCase();
+        if (typeof value.normalize === 'function') {
+            value = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+        value = value.replace(/['`]/g, '');
+        value = value.replace(/[^a-z0-9]+/g, '_');
+        value = value.replace(/^_+|_+$/g, '');
+        return value || 'document';
+    }
+
+    function btkBuildDocFileName(docLabel, originalFileName) {
+        return btkFileBaseFromLabel(docLabel) + btkFileExtension(originalFileName);
+    }
+
     function btkCurrentDateTime() {
         var now = new Date();
         var dd = String(now.getDate()).padStart(2, '0');
@@ -156,12 +180,16 @@
             return;
         }
 
-        var fileName = '';
+        var originalFileName = '';
         if (input.files && input.files.length) {
-            fileName = input.files[0].name || '';
+            originalFileName = input.files[0].name || '';
         } else if (input.value) {
-            fileName = input.value.split('\\').pop();
+            originalFileName = input.value.split('\\').pop();
         }
+
+        var nameInput = btkGetEl('dialogDocName');
+        var docLabel = nameInput ? (nameInput.value || '') : '';
+        var fileName = btkBuildDocFileName(docLabel, originalFileName);
 
         var fileNameInput = btkGetEl('dialogFileName');
         if (fileNameInput) {
@@ -203,12 +231,13 @@
         var nombre = nombreInput ? (nombreInput.value || '') : '';
         var desc = descInput ? (descInput.value || '') : '';
         var targetId = targetInput ? (targetInput.value || '') : '';
+        var uploadedFileName = '';
         var fileName = '';
 
         nombre = nombre.trim();
 
         if (fileInput && fileInput.files && fileInput.files.length) {
-            fileName = fileInput.files[0].name || '';
+            uploadedFileName = fileInput.files[0].name || '';
         }
 
         if (!docLabel) {
@@ -223,10 +252,12 @@
             return false;
         }
 
-        if (!fileName) {
+        if (!uploadedFileName) {
             alert('Le fichier est obligatoire.');
             return false;
         }
+
+        fileName = btkBuildDocFileName(docLabel, uploadedFileName);
 
         if (targetId) {
             var targetField = btkGetEl(targetId);

@@ -27,6 +27,7 @@ import jakarta.transaction.NotSupportedException;
 import jakarta.transaction.RollbackException;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.UserTransaction;
+import jakarta.servlet.http.HttpServletRequest;
 import org.primefaces.PrimeFaces;
 
 @Named("modifierArchivesBean")
@@ -379,31 +380,58 @@ public class ModifierArchivesBean implements Serializable {
     }
 
     public void addBoiteSelection() {
-        if (boite == null) {
-            addWarn("Saisissez un numéro de boîte avant d'ajouter.");
+        Integer boiteValue = boite;
+        String rawBoiteInput = resolveBoiteInputText();
+        if (rawBoiteInput != null) {
+            String cleanBoiteInput = rawBoiteInput.trim();
+            if (cleanBoiteInput.isBlank()) {
+                boiteValue = null;
+            } else {
+                try {
+                    boiteValue = Integer.valueOf(cleanBoiteInput);
+                } catch (NumberFormatException e) {
+                    addWarn("Le numero de boite doit etre numerique.");
+                    markValidationFailed();
+                    return;
+                }
+            }
+        }
+
+        Integer expectedNextBoite = resolveExpectedNextBoite();
+        if (boiteValue == null && expectedNextBoite != null) {
+            boiteValue = expectedNextBoite;
+        }
+
+        if (boiteValue == null) {
+            addWarn("Saisissez un numero de boite avant d'ajouter.");
             markValidationFailed();
             return;
         }
 
-        if (boites == null || !boites.contains(boite)) {
-            addError("La boîte " + boite + " est introuvable.");
+        if (expectedNextBoite != null && !expectedNextBoite.equals(boiteValue)) {
+            addWarn("Les boites doivent etre successives. Prochaine boite attendue : " + expectedNextBoite + ".");
             markValidationFailed();
             return;
         }
 
-        if (selectedBoites.contains(boite)) {
-            addWarn("La boîte " + boite + " est déjà associée.");
+        if (boites == null || !boites.contains(boiteValue)) {
+            addError("La boite " + boiteValue + " est introuvable.");
+            markValidationFailed();
+            return;
+        }
+
+        if (selectedBoites.contains(boiteValue)) {
+            addWarn("La boite " + boiteValue + " est deja associee.");
             boite = null;
             markValidationFailed();
             return;
         }
 
-        selectedBoites.add(boite);
+        selectedBoites.add(boiteValue);
         selectedBoites = new ArrayList<>(DossierEmpUtil.normalizeBoites(selectedBoites));
-        addInfo("Boîte " + boite + " ajoutée.");
-        boite = null;
+        addInfo("Boite " + boiteValue + " ajoutee.");
+        boite = boiteValue + 1;
     }
-
     public void removeBoiteSelection() {
         if (boiteToRemove == null) {
             return;
@@ -434,11 +462,7 @@ public class ModifierArchivesBean implements Serializable {
     }
 
     private List<Integer> resolveBoitesToSave() {
-        List<Integer> resolved = new ArrayList<>(selectedBoites);
-        if (boite != null && !resolved.contains(boite)) {
-            resolved.add(boite);
-        }
-        return resolved;
+        return new ArrayList<>(selectedBoites);
     }
 
     private List<Integer> fetchBoites() {
@@ -572,6 +596,48 @@ public class ModifierArchivesBean implements Serializable {
         return value == null ? "" : value.trim();
     }
 
+    private Integer resolveExpectedNextBoite() {
+        if (selectedBoites == null || selectedBoites.isEmpty()) {
+            return null;
+        }
+
+        Integer maxBoite = null;
+        for (Integer value : selectedBoites) {
+            if (value == null) {
+                continue;
+            }
+            if (maxBoite == null || value > maxBoite) {
+                maxBoite = value;
+            }
+        }
+        return maxBoite == null ? null : maxBoite + 1;
+    }
+
+    private String resolveBoiteInputText() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        if (context == null) {
+            return null;
+        }
+
+        Object requestObject = context.getExternalContext().getRequest();
+        if (!(requestObject instanceof HttpServletRequest)) {
+            return null;
+        }
+
+        HttpServletRequest request = (HttpServletRequest) requestObject;
+        String directValue = request.getParameter("boite_input");
+        if (directValue != null) {
+            return directValue;
+        }
+
+        for (var entry : context.getExternalContext().getRequestParameterMap().entrySet()) {
+            String key = entry.getKey();
+            if (key != null && key.endsWith("boite_input")) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
     private static synchronized EntityManagerFactory getEMF() {
         if (emf == null || !emf.isOpen()) {
             emf = Persistence.createEntityManagerFactory("btk");
