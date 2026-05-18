@@ -1,0 +1,363 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                template="#{loginBean.bankProfile ? '/WEB-INF/templates/app-bank.xhtml' : '/WEB-INF/templates/app.xhtml'}">
+
+    <ui:define name="title">BTK - Recherche globale</ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .global-search-form {
+                display: grid;
+                gap: 12px;
+            }
+
+            .global-search-layout.container {
+                max-width: 1320px;
+            }
+
+            .global-search-line {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .global-search-input {
+                flex: 1 1 420px;
+                min-width: 220px;
+            }
+
+            .global-search-input .ui-inputfield {
+                width: 100%;
+            }
+
+            .global-search-counter {
+                margin-top: 8px;
+                padding: 10px 12px;
+                border-radius: 10px;
+                border: 1px solid #d6e3f1;
+                background: #f6fbff;
+                color: #1f4c70;
+                font-weight: 600;
+            }
+
+            .global-search-empty {
+                margin-top: 12px;
+                padding: 14px;
+                border-radius: 10px;
+                border: 1px dashed #b8cade;
+                background: #f8fbfe;
+                color: #5e7892;
+            }
+
+            .global-result-section {
+                margin-top: 18px;
+                border: 1px solid #d8e5f2;
+                border-radius: 12px;
+                overflow: hidden;
+                background: #fff;
+            }
+
+            .global-result-menu {
+                margin-top: 14px;
+                display: inline-flex;
+                gap: 6px;
+                align-items: center;
+                padding: 5px;
+                border-radius: 12px;
+                border: 1px solid var(--btk-border);
+                background: #f4f8fc;
+            }
+
+            .global-result-menu .ui-commandlink {
+                color: var(--btk-muted);
+                font-size: .88rem;
+                font-weight: 600;
+                text-decoration: none;
+                border: 1px solid transparent;
+                border-radius: 9px;
+                background: transparent;
+                padding: 7px 14px;
+                cursor: pointer;
+                transition: color .12s ease, background .12s ease, border-color .12s ease;
+            }
+
+            .global-result-menu .ui-commandlink:hover {
+                color: var(--btk-ink);
+                background: #eaf2fb;
+                border-color: #d7e6f6;
+                text-decoration: none;
+            }
+
+            .global-result-menu .ui-commandlink.is-active {
+                color: #fff;
+                background: linear-gradient(135deg, var(--btk-primary), var(--btk-primary-2));
+                border-color: rgba(0, 101, 145, .7);
+                box-shadow: 0 6px 14px rgba(0, 123, 174, .26);
+            }
+
+            .global-result-title {
+                padding: 10px 14px;
+                font-size: .85rem;
+                font-weight: 700;
+                color: #1f4f73;
+                background: #edf4fb;
+                border-bottom: 1px solid #d8e5f2;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .global-result-count {
+                font-size: .72rem;
+                font-weight: 700;
+                color: #3a6588;
+                background: #dcecfb;
+                border-radius: 999px;
+                padding: 2px 8px;
+            }
+
+            .global-open-link {
+                color: #0f67a0;
+                font-weight: 700;
+                text-decoration: none;
+            }
+
+            .global-open-link:hover {
+                text-decoration: underline;
+            }
+
+            .global-placeholder {
+                color: #7a91a7;
+            }
+
+            html.theme-dark .global-search-counter {
+                border-color: #3a5570;
+                background: #14293d;
+                color: #d8e9f8;
+            }
+
+            html.theme-dark .global-search-empty {
+                border-color: #405d79;
+                background: #15293d;
+                color: #c8dbed;
+            }
+
+            html.theme-dark .global-result-section {
+                border-color: #38526d;
+                background: #13263a;
+            }
+
+            html.theme-dark .global-result-menu {
+                border-color: #39566f;
+                background: #15293d;
+            }
+
+            html.theme-dark .global-result-menu .ui-commandlink {
+                color: #a9bfd3;
+            }
+
+            html.theme-dark .global-result-menu .ui-commandlink:hover {
+                color: #c8daeb;
+                background: #1e3952;
+                border-color: #446481;
+            }
+
+            html.theme-dark .global-result-menu .ui-commandlink.is-active {
+                color: #eaf5ff;
+                background: linear-gradient(135deg, #2a6f97, #3d8dbd);
+                border-color: #5a9ec8;
+                box-shadow: 0 8px 18px rgba(26, 64, 93, .35);
+            }
+
+            html.theme-dark .global-result-title {
+                background: #183249;
+                border-bottom-color: #365169;
+                color: #d8e7f6;
+            }
+
+            html.theme-dark .global-result-count {
+                background: #254968;
+                color: #d8e9f8;
+            }
+
+            html.theme-dark .global-open-link {
+                color: #9fd3ff;
+            }
+
+            html.theme-dark .global-placeholder {
+                color: #a8bfd4;
+            }
+        </style>
+
+        <div class="container global-search-layout">
+            <div class="card">
+                <div class="card-title">Recherche globale</div>
+
+                <h:form id="globalSearchPageForm" prependId="false" styleClass="global-search-form">
+                    <p:defaultCommand target="launchGlobalSearchBtn"/>
+
+                    <div class="global-search-line">
+                        <div class="global-search-input">
+                            <h:outputLabel for="globalSearchInput"/>
+                            <p:inputText id="globalSearchInput"
+                                         value="#{globalSearchBean.query}"
+                                         placeholder="Ex: pin, relation, nom document"
+                                         autocomplete="off"/>
+                        </div>
+                        <p:commandButton id="launchGlobalSearchBtn"
+                                         value="Rechercher"
+                                         action="#{globalSearchBean.searchFromPage}"
+                                         ajax="false"
+                                         process="@form"
+                                         styleClass="docs-btn docs-btn-primary"/>
+                        <p:commandButton id="clearGlobalSearchBtn"
+                                         value="Clear"
+                                         action="#{globalSearchBean.clearSearch}"
+                                         ajax="false"
+                                         process="@this"
+                                         immediate="true"
+                                         styleClass="docs-btn ui-button-secondary"/>
+                    </div>
+
+                    <h:panelGroup rendered="#{globalSearchBean.searched}" layout="block" styleClass="global-search-counter">
+                        #{globalSearchBean.totalResults} resultat(s) :
+                        #{globalSearchBean.dossierResults.size()} dossier(s),
+                        #{globalSearchBean.documentResults.size()} document(s).
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{not globalSearchBean.searched}" layout="block" styleClass="global-search-empty">
+                        Lancez une recherche depuis cette page ou depuis la barre de recherche en haut.
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{globalSearchBean.emptyResult}" layout="block" styleClass="global-search-empty">
+                        Aucun resultat pour cette recherche.
+                    </h:panelGroup>
+
+                    <h:panelGroup id="resultsContainer" layout="block" rendered="#{globalSearchBean.searched and not globalSearchBean.emptyResult}">
+                        <div class="global-result-menu">
+                            <p:commandLink value="Dossiers"
+                                           actionListener="#{globalSearchBean.showDossiers}"
+                                           process="@this"
+                                           update="resultsContainer"
+                                           styleClass="#{globalSearchBean.dossiersSelected ? 'is-active' : ''}"/>
+                            <p:commandLink value="Documents"
+                                           actionListener="#{globalSearchBean.showDocuments}"
+                                           process="@this"
+                                           update="resultsContainer"
+                                           styleClass="#{globalSearchBean.documentsSelected ? 'is-active' : ''}"/>
+                        </div>
+
+                        <h:panelGroup rendered="#{globalSearchBean.selectedSectionEmpty}" layout="block" styleClass="global-search-empty">
+                            Aucun resultat dans cette categorie.
+                        </h:panelGroup>
+
+                    <h:panelGroup rendered="#{globalSearchBean.showDossiersSection and not empty globalSearchBean.dossierResults}" layout="block" styleClass="global-result-section">
+                        <div class="global-result-title">
+                            <span>Dossiers</span>
+                            <span class="global-result-count">#{globalSearchBean.dossierResults.size()}</span>
+                        </div>
+                        <p:dataTable value="#{globalSearchBean.dossierResults}"
+                                     var="row"
+                                     paginator="true"
+                                     paginatorPosition="bottom"
+                                     rows="10"
+                                     rowsPerPageTemplate="10,20,30"
+                                     emptyMessage="Aucun dossier.">
+                            <p:column headerText="ID" style="width: 70px; text-align: center;">
+                                <h:outputText value="#{row.idDossier}"/>
+                            </p:column>
+                            <p:column headerText="PIN">
+                                <h:outputText value="#{empty row.pin ? '-' : row.pin}"/>
+                            </p:column>
+                            <p:column headerText="Relation">
+                                <h:outputText value="#{empty row.relation ? '-' : row.relation}"/>
+                            </p:column>
+                            <p:column headerText="Portefeuille">
+                                <h:outputText value="#{empty row.portefeuille ? '-' : row.portefeuille}"/>
+                            </p:column>
+                            <p:column headerText="Boites">
+                                <h:outputText value="#{empty row.boites ? '-' : row.boites}"/>
+                            </p:column>
+                            <p:column headerText="Filiale">
+                                <h:outputText value="#{row.filiale}"/>
+                            </p:column>
+                            <p:column headerText="Ouvrir" style="width: 90px; text-align: center;">
+                                <h:link outcome="/consultation-archives"
+                                        rendered="#{row.actionAvailable}"
+                                        value="Voir"
+                                        styleClass="global-open-link">
+                                    <f:param name="globalSearchType" value="#{row.actionType}"/>
+                                    <f:param name="globalSearchValue" value="#{row.actionValue}"/>
+                                </h:link>
+                                <h:outputText rendered="#{not row.actionAvailable}" value="-" styleClass="global-placeholder"/>
+                            </p:column>
+                        </p:dataTable>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{globalSearchBean.showDocumentsSection and not empty globalSearchBean.documentResults}" layout="block" styleClass="global-result-section">
+                        <div class="global-result-title">
+                            <span>Documents</span>
+                            <span class="global-result-count">#{globalSearchBean.documentResults.size()}</span>
+                        </div>
+                        <p:dataTable value="#{globalSearchBean.documentResults}"
+                                     var="row"
+                                     paginator="true"
+                                     paginatorPosition="bottom"
+                                     rows="10"
+                                     rowsPerPageTemplate="10,20,30"
+                                     emptyMessage="Aucun document.">
+                            <p:column headerText="ID" style="width: 80px; text-align: center;">
+                                <h:outputText value="#{row.idDocument}"/>
+                            </p:column>
+                            <p:column headerText="Nom document">
+                                <h:outputText value="#{empty row.documentName ? '-' : row.documentName}"/>
+                            </p:column>
+                            <p:column headerText="Fichier">
+                                <h:outputText value="#{row.fileName}"/>
+                            </p:column>
+                            <p:column headerText="Dossier">
+                                <h:outputText value="#{row.dossierName}"/>
+                            </p:column>
+                            <p:column headerText="Boite" style="width: 90px; text-align: center;">
+                                <h:outputText value="#{empty row.boite ? '-' : row.boite}"/>
+                            </p:column>
+                            <p:column headerText="Cree par">
+                                <h:outputText value="#{empty row.utilisateur ? '-' : row.utilisateur}"/>
+                            </p:column>
+                            <p:column headerText="Date" style="width: 145px; text-align: center;">
+                                <h:outputText value="#{row.dateCreation}" rendered="#{not empty row.dateCreation}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="Africa/Tunis"/>
+                                </h:outputText>
+                                <h:outputText value="-" rendered="#{empty row.dateCreation}"/>
+                            </p:column>
+                            <p:column headerText="Ouvrir" style="width: 90px; text-align: center;">
+                                <ui:fragment rendered="#{row.actionAvailable and globalSearchBean.resolveDocumentOutcome(row) eq '/consultation-archives'}">
+                                    <h:link outcome="/consultation-archives" value="Voir" styleClass="global-open-link">
+                                        <f:param name="globalSearchType" value="#{globalSearchBean.resolveDocumentSearchType(row)}"/>
+                                        <f:param name="globalSearchValue" value="#{globalSearchBean.resolveDocumentParamValue(row)}"/>
+                                    </h:link>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{row.actionAvailable and globalSearchBean.resolveDocumentOutcome(row) eq '/consultation-boites'}">
+                                    <h:link outcome="/consultation-boites" value="Voir" styleClass="global-open-link">
+                                        <f:param name="globalBoite" value="#{globalSearchBean.resolveDocumentParamValue(row)}"/>
+                                    </h:link>
+                                </ui:fragment>
+                                <h:outputText rendered="#{not row.actionAvailable}" value="-" styleClass="global-placeholder"/>
+                            </p:column>
+                        </p:dataTable>
+                    </h:panelGroup>
+                    </h:panelGroup>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

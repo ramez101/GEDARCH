@@ -21,6 +21,7 @@ import com.btk.model.ArchEmplacement;
 import com.btk.util.DossierEmpUtil;
 import com.btk.util.FilialeUtil;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.ExternalContext;
@@ -68,6 +69,11 @@ public class ConsultationArchivesBean implements Serializable {
     private boolean resultLoaded;
     private List<ScannedDocumentRow> scannedDocuments = Collections.emptyList();
     private List<TransmissionHistoryRow> transmissionHistory = Collections.emptyList();
+
+    @PostConstruct
+    public void init() {
+        applyGlobalSearchPrefill();
+    }
 
     public void search() {
         clearResult();
@@ -223,6 +229,33 @@ public class ConsultationArchivesBean implements Serializable {
         } finally {
             em.close();
         }
+    }
+
+    private void applyGlobalSearchPrefill() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        if (context == null || context.isPostback()) {
+            return;
+        }
+
+        var params = context.getExternalContext().getRequestParameterMap();
+        String type = params.get("globalSearchType");
+        String value = params.get("globalSearchValue");
+        if (value == null || value.isBlank()) {
+            return;
+        }
+
+        String normalizedType = type == null ? "" : type.trim().toLowerCase(Locale.ROOT);
+        String normalizedValue = value.trim();
+        if ("relation".equals(normalizedType)) {
+            searchType = "relation";
+            searchRelationValue = normalizedValue;
+            searchPinValue = null;
+        } else {
+            searchType = "pin";
+            searchPinValue = normalizedValue;
+            searchRelationValue = null;
+        }
+        search();
     }
 
     private Map<String, DocMeta> readMetadata(Path dossierPath) {

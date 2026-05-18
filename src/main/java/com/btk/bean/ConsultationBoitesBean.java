@@ -17,6 +17,7 @@ import jakarta.inject.Named;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import java.util.Locale;
 
 @Named("consultationBoitesBean")
 @ViewScoped
@@ -38,6 +39,7 @@ public class ConsultationBoitesBean implements Serializable {
 
     @PostConstruct
     public void init() {
+        applyGlobalSearchPrefill();
     }
 
     public void search() {
@@ -93,6 +95,26 @@ public class ConsultationBoitesBean implements Serializable {
         selectedDossier = null;
         selectedDossierBoites = null;
         resultLoaded = false;
+    }
+
+    private void applyGlobalSearchPrefill() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        if (context == null || context.isPostback()) {
+            return;
+        }
+
+        String rawBoite = context.getExternalContext().getRequestParameterMap().get("globalBoite");
+        if (rawBoite == null || rawBoite.isBlank()) {
+            return;
+        }
+
+        String normalized = rawBoite.trim().toLowerCase(Locale.ROOT);
+        if (!normalized.matches("\\d+")) {
+            return;
+        }
+
+        searchBoite = normalized;
+        search();
     }
 
     private void addWarning(String message) {

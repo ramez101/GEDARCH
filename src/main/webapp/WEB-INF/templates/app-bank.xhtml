@@ -295,6 +295,60 @@
             gap: 16px;
             color: #cde0f5;
             font-size: .88rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .nav-user-session {
+            white-space: nowrap;
+        }
+        .nav-global-search-form {
+            margin: 0;
+        }
+        .nav-global-search {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-global-search .ui-inputfield {
+            width: 250px;
+            height: 34px;
+            border-radius: 9px;
+            border: 1px solid rgba(255,255,255,.34);
+            background: rgba(255,255,255,.18);
+            color: #ffffff;
+            box-shadow: none;
+            padding: 0 10px;
+        }
+        .nav-global-search .ui-inputfield::placeholder {
+            color: rgba(232, 244, 255, .82);
+        }
+        .nav-global-search .ui-inputfield:focus {
+            border-color: rgba(255,255,255,.72);
+            box-shadow: 0 0 0 3px rgba(176, 218, 247, .26);
+            background: rgba(255,255,255,.24);
+        }
+        .nav-global-search-btn.ui-button.ui-widget {
+            width: 35px;
+            min-width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.38);
+            background: rgba(255,255,255,.2);
+            color: #ffffff;
+            box-shadow: none;
+        }
+        .nav-global-search-btn.ui-button.ui-widget .ui-button-text {
+            display: none;
+        }
+        .nav-global-search-btn.ui-button.ui-widget .ui-icon,
+        .nav-global-search-btn.ui-button.ui-widget .pi {
+            position: static;
+            margin: 0;
+            font-size: .95rem;
+        }
+        .nav-global-search-btn.ui-button.ui-widget:hover,
+        .nav-global-search-btn.ui-button.ui-widget:focus {
+            background: rgba(255,255,255,.3);
         }
         .notif-form { margin: 0; }
         .notif-wrapper { position: relative; }
@@ -1386,6 +1440,28 @@
         html.theme-dark .hamburger:hover {
             background: #1b3147;
         }
+        html.theme-dark .nav-global-search .ui-inputfield {
+            border-color: rgba(159, 205, 236, .42);
+            background: rgba(9, 25, 39, .62);
+            color: #e8f4ff;
+        }
+        html.theme-dark .nav-global-search .ui-inputfield::placeholder {
+            color: rgba(188, 216, 240, .82);
+        }
+        html.theme-dark .nav-global-search .ui-inputfield:focus {
+            border-color: rgba(171, 220, 251, .72);
+            background: rgba(14, 34, 52, .84);
+            box-shadow: 0 0 0 3px rgba(120, 184, 226, .24);
+        }
+        html.theme-dark .nav-global-search-btn.ui-button.ui-widget {
+            border-color: rgba(159, 205, 236, .44);
+            background: rgba(17, 40, 58, .74);
+            color: #ddecfb;
+        }
+        html.theme-dark .nav-global-search-btn.ui-button.ui-widget:hover,
+        html.theme-dark .nav-global-search-btn.ui-button.ui-widget:focus {
+            background: rgba(34, 66, 92, .88);
+        }
         html.theme-dark .sidebar {
             background: linear-gradient(180deg, #0f3146 0%, #060d15 100%);
             border-right: 1px solid rgba(168, 206, 235, .12);
@@ -2114,6 +2190,30 @@
             background: rgba(8, 8, 8, .72) !important;
         }
 
+        @media (max-width: 1260px) {
+            .nav-global-search .ui-inputfield {
+                width: 195px;
+            }
+        }
+        @media (max-width: 980px) {
+            .nav-user-session {
+                display: none;
+            }
+            .nav-global-search .ui-inputfield {
+                width: 176px;
+            }
+        }
+        @media (max-width: 680px) {
+            .nav-global-search .ui-inputfield {
+                width: 140px;
+            }
+        }
+        @media (max-width: 520px) {
+            .nav-global-search .ui-inputfield {
+                width: 112px;
+            }
+        }
+
         /* Mobile drawer behavior */
         .sidebar-scrim {
             display: none;
@@ -2386,7 +2486,24 @@
                     <span class="brand brand-helonik">BTK Bank - Garanties</span>
                 </div>
                 <div class="nav-user">
-                    <span>Connecté : <strong>#{empty loginBean.utilisateur.lib ? loginBean.utilisateur.cuti : loginBean.utilisateur.lib}</strong></span>
+                    <h:form id="globalSearchForm" prependId="false" styleClass="nav-global-search-form">
+                        <div class="nav-global-search">
+                            <p:inputText id="globalSearchNavbarInput"
+                                         value="#{globalSearchBean.navbarQuery}"
+                                         placeholder="Recherche"
+                                         autocomplete="off"/>
+                            <p:commandButton id="globalSearchNavbarBtn"
+                                             value=""
+                                             icon="pi pi-search"
+                                             title="Recherche"
+                                             action="#{globalSearchBean.searchFromNavbar}"
+                                             ajax="false"
+                                             process="@form"
+                                             update="@none"
+                                             styleClass="nav-global-search-btn"/>
+                        </div>
+                    </h:form>
+                    <span class="nav-user-session">Connecté : <strong>#{empty loginBean.utilisateur.lib ? loginBean.utilisateur.cuti : loginBean.utilisateur.lib}</strong></span>
                     <h:form id="notifForm"
                             prependId="false"
                             styleClass="notif-form"
